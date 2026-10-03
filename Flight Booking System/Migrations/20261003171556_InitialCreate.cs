@@ -134,7 +134,7 @@ namespace Flight_Booking_System.Migrations
                         column: x => x.AirlineId,
                         principalTable: "Airlines",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -349,19 +349,19 @@ namespace Flight_Booking_System.Migrations
                         column: x => x.AircraftId,
                         principalTable: "Aircrafts",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Flights_Airlines_AirlineId",
                         column: x => x.AirlineId,
                         principalTable: "Airlines",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Flights_Routes_RouteId",
                         column: x => x.RouteId,
                         principalTable: "Routes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(

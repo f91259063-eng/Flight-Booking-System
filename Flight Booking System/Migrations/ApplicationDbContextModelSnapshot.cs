@@ -597,7 +597,7 @@ namespace Flight_Booking_System.Migrations
                     b.HasOne("Flight_Booking_System.Models.Airline", "Airline")
                         .WithMany()
                         .HasForeignKey("AirlineId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Airline");
@@ -640,19 +640,19 @@ namespace Flight_Booking_System.Migrations
                     b.HasOne("Flight_Booking_System.Models.Aircraft", "Aircraft")
                         .WithMany()
                         .HasForeignKey("AircraftId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Flight_Booking_System.Models.Airline", "Airline")
                         .WithMany()
                         .HasForeignKey("AirlineId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Flight_Booking_System.Models.Route", "Route")
                         .WithMany()
                         .HasForeignKey("RouteId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Aircraft");

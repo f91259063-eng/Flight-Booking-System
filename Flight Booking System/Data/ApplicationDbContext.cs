@@ -30,16 +30,68 @@ namespace Flight_Booking_System.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Flight_Booking_System.Models.Route >()
+            // =========================
+            // Route → From Airport
+            // =========================
+
+            modelBuilder.Entity<Flight_Booking_System.Models.Route>()
                 .HasOne(r => r.FromAirport)
                 .WithMany(a => a.FromRoutes)
                 .HasForeignKey(r => r.FromAirportId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Flight_Booking_System.Models.Route>()
+            // =========================
+            // Route → To Airport
+            // =========================
+
+            modelBuilder.Entity<Flight_Booking_System.Models. Route>()
                 .HasOne(r => r.ToAirport)
                 .WithMany(a => a.ToRoutes)
                 .HasForeignKey(r => r.ToAirportId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            // =========================
+            // Aircraft → Airline
+            // =========================
+
+            modelBuilder.Entity<Aircraft>()
+                .HasOne(a => a.Airline)
+                .WithMany()
+                .HasForeignKey(a => a.AirlineId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            // =========================
+            // Flight → Airline
+            // =========================
+
+            modelBuilder.Entity<Flight>()
+                .HasOne(f => f.Airline)
+                .WithMany()
+                .HasForeignKey(f => f.AirlineId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            // =========================
+            // Flight → Aircraft
+            // =========================
+
+            modelBuilder.Entity<Flight>()
+                .HasOne(f => f.Aircraft)
+                .WithMany()
+                .HasForeignKey(f => f.AircraftId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            // =========================
+            // Flight → Route
+            // =========================
+
+            modelBuilder.Entity<Flight>()
+                .HasOne(f => f.Route)
+                .WithMany()
+                .HasForeignKey(f => f.RouteId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }
