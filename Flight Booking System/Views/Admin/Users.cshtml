@@ -1,0 +1,58 @@
+@model IEnumerable<Flight_Booking_System.ViewModels.UserRowViewModel>
+@{
+    ViewData["Title"] = "Users";
+}
+
+<div class="card">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Users (@Model.Count())</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive scrollbar">
+            <table class="table table-hover table-striped fs--1 mb-0 overflow-hidden align-middle">
+                <thead class="bg-200 text-900">
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var u in Model)
+                    {
+                        <tr>
+                            <td>@u.FullName</td>
+                            <td>
+                                @u.Email
+                                @if (!u.EmailConfirmed)
+                                {
+                                    <span class="badge rounded-pill badge-soft-warning ms-1">Unconfirmed</span>
+                                }
+                                @if (u.TwoFactorEnabled)
+                                {
+                                    <span class="badge rounded-pill badge-soft-success ms-1">2FA</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill @(u.IsAdmin ? "badge-soft-danger" : "badge-soft-primary")">@(u.IsAdmin ? "Admin" : "Customer")</span>
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill @(u.IsLocked ? "badge-soft-danger" : "badge-soft-success")">@(u.IsLocked ? "Locked" : "Active")</span>
+                            </td>
+                            <td class="text-end">
+                                <form asp-controller="Admin" asp-action="ToggleAdmin" asp-route-id="@u.Id" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-falcon-default btn-sm">@(u.IsAdmin ? "Make customer" : "Make admin")</button>
+                                </form>
+                                <form asp-controller="Admin" asp-action="ToggleLock" asp-route-id="@u.Id" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-falcon-@(u.IsLocked ? "success" : "danger") btn-sm">@(u.IsLocked ? "Unlock" : "Lock")</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

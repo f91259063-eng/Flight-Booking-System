@@ -1,0 +1,28 @@
+@model MessageViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    ViewData["Tagline"] = "Domestic flights made simple.";
+}
+
+<partial name="_AuthSide" />
+
+<div class="col-md-7 d-flex flex-center">
+    <div class="p-4 p-md-5 flex-grow-1 text-center">
+        <h3 class="@(Model.IsSuccess ? "text-success" : "text-danger")">@Model.Title</h3>
+        <p class="mb-4">@Model.Message</p>
+
+        @if (!string.IsNullOrEmpty(Model.DevLink))
+        {
+            <div class="alert alert-warning text-start fs--1">
+                <strong>Development mode:</strong> no email is sent until SMTP is configured in appsettings.json.
+                Use this link instead:<br />
+                <a class="text-break" href="@Model.DevLink">@Model.DevLink</a>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.LinkUrl))
+        {
+            <a class="btn btn-primary" href="@Model.LinkUrl">@Model.LinkText</a>
+        }
+    </div>
+</div>

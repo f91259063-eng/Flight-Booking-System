@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en-US" dir="ltr">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] | Flight Booking</title>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="~/falcon/img/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="~/falcon/img/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="~/falcon/img/favicon-16x16.png" />
+    <link rel="shortcut icon" type="image/x-icon" href="~/falcon/img/favicon.ico" />
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,600,700%7cPoppins:300,400,500,600,700,800,900&amp;display=swap" rel="stylesheet" />
+    <link href="~/falcon/css/theme.min.css" rel="stylesheet" />
+    <link href="~/falcon/css/user.min.css" rel="stylesheet" />
+</head>
+<body>
+    <main class="main" id="top">
+        <div class="container-fluid">
+            <div class="row min-vh-100 flex-center g-0">
+                <div class="col-lg-8 col-xxl-5 py-3 position-relative">
+                    <img class="bg-auth-circle-shape" src="~/falcon/img/bg-shape.png" alt="" width="250" />
+                    <img class="bg-auth-circle-shape-2" src="~/falcon/img/shape-1.png" alt="" width="150" />
+                    <div class="card overflow-hidden z-index-1">
+                        <div class="card-body p-0">
+                            <div class="row g-0 h-100">
+                                @RenderBody()
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/falcon/js/popper.min.js"></script>
+    <script src="~/falcon/js/bootstrap.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

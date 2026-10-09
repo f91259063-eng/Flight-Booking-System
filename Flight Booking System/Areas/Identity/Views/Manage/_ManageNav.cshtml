@@ -1,0 +1,20 @@
+@{
+    var action = ViewContext.RouteData.Values["action"]?.ToString() ?? string.Empty;
+    string Active(params string[] names) => names.Contains(action, StringComparer.OrdinalIgnoreCase) ? "active" : string.Empty;
+}
+
+<div class="card">
+    <div class="card-body p-2">
+        <nav class="nav flex-column nav-pills">
+            <a class="nav-link @Active("Index")" asp-controller="Manage" asp-action="Index">
+                <span class="fas fa-user me-2"></span>Profile
+            </a>
+            <a class="nav-link @Active("ChangePassword")" asp-controller="Manage" asp-action="ChangePassword">
+                <span class="fas fa-key me-2"></span>Password
+            </a>
+            <a class="nav-link @Active("TwoFactor", "EnableAuthenticator", "ShowRecoveryCodes")" asp-controller="Manage" asp-action="TwoFactor">
+                <span class="fas fa-shield-alt me-2"></span>Two-factor authentication
+            </a>
+        </nav>
+    </div>
+</div>

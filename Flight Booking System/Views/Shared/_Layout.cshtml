@@ -1,50 +1,95 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en-US" dir="ltr">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Flight_Booking_System</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/Flight_Booking_System.styles.css" asp-append-version="true" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] | Flight Booking</title>
+
+    <link rel="icon" type="image/png" sizes="32x32" href="~/falcon/img/favicon-32x32.png" />
+    <link rel="shortcut icon" type="image/x-icon" href="~/falcon/img/favicon.ico" />
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,600,700%7cPoppins:300,400,500,600,700,800,900&amp;display=swap" rel="stylesheet" />
+    <link href="~/falcon/css/theme.min.css" rel="stylesheet" />
+    <link href="~/falcon/css/user.min.css" rel="stylesheet" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Flight_Booking_System</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+    <main class="main" id="top">
+        <div class="container" data-layout="container">
+            <div class="content">
+                <nav class="navbar navbar-light navbar-glass navbar-top navbar-expand-lg">
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle Navigation">
+                        <span class="navbar-toggle-icon"><span class="toggle-line"></span></span>
+                    </button>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - Flight_Booking_System - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                    <a class="navbar-brand me-1 me-sm-3" asp-area="" asp-controller="Home" asp-action="Index">
+                        <div class="d-flex align-items-center">
+                            <span class="fas fa-plane-departure text-primary me-2 fs-2"></span>
+                            <span class="font-sans-serif">Flight Booking</span>
+                        </div>
+                    </a>
+
+                    <div class="collapse navbar-collapse" id="mainNav">
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            </li>
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="MyBookings" asp-action="Index">My bookings</a>
+                                </li>
+                            }
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Admin" asp-action="Users">Users</a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+
+                    <partial name="_LoginPartial" />
+                </nav>
+
+                <div class="pt-3">
+                    @if (TempData["Success"] is string ok)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            @ok
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+                    @if (TempData["Error"] is string err)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            @err
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    @RenderBody()
+                </div>
+
+                <footer class="footer">
+                    <div class="row g-0 justify-content-between fs--1 mt-4 mb-3">
+                        <div class="col-12 col-sm-auto text-center">
+                            <p class="mb-0 text-600">Flight Booking System &copy; 2026 <span class="d-none d-sm-inline-block">| </span><br class="d-sm-none" /> UI based on Falcon theme</p>
+                        </div>
+                        <div class="col-12 col-sm-auto text-center">
+                            <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </div>
+                    </div>
+                </footer>
+            </div>
         </div>
-    </footer>
+    </main>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/falcon/js/popper.min.js"></script>
+    <script src="~/falcon/js/bootstrap.min.js"></script>
+    <script src="~/falcon/js/fontawesome.all.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
