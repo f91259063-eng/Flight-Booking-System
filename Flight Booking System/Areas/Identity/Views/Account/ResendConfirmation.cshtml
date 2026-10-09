@@ -1,0 +1,30 @@
+@model ResendConfirmationViewModel
+@{
+    ViewData["Title"] = "Resend confirmation";
+    ViewData["Tagline"] = "We'll send you a fresh confirmation link.";
+}
+
+<partial name="_AuthSide" />
+
+<div class="col-md-7 d-flex flex-center">
+    <div class="p-4 p-md-5 flex-grow-1">
+        <h3>Resend confirmation email</h3>
+        <p class="fs--1">Enter the email you registered with.</p>
+
+        <form asp-action="ResendConfirmation" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label">Email address</label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger fs--1"></span>
+            </div>
+            <button class="btn btn-primary d-block w-100" type="submit">Send link</button>
+        </form>
+
+        <p class="fs--1 mt-3 mb-0"><a asp-action="Login">Back to login</a></p>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

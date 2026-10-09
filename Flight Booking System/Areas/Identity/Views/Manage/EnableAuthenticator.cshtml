@@ -1,0 +1,51 @@
+@model EnableAuthenticatorViewModel
+@{
+    ViewData["Title"] = "Set up authenticator";
+}
+
+<div class="row g-3">
+    <div class="col-lg-3"><partial name="_ManageNav" /></div>
+    <div class="col-lg-9">
+        <div class="card">
+            <div class="card-header bg-light"><h5 class="mb-0">Set up authenticator app</h5></div>
+            <div class="card-body">
+                <ol class="fs--1 ps-3">
+                    <li class="mb-2">Install an authenticator app (Microsoft Authenticator or Google Authenticator).</li>
+                    <li class="mb-2">
+                        Scan this QR code, or type this key in the app:
+                        <kbd>@Model.SharedKey</kbd>
+                        <div id="qrCode" class="my-3" data-url="@Model.AuthenticatorUri"></div>
+                    </li>
+                    <li class="mb-2">Enter the 6-digit code the app shows to confirm.</li>
+                </ol>
+
+                <form asp-action="EnableAuthenticator" method="post" class="col-md-6 px-0">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <input type="hidden" asp-for="SharedKey" />
+                    <input type="hidden" asp-for="AuthenticatorUri" />
+
+                    <div class="mb-3">
+                        <label asp-for="Code" class="form-label"></label>
+                        <input asp-for="Code" class="form-control" autocomplete="off" inputmode="numeric" />
+                        <span asp-validation-for="Code" class="text-danger fs--1"></span>
+                    </div>
+
+                    <button class="btn btn-primary" type="submit">Verify and turn on</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        (function () {
+            var el = document.getElementById("qrCode");
+            if (el && window.QRCode) {
+                new QRCode(el, { text: el.getAttribute("data-url"), width: 180, height: 180 });
+            }
+        })();
+    </script>
+}
