@@ -1,0 +1,61 @@
+@model ProfileViewModel
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<div class="row g-3">
+    <div class="col-lg-3"><partial name="_ManageNav" /></div>
+    <div class="col-lg-9">
+        <div class="card">
+            <div class="card-header bg-light"><h5 class="mb-0">Profile</h5></div>
+            <div class="card-body">
+                <form asp-action="Index" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="row gx-2">
+                        <div class="mb-3 col-sm-4">
+                            <label asp-for="FirstName" class="form-label"></label>
+                            <input asp-for="FirstName" class="form-control" />
+                            <span asp-validation-for="FirstName" class="text-danger fs--1"></span>
+                        </div>
+                        <div class="mb-3 col-sm-4">
+                            <label asp-for="MiddleName" class="form-label"></label>
+                            <input asp-for="MiddleName" class="form-control" />
+                            <span asp-validation-for="MiddleName" class="text-danger fs--1"></span>
+                        </div>
+                        <div class="mb-3 col-sm-4">
+                            <label asp-for="LastName" class="form-label"></label>
+                            <input asp-for="LastName" class="form-control" />
+                            <span asp-validation-for="LastName" class="text-danger fs--1"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Email address</label>
+                        <input class="form-control" value="@Model.Email" disabled />
+                        @if (Model.EmailConfirmed)
+                        {
+                            <span class="badge rounded-pill badge-soft-success mt-1">Confirmed</span>
+                        }
+                        else
+                        {
+                            <span class="badge rounded-pill badge-soft-warning mt-1">Not confirmed</span>
+                        }
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="PhoneNumber" class="form-label"></label>
+                        <input asp-for="PhoneNumber" class="form-control" />
+                        <span asp-validation-for="PhoneNumber" class="text-danger fs--1"></span>
+                    </div>
+
+                    <button class="btn btn-primary" type="submit">Save changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

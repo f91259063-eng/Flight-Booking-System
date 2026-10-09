@@ -1,0 +1,45 @@
+@using Microsoft.AspNetCore.Identity
+@using Flight_Booking_System.Models.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<ul class="navbar-nav navbar-nav-icons ms-auto flex-row align-items-center">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        var current = await UserManager.GetUserAsync(User);
+        var first = string.IsNullOrEmpty(current?.FirstName) ? "?" : current!.FirstName.Substring(0, 1).ToUpper();
+        var last = string.IsNullOrEmpty(current?.LastName) ? "" : current!.LastName.Substring(0, 1).ToUpper();
+        var fullName = $"{current?.FirstName} {current?.LastName}".Trim();
+
+        <li class="nav-item dropdown">
+            <a class="nav-link pe-0 ps-2" id="navbarDropdownUser" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <div class="avatar avatar-xl">
+                    <div class="avatar-name rounded-circle"><span>@first@last</span></div>
+                </div>
+            </a>
+            <div class="dropdown-menu dropdown-caret dropdown-menu-end py-0" aria-labelledby="navbarDropdownUser">
+                <div class="bg-white rounded-2 py-2">
+                    <span class="dropdown-item-text fw-bold">@fullName</span>
+                    <span class="dropdown-item-text fs--1 text-600">@current?.Email</span>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" asp-area="Identity" asp-controller="Manage" asp-action="Index">Profile</a>
+                    <a class="dropdown-item" asp-area="Identity" asp-controller="Manage" asp-action="ChangePassword">Change password</a>
+                    <a class="dropdown-item" asp-area="Identity" asp-controller="Manage" asp-action="TwoFactor">Two-factor authentication</a>
+                    <div class="dropdown-divider"></div>
+                    <form asp-area="Identity" asp-controller="Account" asp-action="Logout" method="post">
+                        <button type="submit" class="dropdown-item">Logout</button>
+                    </form>
+                </div>
+            </div>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item me-2">
+            <a class="btn btn-falcon-default btn-sm" asp-area="Identity" asp-controller="Account" asp-action="Login">Log in</a>
+        </li>
+        <li class="nav-item">
+            <a class="btn btn-primary btn-sm" asp-area="Identity" asp-controller="Account" asp-action="Register">Register</a>
+        </li>
+    }
+</ul>

@@ -1,0 +1,30 @@
+@model RecoveryCodeLoginViewModel
+@{
+    ViewData["Title"] = "Recovery code";
+    ViewData["Tagline"] = "Use one of the recovery codes you saved when you turned on two-factor authentication.";
+}
+
+<partial name="_AuthSide" />
+
+<div class="col-md-7 d-flex flex-center">
+    <div class="p-4 p-md-5 flex-grow-1">
+        <h3>Recovery code</h3>
+
+        <form asp-action="LoginWithRecoveryCode" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <input type="hidden" asp-for="ReturnUrl" />
+
+            <div class="mb-3">
+                <label asp-for="RecoveryCode" class="form-label"></label>
+                <input asp-for="RecoveryCode" class="form-control" autocomplete="off" />
+                <span asp-validation-for="RecoveryCode" class="text-danger fs--1"></span>
+            </div>
+
+            <button class="btn btn-primary d-block w-100" type="submit">Log in</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
