@@ -85,15 +85,10 @@ namespace Flight_Booking_System
 
             // Identity Area Route
             app.MapControllerRoute(
-                name: "Identity",
-                pattern: "Identity/{controller=Account}/{action=Login}/{id?}"
-            )
+                name: "default",
+                pattern: "{area=identity}/{controller=Account}/{action=login}/{id?}")
+          
             .WithStaticAssets();
-
-            app.MapControllerRoute(
-               name: "default",
-               pattern: "{area=Identity}/{controller=Account}/{action=login}/{id?}")
-               .WithStaticAssets();
 
 
             app.Run();
