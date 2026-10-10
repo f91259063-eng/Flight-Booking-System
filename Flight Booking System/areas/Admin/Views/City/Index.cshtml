@@ -1,0 +1,60 @@
+﻿@model IEnumerable<Flight_Booking_System.Models.city>
+
+@{
+    ViewData["Title"] = "Cities";
+}
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">Cities</h2>
+
+    <div class="mb-3">
+        <a asp-controller="City"
+           asp-action="Create"
+           class="btn btn-primary">
+            Add New City
+        </a>
+    </div>
+
+    <table class="table table-bordered table-striped">
+
+        <thead class="table-dark">
+            <tr>
+                <th>Id</th>
+                <th>City Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var city in Model)
+            {
+                <tr>
+                    <td>@city.Id</td>
+                    <td>@city.Name</td>
+                    <td>
+                        <a asp-action="Edit"
+                           asp-route-id="@city.Id"
+                           class="btn btn-warning btn-sm">
+                            Edit
+                        </a>
+
+                        <a asp-action="Details"
+                           asp-route-id="@city.Id"
+                           class="btn btn-info btn-sm">
+                            Details
+                        </a>
+
+                        <a asp-action="Delete"
+                           asp-route-id="@city.Id"
+                           class="btn btn-danger btn-sm">
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+
+    </table>
+
+</div>

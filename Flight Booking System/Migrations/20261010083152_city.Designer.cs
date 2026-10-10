@@ -4,6 +4,7 @@ using Flight_Booking_System.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Flight_Booking_System.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261010083152_city")]
+    partial class city
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,12 +37,7 @@ namespace Flight_Booking_System.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("cityId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("cityId");
 
                     b.ToTable("AirPorts");
                 });
@@ -612,17 +610,6 @@ namespace Flight_Booking_System.Migrations
                     b.HasIndex("SeatId");
 
                     b.ToTable("Tickets");
-                });
-
-            modelBuilder.Entity("Flight_Booking_System.Models.AirPort", b =>
-                {
-                    b.HasOne("Flight_Booking_System.Models.city", "City")
-                        .WithMany()
-                        .HasForeignKey("cityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("City");
                 });
 
             modelBuilder.Entity("Flight_Booking_System.Models.Aircraft", b =>
