@@ -139,46 +139,107 @@ namespace Flight_Booking_System.Areas.Identity.Controllers
         // Login / 2FA / Logout
         // =====================================================
 
-        [HttpGet]
-        public IActionResult Login(string? returnUrl = null)
-            => View(new LoginViewModel { ReturnUrl = returnUrl });
+[HttpGet]
+public IActionResult Login(string? returnUrl = null)
+        {
+            return View(new LoginViewModel
+            {
+                ReturnUrl = returnUrl
+            });
+        }
 
-        [HttpPost, ValidateAntiForgeryToken]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
-                return View(model);
-
-            var user = await _userManager.FindByEmailAsync(model.Email);
-
-            if (user is not null)
             {
-                var result = await _signInManager.PasswordSignInAsync(
-                    user, model.Password, model.RememberMe, lockoutOnFailure: true);
-
-                if (result.Succeeded)
-                    return RedirectToLocal(model.ReturnUrl);
-
-                if (result.RequiresTwoFactor)
-                    return RedirectToAction(nameof(LoginWith2fa),
-                        new { rememberMe = model.RememberMe, returnUrl = model.ReturnUrl });
-
-                if (result.IsLockedOut)
-                {
-                    ModelState.AddModelError(string.Empty, "Account locked after too many failed attempts. Try again in a few minutes.");
-                    return View(model);
-                }
-
-                if (result.IsNotAllowed)
-                {
-                    ModelState.AddModelError(string.Empty, "You need to confirm your email before logging in.");
-                    ViewData["ShowResend"] = true;
-                    return View(model);
-                }
+                return View(model);
             }
 
-            // Same message for "no such user" and "wrong password"
-            ModelState.AddModelError(string.Empty, "Invalid email or password.");
+            // Find user by email
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            if (user == null)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Invalid email or password."
+                );
+
+                return View(model);
+            }
+
+            // Sign in
+            var result = await _signInManager.PasswordSignInAsync(
+                user,
+                model.Password,
+                model.RememberMe,
+                lockoutOnFailure: true
+            );
+
+            // Login successful
+            if (result.Succeeded)
+            {
+                // Admin user
+                if (await _userManager.IsInRoleAsync(user, "Admin"))
+                {
+                    return Redirect("/Admin/Home/Index");
+
+                    //return RedirectToAction(
+                    //    "Index",
+                    //    "Home",
+                    //    new { area = "Admin" }
+                    //);
+                }
+
+                // Normal user
+                return RedirectToLocal(model.ReturnUrl);
+            }
+
+            // Two-factor authentication
+            if (result.RequiresTwoFactor)
+            {
+                return RedirectToAction(
+                    nameof(LoginWith2fa),
+                    new
+                    {
+                        rememberMe = model.RememberMe,
+                        returnUrl = model.ReturnUrl
+                    }
+                );
+            }
+
+            // Account locked
+            if (result.IsLockedOut)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Account locked after too many failed attempts. Try again in a few minutes."
+                );
+
+                return View(model);
+            }
+
+            // Email confirmation required
+            if (result.IsNotAllowed)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    "You need to confirm your email before logging in."
+                );
+
+                ViewData["ShowResend"] = true;
+
+                return View(model);
+            }
+
+            // Invalid password
+            ModelState.AddModelError(
+                string.Empty,
+                "Invalid email or password."
+            );
+
             return View(model);
         }
 
@@ -225,12 +286,6 @@ namespace Flight_Booking_System.Areas.Identity.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> LoginWithRecoveryCode(RecoveryCodeLoginViewModel model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            if (await _signInManager.GetTwoFactorAuthenticationUserAsync() is null)
-                return RedirectToAction(nameof(Login));
-
             var code = model.RecoveryCode.Replace(" ", string.Empty);
             var result = await _signInManager.TwoFactorRecoveryCodeSignInAsync(code);
 

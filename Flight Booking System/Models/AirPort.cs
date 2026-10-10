@@ -5,6 +5,8 @@
 
         public int Id { get; set; }
         public string Name { get; set; }
+        public int cityId { get; set; }
+        public city City { get; set; }  
         public ICollection<Route> FromRoutes { get; set; }
         = new List<Route>();
 
