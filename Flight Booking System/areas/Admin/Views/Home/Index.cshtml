@@ -1,0 +1,155 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+    // Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid py-4">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold">Admin Dashboard</h2>
+            <p class="text-muted mb-0">
+                Welcome to Flight Booking System Administration
+            </p>
+        </div>
+
+        <span class="badge bg-primary fs-6">
+            Administrator
+        </span>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <p class="text-muted mb-1">Total Users</p>
+                            <h3 class="fw-bold">Manage Users</h3>
+                        </div>
+                        <i class="bi bi-people fs-1 text-primary"></i>
+                    </div>
+
+                    <a asp-area="Admin"
+                       asp-controller="Users"
+                       asp-action="Index"
+                       class="btn btn-outline-primary mt-3">
+                        Manage Users
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <p class="text-muted mb-1">Roles</p>
+                            <h3 class="fw-bold">Manage Roles</h3>
+                        </div>
+                        <i class="bi bi-shield-lock fs-1 text-success"></i>
+                    </div>
+
+                    <a asp-area="Admin"
+                       asp-controller="Roles"
+                       asp-action="Index"
+                       class="btn btn-outline-success mt-3">
+                        Manage Roles
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <p class="text-muted mb-1">Flights</p>
+                            <h3 class="fw-bold">Manage Flights</h3>
+                        </div>
+                        <i class="bi bi-airplane fs-1 text-info"></i>
+                    </div>
+
+                    <a asp-area=""
+                       asp-controller="Flights"
+                       asp-action="Index"
+                       class="btn btn-outline-info mt-3">
+                        View Flights
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <p class="text-muted mb-1">Bookings</p>
+                            <h3 class="fw-bold">Manage Bookings</h3>
+                        </div>
+                        <i class="bi bi-ticket-perforated fs-1 text-warning"></i>
+                    </div>
+
+                    <a asp-area=""
+                       asp-controller="Bookings"
+                       asp-action="Index"
+                       class="btn btn-outline-warning mt-3">
+                        View Bookings
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0 fw-bold">Quick Actions</h5>
+        </div>
+
+        <div class="card-body">
+            <div class="row g-3">
+
+                <div class="col-md-4">
+                    <a asp-area="Admin"
+                       asp-controller="Users"
+                       asp-action="Create"
+                       class="btn btn-primary w-100 py-3">
+                        <i class="bi bi-person-plus me-2"></i>
+                        Create New User
+                    </a>
+                </div>
+
+                <div class="col-md-4">
+                    <a asp-area="Admin"
+                       asp-controller="Roles"
+                       asp-action="Create"
+                       class="btn btn-success w-100 py-3">
+                        <i class="bi bi-shield-plus me-2"></i>
+                        Create New Role
+                    </a>
+                </div>
+
+                <div class="col-md-4">
+                    <a asp-area=""
+                       asp-controller="Flights"
+                       asp-action="Create"
+                       class="btn btn-info w-100 py-3 text-white">
+                        <i class="bi bi-airplane me-2"></i>
+                        Add New Flight
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+```

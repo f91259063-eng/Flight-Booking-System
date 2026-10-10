@@ -1,5 +1,7 @@
 using Flight_Booking_System.Data;
+using Flight_Booking_System.Models;
 using Flight_Booking_System.Models.Identity;
+using Flight_Booking_System.Repositories;
 using Flight_Booking_System.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -37,6 +39,7 @@ namespace Flight_Booking_System
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();   // needed for email confirmation, password reset and 2FA tokens
 
+            builder.Services.AddScoped<IRepository<city>, Repository<city>>();
             // Where to send users who are not logged in / not allowed
             builder.Services.ConfigureApplicationCookie(options =>
             {
@@ -47,6 +50,9 @@ namespace Flight_Booking_System
             // Email (settings come from the "Email" section in appsettings.json)
             builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Email"));
             builder.Services.AddTransient<IAppEmailSender, SmtpEmailSender>();
+
+
+
 
             // MVC
             builder.Services.AddControllersWithViews();
@@ -76,17 +82,22 @@ namespace Flight_Booking_System
             app.MapStaticAssets();
 
             // Areas route must come BEFORE the default route
+
+            // Identity Area Route
             app.MapControllerRoute(
-                name: "areas",
-                pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}")
-                .WithStaticAssets();
+                name: "Identity",
+                pattern: "Identity/{controller=Account}/{action=Login}/{id?}"
+            )
+            .WithStaticAssets();
 
             app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}")
-                .WithStaticAssets();
+               name: "default",
+               pattern: "{area=Identity}/{controller=Account}/{action=login}/{id?}")
+               .WithStaticAssets();
+
 
             app.Run();
+
         }
     }
 }

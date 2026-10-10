@@ -34,7 +34,12 @@ namespace Flight_Booking_System.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("cityId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("cityId");
 
                     b.ToTable("AirPorts");
                 });
@@ -426,6 +431,23 @@ namespace Flight_Booking_System.Migrations
                     b.ToTable("Seats");
                 });
 
+            modelBuilder.Entity("Flight_Booking_System.Models.city", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Cities");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -590,6 +612,17 @@ namespace Flight_Booking_System.Migrations
                     b.HasIndex("SeatId");
 
                     b.ToTable("Tickets");
+                });
+
+            modelBuilder.Entity("Flight_Booking_System.Models.AirPort", b =>
+                {
+                    b.HasOne("Flight_Booking_System.Models.city", "City")
+                        .WithMany()
+                        .HasForeignKey("cityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("City");
                 });
 
             modelBuilder.Entity("Flight_Booking_System.Models.Aircraft", b =>
