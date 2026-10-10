@@ -1,0 +1,44 @@
+@model TwoFactorStatusViewModel
+@{
+    ViewData["Title"] = "Two-factor authentication";
+}
+
+<div class="row g-3">
+    <div class="col-lg-3"><partial name="_ManageNav" /></div>
+    <div class="col-lg-9">
+        <div class="card">
+            <div class="card-header bg-light"><h5 class="mb-0">Two-factor authentication</h5></div>
+            <div class="card-body">
+                @if (Model.Is2faEnabled)
+                {
+                    <p>Status: <span class="badge rounded-pill badge-soft-success">Enabled</span></p>
+                    <p class="fs--1">Recovery codes left: <strong>@Model.RecoveryCodesLeft</strong></p>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <a class="btn btn-falcon-default btn-sm" asp-action="EnableAuthenticator">Set up a new authenticator</a>
+
+                        <form asp-action="GenerateRecoveryCodes" method="post">
+                            <button class="btn btn-falcon-default btn-sm" type="submit"
+                                    onclick="return confirm('Your old recovery codes will stop working. Continue?');">
+                                Generate new recovery codes
+                            </button>
+                        </form>
+
+                        <form asp-action="Disable2fa" method="post">
+                            <button class="btn btn-falcon-danger btn-sm" type="submit"
+                                    onclick="return confirm('Turn off two-factor authentication?');">
+                                Turn off
+                            </button>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <p>Status: <span class="badge rounded-pill badge-soft-warning">Not enabled</span></p>
+                    <p class="fs--1">Add a second step to your login using an authenticator app such as Microsoft Authenticator or Google Authenticator.</p>
+                    <a class="btn btn-primary" asp-action="EnableAuthenticator">Set up authenticator app</a>
+                }
+            </div>
+        </div>
+    </div>
+</div>

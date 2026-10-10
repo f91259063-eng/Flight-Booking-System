@@ -1,0 +1,39 @@
+@model TwoFactorLoginViewModel
+@{
+    ViewData["Title"] = "Two-factor verification";
+    ViewData["Tagline"] = "One more step to keep your account safe.";
+}
+
+<partial name="_AuthSide" />
+
+<div class="col-md-7 d-flex flex-center">
+    <div class="p-4 p-md-5 flex-grow-1">
+        <h3>Two-factor verification</h3>
+        <p class="fs--1">Open your authenticator app and enter the 6-digit code.</p>
+
+        <form asp-action="LoginWith2fa" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <input type="hidden" asp-for="RememberMe" />
+            <input type="hidden" asp-for="ReturnUrl" />
+
+            <div class="mb-3">
+                <label asp-for="TwoFactorCode" class="form-label"></label>
+                <input asp-for="TwoFactorCode" class="form-control" autocomplete="off" inputmode="numeric" />
+                <span asp-validation-for="TwoFactorCode" class="text-danger fs--1"></span>
+            </div>
+
+            <div class="form-check mb-3">
+                <input asp-for="RememberMachine" class="form-check-input" />
+                <label asp-for="RememberMachine" class="form-check-label mb-0"></label>
+            </div>
+
+            <button class="btn btn-primary d-block w-100" type="submit">Verify</button>
+        </form>
+
+        <p class="fs--1 mt-3 mb-0">Lost your device? <a asp-action="LoginWithRecoveryCode" asp-route-returnUrl="@Model.ReturnUrl">Use a recovery code</a></p>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,42 @@
+@model IEnumerable<Flight_Booking_System.Models.Booking>
+@{
+    ViewData["Title"] = "My bookings";
+}
+
+<div class="card">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">My bookings</h5>
+    </div>
+    <div class="card-body p-0">
+        @if (!Model.Any())
+        {
+            <p class="p-4 mb-0 text-center text-600">You don't have any bookings yet.</p>
+        }
+        else
+        {
+            <div class="table-responsive scrollbar">
+                <table class="table table-hover table-striped fs--1 mb-0 overflow-hidden">
+                    <thead class="bg-200 text-900">
+                        <tr>
+                            <th>Reference</th>
+                            <th>Date</th>
+                            <th>Tickets</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var b in Model)
+                        {
+                            <tr>
+                                <td class="fw-semi-bold">@b.BookingReference</td>
+                                <td>@b.BookingDate.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td>@b.NumberOfTickets</td>
+                                <td><span class="badge rounded-pill badge-soft-primary">@b.Status</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

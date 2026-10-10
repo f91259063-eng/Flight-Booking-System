@@ -1,0 +1,56 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Log in";
+    ViewData["Tagline"] = "Search domestic flights, book your tickets, and collect reward points on every trip.";
+}
+
+<partial name="_AuthSide" />
+
+<div class="col-md-7 d-flex flex-center">
+    <div class="p-4 p-md-5 flex-grow-1">
+        <h3>Account Login</h3>
+
+        <form asp-area="Identity" asp-controller="Account" asp-action="Login" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <input type="hidden" asp-for="ReturnUrl" />
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label">Email address</label>
+                <input asp-for="Email" class="form-control" autocomplete="username" />
+                <span asp-validation-for="Email" class="text-danger fs--1"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label"></label>
+                <input asp-for="Password" class="form-control" autocomplete="current-password" />
+                <span asp-validation-for="Password" class="text-danger fs--1"></span>
+            </div>
+
+            <div class="row flex-between-center">
+                <div class="col-auto">
+                    <div class="form-check mb-0">
+                        <input asp-for="RememberMe" class="form-check-input" />
+                        <label asp-for="RememberMe" class="form-check-label mb-0"></label>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <a class="fs--1" asp-action="ForgotPassword">Forgot Password?</a>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <button class="btn btn-primary d-block w-100 mt-3" type="submit">Log in</button>
+            </div>
+        </form>
+
+        @if (ViewData["ShowResend"] is true)
+        {
+            <p class="fs--1 mb-2">Didn't get the email? <a asp-action="ResendConfirmation">Resend confirmation</a></p>
+        }
+        <p class="fs--1 mb-0">Don't have an account? <a asp-action="Register">Register</a></p>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

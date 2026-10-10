@@ -1,8 +1,52 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Home";
+    var signedIn = User.Identity?.IsAuthenticated == true;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="card mb-3">
+    <div class="card-body position-relative bg-card-gradient rounded-3 p-4 p-md-5 light">
+        <div class="bg-holder bg-auth-card-shape" style="background-image:url(@Url.Content("~/falcon/img/half-circle.png"));"></div>
+        <div class="position-relative z-index-1">
+            <h2 class="text-white mb-2">@(signedIn ? $"Welcome back, {User.Identity!.Name}" : "Domestic flights made simple")</h2>
+            <p class="text-white opacity-75 mb-4">Browse flights, book your tickets and collect reward points on every trip.</p>
+
+            @if (signedIn)
+            {
+                <a class="btn btn-light me-2" asp-controller="MyBookings" asp-action="Index">My bookings</a>
+                <a class="btn btn-outline-light" asp-area="Identity" asp-controller="Manage" asp-action="Index">My profile</a>
+            }
+            else
+            {
+                <a class="btn btn-light me-2" asp-area="Identity" asp-controller="Account" asp-action="Register">Create an account</a>
+                <a class="btn btn-outline-light" asp-area="Identity" asp-controller="Account" asp-action="Login">Log in</a>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card h-100"><div class="card-body">
+            <span class="fas fa-search text-primary fs-3 mb-3"></span>
+            <h5>Browse flights</h5>
+            <p class="fs--1 mb-2">Find flights between domestic airports.</p>
+            <span class="badge rounded-pill badge-soft-warning">Coming soon</span>
+        </div></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100"><div class="card-body">
+            <span class="fas fa-ticket-alt text-primary fs-3 mb-3"></span>
+            <h5>Book tickets</h5>
+            <p class="fs--1 mb-2">Pick your seats and pay securely.</p>
+            <span class="badge rounded-pill badge-soft-warning">Coming soon</span>
+        </div></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100"><div class="card-body">
+            <span class="fas fa-gift text-primary fs-3 mb-3"></span>
+            <h5>Reward points</h5>
+            <p class="fs--1 mb-2">Earn points on every booking.</p>
+            <span class="badge rounded-pill badge-soft-warning">Coming soon</span>
+        </div></div>
+    </div>
 </div>

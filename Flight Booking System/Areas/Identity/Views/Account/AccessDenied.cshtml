@@ -1,0 +1,14 @@
+@{
+    ViewData["Title"] = "Access denied";
+    ViewData["Tagline"] = "Domestic flights made simple.";
+}
+
+<partial name="_AuthSide" />
+
+<div class="col-md-7 d-flex flex-center">
+    <div class="p-4 p-md-5 flex-grow-1 text-center">
+        <h3 class="text-danger">Access denied</h3>
+        <p class="mb-4">You don't have permission to view this page.</p>
+        <a class="btn btn-primary" asp-area="" asp-controller="Home" asp-action="Index">Back to home</a>
+    </div>
+</div>
