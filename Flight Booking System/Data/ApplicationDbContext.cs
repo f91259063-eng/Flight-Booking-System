@@ -10,7 +10,7 @@ namespace Flight_Booking_System.Data
         public ApplicationDbContext(
             DbContextOptions<ApplicationDbContext> options)
             : base(options)
-        {
+        { 
         }
         public DbSet<city> Cities { get; set;  }
         public DbSet<Airline> Airlines { get; set; }

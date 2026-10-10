@@ -1,0 +1,97 @@
+﻿```cshtml
+@model Flight_Booking_System.Models.city
+
+@{
+    ViewData["Title"] = "Edit City";
+    // Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid py-4">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Edit City</h2>
+            <p class="text-muted mb-0">
+                Update city information
+            </p>
+        </div>
+
+        <a asp-area="Admin"
+           asp-controller="Cities"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Cities
+        </a>
+    </div>
+
+    <!-- Edit Form -->
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">City Information</h5>
+                </div>
+
+                <div class="card-body p-4">
+
+                    <form asp-area="Admin"
+                          asp-controller="city"
+                          asp-action="Edit"
+                          asp-route-id="@Model.Id"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden" asp-for="Id" />
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="alert alert-danger"
+                             role="alert"></div>
+
+                        <div class="mb-4">
+                            <label asp-for="Name"
+                                   class="form-label fw-semibold">
+                                City Name
+                            </label>
+
+                            <input asp-for="Name"
+                                   class="form-control"
+                                   placeholder="Enter city name" />
+
+                            <span asp-validation-for="Name"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <hr />
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a asp-area="Admin"
+                               asp-controller="Cities"
+                               asp-action="Index"
+                               class="btn btn-light border">
+                                Cancel
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i>
+                                Save Changes
+                            </button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+```
