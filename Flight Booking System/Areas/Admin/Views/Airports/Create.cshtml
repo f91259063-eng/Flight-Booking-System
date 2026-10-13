@@ -1,0 +1,51 @@
+﻿@model Flight_Booking_System.Models.AirPort
+
+@{
+    ViewData["Title"] = "إضافة مطار";
+}
+
+<h2 class="mb-4">إضافة مطار جديد</h2>
+
+<form asp-controller="Airports"
+      asp-action="Create"
+      method="post">
+
+    @Html.AntiForgeryToken()
+
+    <div asp-validation-summary="ModelOnly"
+         class="text-danger mb-3"></div>
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label">اسم المطار</label>
+        <input asp-for="Name"
+               class="form-control"
+               placeholder="مثال: Cairo International Airport" />
+        <span asp-validation-for="Name"
+              class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="cityId" class="form-label">المدينة</label>
+        <select asp-for="cityId"
+                asp-items="ViewBag.Cities"
+                class="form-select">
+            <option value="">-- اختر المدينة --</option>
+        </select>
+        <span asp-validation-for="cityId"
+              class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        حفظ المطار وجلب الإحداثيات
+    </button>
+
+    <a asp-controller="Airports"
+       asp-action="Index"
+       class="btn btn-secondary">
+        رجوع
+    </a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
