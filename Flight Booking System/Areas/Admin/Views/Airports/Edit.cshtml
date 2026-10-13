@@ -1,0 +1,68 @@
+﻿
+@model Flight_Booking_System.Models.AirPort
+
+@{
+    ViewData["Title"] = "تعديل بيانات المطار";
+}
+
+<h2 class="mb-4">تعديل بيانات المطار</h2>
+
+<form asp-controller="Airports"
+      asp-action="Edit"
+      asp-route-id="@Model.Id"
+      method="post">
+
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" asp-for="Id" />
+
+    <div asp-validation-summary="All"
+         class="text-danger mb-3"></div>
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label">اسم المطار</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="cityId" class="form-label">المدينة</label>
+        <select asp-for="cityId"
+                asp-items="ViewBag.Cities"
+                class="form-select">
+            <option value="">-- اختر المدينة --</option>
+        </select>
+        <span asp-validation-for="cityId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Latitude" class="form-label">خط العرض</label>
+        <input asp-for="Latitude"
+               type="number"
+               step="any"
+               class="form-control" />
+        <span asp-validation-for="Latitude" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Longitude" class="form-label">خط الطول</label>
+        <input asp-for="Longitude"
+               type="number"
+               step="any"
+               class="form-control" />
+        <span asp-validation-for="Longitude" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        حفظ التعديلات
+    </button>
+
+    <a asp-action="Index" class="btn btn-secondary">
+        رجوع
+    </a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+s

@@ -1,0 +1,133 @@
+﻿```cshtml
+@model IEnumerable<Flight_Booking_System.Models.AirPort>
+
+@{
+    ViewData["Title"] = "المطارات";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>إدارة المطارات</h2>
+
+        <a asp-controller="Airports"
+           asp-action="Create"
+           class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i>
+            إضافة مطار جديد
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Error"]
+        </div>
+    }
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info">
+            لا توجد مطارات مسجلة حتى الآن.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover align-middle">
+
+                <thead class="table-dark">
+                    <tr>
+                        <th>رقم</th>
+                        <th>اسم المطار</th>
+                        <th>المدينة</th>
+                        <th>Latitude</th>
+                        <th>Longitude</th>
+                        <th>حالة الإحداثيات</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var airport in Model)
+                    {
+                        <tr>
+                            <td>@airport.Id</td>
+
+                            <td>@airport.Name</td>
+
+                            <td>
+                                @(airport.City?.Name ?? "غير محددة")
+                            </td>
+
+                            <td>
+                                @(airport.Latitude?.ToString("F6") ?? "غير متاحة")
+                            </td>
+
+                            <td>
+                                @(airport.Longitude?.ToString("F6") ?? "غير متاحة")
+                            </td>
+
+                            <td>
+                                @if (airport.Latitude.HasValue &&
+                                     airport.Longitude.HasValue)
+                                {
+                                    <span class="badge bg-success">
+                                        الإحداثيات موجودة
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">
+                                        الإحداثيات غير موجودة
+                                    </span>
+                                }
+                            </td>
+
+                            <td>
+                                <div class="d-flex gap-2">
+
+                                    <a asp-controller="Airports"
+                                       asp-action="Edit"
+                                       asp-route-id="@airport.Id"
+                                       class="btn btn-warning btn-sm">
+                                        <i class="bi bi-pencil-square"></i>
+                                        
+                                        Edit
+                                    </a>
+
+                                    <form asp-controller="Airports"
+                                          asp-action="Delete"
+                                          asp-route-id="@airport.Id"
+                                          method="post"
+                                          class="d-inline"
+                                          onsubmit="return confirm('هل أنت متأكد من حذف هذا المطار؟');">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit"
+                                                class="btn btn-danger btn-sm">
+                                            <i class="bi bi-trash"></i>
+                                            ]Delete
+                                        </button>
+                                    </form>
+
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+        </div>
+    }
+
+</div>
+```

@@ -1,0 +1,91 @@
+﻿@model IEnumerable<Flight_Booking_System.Models.Route>
+
+@{
+    ViewData["Title"] = "مسارات الطيران";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>إدارة مسارات الطيران</h2>
+
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i>
+            إضافة مسار
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Error"]
+        </div>
+    }
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info">
+            لا توجد مسارات مسجلة حتى الآن.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>رقم</th>
+                        <th>مطار المغادرة</th>
+                        <th>مطار الوصول</th>
+                        <th>المسافة الجوية (كم)</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var route in Model)
+                    {
+                        <tr>
+                            <td>@route.Id</td>
+                            <td>@(route.FromAirport?.Name ?? "غير محدد")</td>
+                            <td>@(route.ToAirport?.Name ?? "غير محدد")</td>
+                            <td>@route.Distance.ToString("F2")</td>
+
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <a asp-action="Edit"
+                                       asp-route-id="@route.Id"
+                                       class="btn btn-warning btn-sm">
+                                        <i class="bi bi-pencil-square"></i>
+                                        تعديل
+                                    </a>
+
+                                    <form asp-action="Delete"
+                                          asp-route-id="@route.Id"
+                                          method="post"
+                                          onsubmit="return confirm('هل أنت متأكد من حذف هذا المسار؟');">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit"
+                                                class="btn btn-danger btn-sm">
+                                            <i class="bi bi-trash"></i>
+                                            حذف
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

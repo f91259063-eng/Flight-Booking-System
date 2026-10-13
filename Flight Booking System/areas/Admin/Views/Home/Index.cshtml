@@ -1,155 +1,559 @@
-﻿@{
+﻿@model Flight_Booking_System.ViewModels.AdminDashboardViewModel
+
+@{
     ViewData["Title"] = "Admin Dashboard";
-    // Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    Layout = "_AdminLayout";
 }
 
-<div class="container-fluid py-4">
+<style>
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 25px;
+    }
 
-    <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+        .dashboard-header h2 {
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .dashboard-header p {
+            color: #6c757d;
+            margin: 0;
+        }
+
+    .dashboard-card {
+        border: 0;
+        border-radius: 16px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, .06);
+        transition: transform .2s, box-shadow .2s;
+        height: 100%;
+        overflow: hidden;
+        background: #fff;
+    }
+
+        .dashboard-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .10);
+        }
+
+        .dashboard-card a {
+            display: block;
+            color: inherit;
+            text-decoration: none;
+            padding: 22px;
+            height: 100%;
+        }
+
+        .dashboard-card .card-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .dashboard-card .card-label {
+            color: #6c757d;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-card .card-number {
+            font-size: 30px;
+            font-weight: 800;
+            color: #212529;
+            line-height: 1.2;
+        }
+
+        .dashboard-card .card-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 25px;
+            flex-shrink: 0;
+        }
+
+    .icon-blue {
+        background: #e7f0ff;
+        color: #0d6efd;
+    }
+
+    .icon-green {
+        background: #e4f7ec;
+        color: #198754;
+    }
+
+    .icon-orange {
+        background: #fff0df;
+        color: #fd7e14;
+    }
+
+    .icon-purple {
+        background: #f0e8ff;
+        color: #6f42c1;
+    }
+
+    .icon-red {
+        background: #ffe8e8;
+        color: #dc3545;
+    }
+
+    .icon-cyan {
+        background: #e1f7fb;
+        color: #0dcaf0;
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 30px 0 16px;
+    }
+
+    .quick-action {
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        padding: 15px;
+        color: #212529;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: background .2s;
+        height: 100%;
+    }
+
+        .quick-action:hover {
+            background: #f8f9fa;
+            color: #0d6efd;
+        }
+
+        .quick-action i {
+            font-size: 22px;
+            color: #0d6efd;
+        }
+
+    .chart-container {
+        position: relative;
+        height: 350px;
+        max-width: 500px;
+        margin: auto;
+    }
+
+    .chart-card {
+        border: 0;
+        border-radius: 16px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, .06);
+        background: #fff;
+        height: 100%;
+    }
+</style>
+
+<div class="container-fluid py-3">
+
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
         <div>
-            <h2 class="fw-bold">Admin Dashboard</h2>
-            <p class="text-muted mb-0">
-                Welcome to Flight Booking System Administration
-            </p>
+            <h2>Admin Dashboard</h2>
+            <p>Welcome to Flight Booking System management panel.</p>
         </div>
 
-        <span class="badge bg-primary fs-6">
-            Administrator
+        <span class="badge text-bg-primary p-2">
+            <i class="bi bi-airplane"></i>
+            Flight Management
         </span>
     </div>
 
     <!-- Statistics Cards -->
-    <div class="row g-4 mb-4">
+    <h5 class="section-title">System Statistics</h5>
 
-        <div class="col-md-6 col-xl-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
+    <div class="row g-4">
+
+        <!-- Users -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="dashboard-card">
+                <a asp-area="Admin" asp-controller="Users" asp-action="Index">
+                    <div class="card-content">
                         <div>
-                            <p class="text-muted mb-1">Total Users</p>
-                            <h3 class="fw-bold">Manage Users</h3>
+                            <div class="card-label">Total Users</div>
+                            <div class="card-number">@Model.TotalUsers</div>
                         </div>
-                        <i class="bi bi-people fs-1 text-primary"></i>
+                        <div class="card-icon icon-blue">
+                            <i class="bi bi-people"></i>
+                        </div>
                     </div>
+                </a>
+            </div>
+        </div>
 
-                    <a asp-area="Admin"
-                       asp-controller="Users"
-                       asp-action="Index"
-                       class="btn btn-outline-primary mt-3">
-                        Manage Users
-                    </a>
+        <!-- Roles -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="dashboard-card">
+                <a asp-area="Admin" asp-controller="Roles" asp-action="Index">
+                    <div class="card-content">
+                        <div>
+                            <div class="card-label">Total Roles</div>
+                            <div class="card-number">@Model.TotalRoles</div>
+                        </div>
+                        <div class="card-icon icon-purple">
+                            <i class="bi bi-shield-lock"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Flights -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="dashboard-card">
+                <a asp-area="" asp-controller="Flights" asp-action="Index">
+                    <div class="card-content">
+                        <div>
+                            <div class="card-label">Total Flights</div>
+                            <div class="card-number">@Model.TotalFlights</div>
+                        </div>
+                        <div class="card-icon icon-cyan">
+                            <i class="bi bi-airplane"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Bookings -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="dashboard-card">
+                <a asp-area="" asp-controller="Bookings" asp-action="Index">
+                    <div class="card-content">
+                        <div>
+                            <div class="card-label">Total Bookings</div>
+                            <div class="card-number">@Model.TotalBookings</div>
+                        </div>
+                        <div class="card-icon icon-green">
+                            <i class="bi bi-ticket-perforated"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Passengers -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="dashboard-card">
+                <a asp-area="" asp-controller="Passengers" asp-action="Index">
+                    <div class="card-content">
+                        <div>
+                            <div class="card-label">Total Passengers</div>
+                            <div class="card-number">@Model.TotalPassengers</div>
+                        </div>
+                        <div class="card-icon icon-blue">
+                            <i class="bi bi-person-vcard"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Aircraft -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="dashboard-card">
+                <a asp-area="" asp-controller="Aircraft" asp-action="Index">
+                    <div class="card-content">
+                        <div>
+                            <div class="card-label">Total Aircraft</div>
+                            <div class="card-number">@Model.TotalAircraft</div>
+                        </div>
+                        <div class="card-icon icon-orange">
+                            <i class="bi bi-airplane-engines"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Airports -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="dashboard-card">
+                <a asp-area="" asp-controller="Airports" asp-action="Index">
+                    <div class="card-content">
+                        <div>
+                            <div class="card-label">Total Airports</div>
+                            <div class="card-number">@Model.TotalAirports</div>
+                        </div>
+                        <div class="card-icon icon-red">
+                            <i class="bi bi-geo-alt"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Routes -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="dashboard-card">
+                <a asp-area="" asp-controller="Routes" asp-action="Index">
+                    <div class="card-content">
+                        <div>
+                            <div class="card-label">Total Routes</div>
+                            <div class="card-number">@Model.TotalRoutes</div>
+                        </div>
+                        <div class="card-icon icon-purple">
+                            <i class="bi bi-signpost-2"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Seats -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="dashboard-card">
+                <div style="padding:22px">
+                    <div class="card-content">
+                        <div>
+                            <div class="card-label">Total Seats</div>
+                            <div class="card-number">@Model.TotalSeats</div>
+                        </div>
+                        <div class="card-icon icon-green">
+                            <i class="bi bi-grid-3x3"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-6 col-xl-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
+        <!-- Payments -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="dashboard-card">
+                <a asp-area="" asp-controller="Payments" asp-action="Index">
+                    <div class="card-content">
                         <div>
-                            <p class="text-muted mb-1">Roles</p>
-                            <h3 class="fw-bold">Manage Roles</h3>
+                            <div class="card-label">Total Payments</div>
+                            <div class="card-number">@Model.TotalPayments</div>
                         </div>
-                        <i class="bi bi-shield-lock fs-1 text-success"></i>
+                        <div class="card-icon icon-orange">
+                            <i class="bi bi-credit-card"></i>
+                        </div>
                     </div>
+                </a>
+            </div>
+        </div>
 
-                    <a asp-area="Admin"
-                       asp-controller="Roles"
-                       asp-action="Index"
-                       class="btn btn-outline-success mt-3">
-                        Manage Roles
-                    </a>
+        <!-- Cities -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="dashboard-card">
+                <a asp-area="" asp-controller="Cities" asp-action="Index">
+                    <div class="card-content">
+                        <div>
+                            <div class="card-label">Total Cities</div>
+                            <div class="card-number">@Model.TotalCities</div>
+                        </div>
+                        <div class="card-icon icon-cyan">
+                            <i class="bi bi-buildings"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Pie Chart -->
+    <h5 class="section-title">System Statistics Chart</h5>
+
+    <div class="row g-4">
+        <div class="col-12 col-lg-7">
+            <div class="chart-card">
+                <div class="p-4">
+                    <h5 class="fw-bold mb-4">System Data Distribution</h5>
+
+                    <div class="chart-container">
+                        <canvas id="systemPieChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-6 col-xl-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <p class="text-muted mb-1">Flights</p>
-                            <h3 class="fw-bold">Manage Flights</h3>
-                        </div>
-                        <i class="bi bi-airplane fs-1 text-info"></i>
+        <div class="col-12 col-lg-5">
+            <div class="chart-card">
+                <div class="p-4">
+                    <h5 class="fw-bold mb-4">Statistics Summary</h5>
+
+                    <div class="d-flex justify-content-between border-bottom py-3">
+                        <span><i class="bi bi-airplane text-info me-2"></i>Flights</span>
+                        <strong>@Model.TotalFlights</strong>
                     </div>
 
-                    <a asp-area=""
-                       asp-controller="Flights"
-                       asp-action="Index"
-                       class="btn btn-outline-info mt-3">
-                        View Flights
-                    </a>
+                    <div class="d-flex justify-content-between border-bottom py-3">
+                        <span><i class="bi bi-ticket-perforated text-success me-2"></i>Bookings</span>
+                        <strong>@Model.TotalBookings</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between border-bottom py-3">
+                        <span><i class="bi bi-people text-primary me-2"></i>Passengers</span>
+                        <strong>@Model.TotalPassengers</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between border-bottom py-3">
+                        <span><i class="bi bi-airplane-engines text-warning me-2"></i>Aircraft</span>
+                        <strong>@Model.TotalAircraft</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between border-bottom py-3">
+                        <span><i class="bi bi-geo-alt text-danger me-2"></i>Airports</span>
+                        <strong>@Model.TotalAirports</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between py-3">
+                        <span><i class="bi bi-signpost-2 text-secondary me-2"></i>Routes</span>
+                        <strong>@Model.TotalRoutes</strong>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <div class="col-md-6 col-xl-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <p class="text-muted mb-1">Bookings</p>
-                            <h3 class="fw-bold">Manage Bookings</h3>
-                        </div>
-                        <i class="bi bi-ticket-perforated fs-1 text-warning"></i>
-                    </div>
-
-                    <a asp-area=""
-                       asp-controller="Bookings"
-                       asp-action="Index"
-                       class="btn btn-outline-warning mt-3">
-                        View Bookings
-                    </a>
-                </div>
-            </div>
-        </div>
-
     </div>
 
     <!-- Quick Actions -->
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white py-3">
-            <h5 class="mb-0 fw-bold">Quick Actions</h5>
+    <h5 class="section-title">Quick Actions</h5>
+
+    <div class="row g-3">
+
+        <div class="col-12 col-md-6 col-xl-3">
+            <a class="quick-action"
+               asp-area="" asp-controller="Flights" asp-action="Create">
+                <i class="bi bi-plus-circle"></i>
+                <div>
+                    <strong>Add Flight</strong>
+                    <div class="text-muted small">Create a new flight</div>
+                </div>
+            </a>
         </div>
 
-        <div class="card-body">
-            <div class="row g-3">
-
-                <div class="col-md-4">
-                    <a asp-area="Admin"
-                       asp-controller="Users"
-                       asp-action="Create"
-                       class="btn btn-primary w-100 py-3">
-                        <i class="bi bi-person-plus me-2"></i>
-                        Create New User
-                    </a>
+        <div class="col-12 col-md-6 col-xl-3">
+            <a class="quick-action"
+               asp-area="" asp-controller="Airports" asp-action="Create">
+                <i class="bi bi-geo-alt"></i>
+                <div>
+                    <strong>Add Airport</strong>
+                    <div class="text-muted small">Register a new airport</div>
                 </div>
-
-                <div class="col-md-4">
-                    <a asp-area="Admin"
-                       asp-controller="Roles"
-                       asp-action="Create"
-                       class="btn btn-success w-100 py-3">
-                        <i class="bi bi-shield-plus me-2"></i>
-                        Create New Role
-                    </a>
-                </div>
-
-                <div class="col-md-4">
-                    <a asp-area=""
-                       asp-controller="Flights"
-                       asp-action="Create"
-                       class="btn btn-info w-100 py-3 text-white">
-                        <i class="bi bi-airplane me-2"></i>
-                        Add New Flight
-                    </a>
-                </div>
-
-            </div>
+            </a>
         </div>
+
+        <div class="col-12 col-md-6 col-xl-3">
+            <a class="quick-action"
+               asp-area="" asp-controller="Routes" asp-action="Create">
+                <i class="bi bi-signpost"></i>
+                <div>
+                    <strong>Add Route</strong>
+                    <div class="text-muted small">Create an airport route</div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-3">
+            <a class="quick-action"
+               asp-area="Admin" asp-controller="Users" asp-action="Index">
+                <i class="bi bi-person-gear"></i>
+                <div>
+                    <strong>Manage Users</strong>
+                    <div class="text-muted small">Manage system accounts</div>
+                </div>
+            </a>
+        </div>
+
     </div>
-
 </div>
-```
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const canvas = document.getElementById('systemPieChart');
+
+        if (!canvas) {
+            return;
+        }
+
+        const chartData = [
+                @Model.TotalFlights,
+                @Model.TotalBookings,
+                @Model.TotalPassengers,
+                @Model.TotalAircraft,
+                @Model.TotalAirports,
+            @Model.TotalRoutes
+        ];
+
+        new Chart(canvas, {
+            type: 'pie',
+
+            data: {
+                labels: [
+                    'Flights',
+                    'Bookings',
+                    'Passengers',
+                    'Aircraft',
+                    'Airports',
+                    'Routes'
+                ],
+
+                datasets: [{
+                    data: chartData,
+
+                    backgroundColor: [
+                        '#0d6efd',
+                        '#198754',
+                        '#ffc107',
+                        '#6f42c1',
+                        '#dc3545',
+                        '#0dcaf0'
+                    ],
+
+                    borderColor: '#ffffff',
+                    borderWidth: 3,
+                    hoverOffset: 8
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 18,
+                            usePointStyle: true
+                        }
+                    },
+
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                const value = Number(context.raw) || 0;
+
+                                const total = context.dataset.data.reduce(
+                                    (sum, item) => sum + (Number(item) || 0),
+                                    0
+                                );
+
+                                const percentage = total > 0
+                                    ? ((value / total) * 100).toFixed(1)
+                                    : '0.0';
+
+                                return `${context.label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
