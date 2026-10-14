@@ -16,8 +16,11 @@ namespace Flight_Booking_System.Models
 
         public string NationalID { get; set; } = string.Empty;
 
-        [MaxLength(11)]
-        [MinLength(11)]
+        [Required(ErrorMessage = "رقم الهاتف مطلوب")]
+        [StringLength(11, MinimumLength = 11,
+              ErrorMessage = "رقم الهاتف يجب أن يتكون من 11 رقمًا")]
+        [RegularExpression(@"^[0-9]{11}$",
+              ErrorMessage = "رقم الهاتف يجب أن يحتوي على أرقام فقط")]
         public string Phone { get; set; } = string.Empty;
 
         public string Email { get; set; } = string.Empty;

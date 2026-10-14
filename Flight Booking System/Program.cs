@@ -40,6 +40,9 @@ namespace Flight_Booking_System
             .AddDefaultTokenProviders();   // needed for email confirmation, password reset and 2FA tokens
 
             builder.Services.AddScoped<IRepository<city>, Repository<city>>();
+            builder.Services.AddScoped<IRepository<Airline>, Repository<Airline>>();
+            builder.Services.AddScoped<IRepository<Class>, Repository<Class>>();
+            builder.Services.AddScoped<IRepository<Passenger>, Repository<Passenger>>();
             // Where to send users who are not logged in / not allowed
             builder.Services.ConfigureApplicationCookie(options =>
             {
@@ -86,7 +89,7 @@ namespace Flight_Booking_System
             // Identity Area Route
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{area=identity}/{controller=Account}/{action=login}/{id?}")
+                pattern: "{area=Admin}/{controller=Passenger}/{action=Index}/{id?}")
           
             .WithStaticAssets();
 
