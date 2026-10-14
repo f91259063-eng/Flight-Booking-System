@@ -1,0 +1,45 @@
+﻿
+@{
+    ViewData["Title"] = "إضافة مسار";
+}
+
+<h2 class="mb-4">إضافة مسار طيران جديد</h2>
+
+<form asp-controller="Routes" asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+
+    <div asp-validation-summary="All"
+         class="text-danger mb-3"></div>
+
+    <div class="mb-3">
+        <label class="form-label">مطار المغادرة</label>
+        <select name="FromAirportId"
+                asp-items="ViewBag.FromAirports"
+                class="form-select"
+                required>
+            <option value="">-- اختر مطار المغادرة --</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">مطار الوصول</label>
+        <select name="ToAirportId"
+                asp-items="ViewBag.ToAirports"
+                class="form-select"
+                required>
+            <option value="">-- اختر مطار الوصول --</option>
+        </select>
+    </div>
+
+    <p class="text-muted">
+        سيتم حساب المسافة الجوية تلقائيًا من إحداثيات المطارين.
+    </p>
+
+    <button type="submit" class="btn btn-primary">
+        حفظ المسار وحساب المسافة
+    </button>
+
+    <a asp-action="Index" class="btn btn-secondary">
+        رجوع
+    </a>
+</form>

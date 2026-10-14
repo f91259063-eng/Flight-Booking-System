@@ -28,5 +28,8 @@ namespace Flight_Booking_System.Repositories
 
           );
         Task<int> CommitAsync();
+
+        Task<int> CountAsync(
+    Expression<Func<T, bool>>? filter = null);
     }
 }

@@ -1,10 +1,10 @@
-﻿using Flight_Booking_System.Data;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using System.Linq.Expressions;
+﻿    using Flight_Booking_System.Data;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.ChangeTracking;
+    using System.Linq.Expressions;
 
-namespace Flight_Booking_System.Repositories
-{
+    namespace Flight_Booking_System.Repositories
+    {
     public class Repository<T> : IRepository<T> where T : class
     {
         protected readonly ApplicationDbContext _context; // = new ApplicationDbContext();
@@ -92,5 +92,18 @@ namespace Flight_Booking_System.Repositories
                 return -1; // Return -1 to indicate an error occurred
             }
         }
+
+        public async Task<int> CountAsync(
+            Expression<Func<T, bool>>? filter = null)
+        {
+            IQueryable<T> query = _context.Set<T>();
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            return await query.CountAsync();
+        }
     }
-}
+    }
