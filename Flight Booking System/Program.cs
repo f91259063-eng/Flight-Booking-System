@@ -47,10 +47,13 @@ namespace Flight_Booking_System
             builder.Services.AddScoped<IRepository<Seat>, Repository<Seat>>();
             builder.Services.AddScoped<IRepository<Payment>, Repository<Payment>>();
             builder.Services.AddScoped<IRepository<city>, Repository<city>>();
-
+            builder.Services.AddScoped<IRepository<AircraftClass>,
+    Repository<AircraftClass>>();
+            builder.Services.AddScoped<IRepository<Seat>, Repository<Seat>>();
             //////servies 
             builder.Services.AddHttpClient<AirportCoordinateService>();
             builder.Services.AddScoped<DistanceCalculatorService>();
+            builder.Services.AddScoped<Flight_Booking_System.Services.ISeatService, SeatService>();
 
 
             // Where to send users who are not logged in / not allowed
