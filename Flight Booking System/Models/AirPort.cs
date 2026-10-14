@@ -6,7 +6,14 @@
         public int Id { get; set; }
         public string Name { get; set; }
         public int cityId { get; set; }
-        public city City { get; set; }  
+        public city? City { get; set; }
+
+
+        public double? Latitude { get; set; }
+
+        public double? Longitude { get; set; }
+
+
         public ICollection<Route> FromRoutes { get; set; }
         = new List<Route>();
 
