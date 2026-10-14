@@ -38,11 +38,24 @@ namespace Flight_Booking_System
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();   // needed for email confirmation, password reset and 2FA tokens
-
-            builder.Services.AddScoped<IRepository<city>, Repository<city>>();
-            builder.Services.AddScoped<IRepository<Airline>, Repository<Airline>>();
-            builder.Services.AddScoped<IRepository<Class>, Repository<Class>>();
+            builder.Services.AddScoped<IRepository<Flight>, Repository<Flight>>();
+            builder.Services.AddScoped<IRepository<Booking>, Repository<Booking>>();
             builder.Services.AddScoped<IRepository<Passenger>, Repository<Passenger>>();
+            builder.Services.AddScoped<IRepository<Aircraft>, Repository<Aircraft>>();
+            builder.Services.AddScoped<IRepository<AirPort>, Repository<AirPort>>();
+            builder.Services.AddScoped<IRepository<Flight_Booking_System.Models.Route>, Repository<Flight_Booking_System.Models.Route>>();
+            builder.Services.AddScoped<IRepository<Seat>, Repository<Seat>>();
+            builder.Services.AddScoped<IRepository<Payment>, Repository<Payment>>();
+            builder.Services.AddScoped<IRepository<city>, Repository<city>>();
+            builder.Services.AddScoped<IRepository<Class>, Repository<Class>>();
+            builder.Services.AddScoped<IRepository<Airline>, Repository<Airline>>();
+            builder.Services.AddScoped<IRepository<Passenger>, Repository<Passenger>>();
+
+            //////servies 
+            builder.Services.AddHttpClient<AirportCoordinateService>();
+            builder.Services.AddScoped<DistanceCalculatorService>();
+
+
             // Where to send users who are not logged in / not allowed
             builder.Services.ConfigureApplicationCookie(options =>
             {
@@ -89,8 +102,8 @@ namespace Flight_Booking_System
             // Identity Area Route
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{area=Admin}/{controller=Passenger}/{action=Index}/{id?}")
-          
+                pattern: "{area=identity}/{controller=Account}/{action=login}/{id?}")
+
             .WithStaticAssets();
 
 
