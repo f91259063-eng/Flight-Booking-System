@@ -1,0 +1,88 @@
+﻿@model Flight_Booking_System.Models.Airline
+
+@{
+    ViewData["Title"] = "حذف شركة الطيران";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid py-4" dir="rtl">
+
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">حذف شركة الطيران</h2>
+        <p class="text-muted mb-0">
+            مراجعة بيانات الشركة قبل تأكيد الحذف
+        </p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 text-danger">
+                        <i class="bi bi-exclamation-triangle me-1"></i>
+                        تأكيد الحذف
+                    </h5>
+                </div>
+
+                <div class="card-body p-4">
+
+                    <div class="alert alert-warning" role="alert">
+                        هل أنت متأكد من رغبتك في حذف شركة الطيران التالية؟
+                        لا يمكن التراجع عن هذا الإجراء بسهولة.
+                    </div>
+
+                    <dl class="row mb-4">
+
+                        <dt class="col-sm-4">رقم الشركة</dt>
+                        <dd class="col-sm-8">@Model.Id</dd>
+
+                        <dt class="col-sm-4">اسم الشركة</dt>
+                        <dd class="col-sm-8">@Model.Name</dd>
+
+                        <dt class="col-sm-4">كود الشركة</dt>
+                        <dd class="col-sm-8">@Model.AirlineCode</dd>
+
+                        <dt class="col-sm-4">البريد الإلكتروني</dt>
+                        <dd class="col-sm-8" dir="ltr">@Model.Email</dd>
+
+                        <dt class="col-sm-4">رقم الهاتف</dt>
+                        <dd class="col-sm-8" dir="ltr">@Model.Phone</dd>
+
+                    </dl>
+
+                    <hr />
+
+                    <form asp-area="Admin"
+                          asp-controller="Airline"
+                          asp-action="Delete"
+                          asp-route-id="@Model.Id"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <div class="d-flex justify-content-start gap-2">
+
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash me-1"></i>
+                                تأكيد الحذف
+                            </button>
+
+                            <a asp-area="Admin"
+                               asp-controller="Airline"
+                               asp-action="Index"
+                               class="btn btn-light border">
+                                إلغاء والعودة
+                            </a>
+
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

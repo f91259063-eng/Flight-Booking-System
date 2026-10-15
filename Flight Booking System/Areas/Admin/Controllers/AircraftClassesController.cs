@@ -1,5 +1,4 @@
-﻿
-using Flight_Booking_System.Models;
+﻿using Flight_Booking_System.Models;
 using Flight_Booking_System.Repositories;
 using Flight_Booking_System.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +18,24 @@ namespace Flight_Booking_System.Controllers
             _seatService = seatService;
         }
 
+        // GET: AircraftClasses
+        [HttpGet]
+        public async Task<IActionResult> Index()
+        {
+            var aircraftClasses =
+                await _aircraftClassRepository.GetAllAsync();
+
+            return View(aircraftClasses);
+        }
+
+        // GET: AircraftClasses/Create
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        // POST: AircraftClasses/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
@@ -29,14 +46,12 @@ namespace Flight_Booking_System.Controllers
                 return View(aircraftClass);
             }
 
-            // 1. Save AircraftClass
-            _aircraftClassRepository.InsertAsync(aircraftClass);
-            _aircraftClassRepository.CommitAsync();
+            await _aircraftClassRepository.InsertAsync(aircraftClass);
 
-            // 2. Generate seats automatically
+            await _aircraftClassRepository.CommitAsync();
+
             await _seatService.GenerateSeatsAsync(aircraftClass);
 
-            // 3. Return to Index
             return RedirectToAction(nameof(Index));
         }
     }
