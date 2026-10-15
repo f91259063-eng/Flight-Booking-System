@@ -8,10 +8,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Controllers\ClassController.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Areas\Customer\Controllers\" />
     <Folder Include="Areas\Customer\Views\" />
     <Folder Include="Areas\Identity\Controllers\" />
     <Folder Include="Areas\Identity\Views\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Areas\Admin\Controllers\ClassController.cs" />
   </ItemGroup>
 
   <ItemGroup>

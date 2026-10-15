@@ -1,0 +1,136 @@
+﻿@model Flight_Booking_System.Models.Airline
+
+@{
+    ViewData["Title"] = "تعديل شركة الطيران";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid py-4" dir="rtl">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">تعديل شركة الطيران</h2>
+            <p class="text-muted mb-0">
+                يمكنك تحديث بيانات شركة الطيران
+            </p>
+        </div>
+
+        <a asp-area="Admin"
+           asp-controller="Airline"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-right me-1"></i>
+            العودة إلى شركات الطيران
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">بيانات شركة الطيران</h5>
+                </div>
+
+                <div class="card-body p-4">
+
+                    <form asp-area="Admin"
+                          asp-controller="Airline"
+                          asp-action="Edit"
+                          asp-route-id="@Model.Id"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden" asp-for="Id" />
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="text-danger mb-3">
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label fw-semibold">
+                                اسم شركة الطيران
+                            </label>
+
+                            <input asp-for="Name"
+                                   class="form-control"
+                                   placeholder="أدخل اسم شركة الطيران" />
+
+                            <span asp-validation-for="Name"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="AirlineCode" class="form-label fw-semibold">
+                                كود شركة الطيران
+                            </label>
+
+                            <input asp-for="AirlineCode"
+                                   class="form-control"
+                                   placeholder="أدخل كود شركة الطيران" />
+
+                            <span asp-validation-for="AirlineCode"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-semibold">
+                                البريد الإلكتروني
+                            </label>
+
+                            <input asp-for="Email"
+                                   type="email"
+                                   dir="ltr"
+                                   class="form-control text-end"
+                                   placeholder="example@email.com" />
+
+                            <span asp-validation-for="Email"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Phone" class="form-label fw-semibold">
+                                رقم الهاتف
+                            </label>
+
+                            <input asp-for="Phone"
+                                   type="tel"
+                                   dir="ltr"
+                                   maxlength="11"
+                                   minlength="11"
+                                   class="form-control text-end"
+                                   placeholder="أدخل رقم الهاتف" />
+
+                            <span asp-validation-for="Phone"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <hr />
+
+                        <div class="d-flex justify-content-start gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i>
+                                حفظ التعديلات
+                            </button>
+
+                            <a asp-area="Admin"
+                               asp-controller="Airline"
+                               asp-action="Index"
+                               class="btn btn-light border">
+                                إلغاء
+                            </a>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

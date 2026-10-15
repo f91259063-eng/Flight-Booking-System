@@ -1,0 +1,76 @@
+﻿@model Flight_Booking_System.Models.Passenger
+
+@{
+    ViewData["Title"] = "حذف راكب";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid py-4" dir="rtl">
+    <div class="mb-4">
+        <h2 class="fw-bold">حذف راكب</h2>
+        <p class="text-muted">راجع بيانات الراكب قبل تأكيد الحذف.</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 text-danger">تأكيد حذف الراكب</h5>
+                </div>
+
+                <div class="card-body p-4">
+                    <div class="alert alert-warning">
+                        هل أنت متأكد أنك تريد حذف هذا الراكب؟
+                    </div>
+
+                    <dl class="row">
+                        <dt class="col-sm-4">الاسم الكامل</dt>
+                        <dd class="col-sm-8">
+                            @Model.FirstName @Model.MiddleName @Model.LastName
+                        </dd>
+
+                        <dt class="col-sm-4">رقم جواز السفر</dt>
+                        <dd class="col-sm-8">@Model.PassportNumber</dd>
+
+                        <dt class="col-sm-4">الرقم القومي</dt>
+                        <dd class="col-sm-8">@Model.NationalID</dd>
+
+                        <dt class="col-sm-4">رقم الهاتف</dt>
+                        <dd class="col-sm-8" dir="ltr">@Model.Phone</dd>
+
+                        <dt class="col-sm-4">البريد الإلكتروني</dt>
+                        <dd class="col-sm-8">@Model.Email</dd>
+
+                        <dt class="col-sm-4">تاريخ الميلاد</dt>
+                        <dd class="col-sm-8">
+                            @Model.DateOfBirth.ToString("yyyy/MM/dd")
+                        </dd>
+                    </dl>
+
+                    <form asp-area="Admin"
+                          asp-controller="Passenger"
+                          asp-action="Delete"
+                          asp-route-id="@Model.Id"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-danger">
+                                تأكيد الحذف
+                            </button>
+
+                            <a asp-area="Admin"
+                               asp-controller="Passenger"
+                               asp-action="Index"
+                               class="btn btn-light border">
+                                إلغاء
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+```
