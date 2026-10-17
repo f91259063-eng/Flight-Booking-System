@@ -1,0 +1,267 @@
+﻿@model Flight_Booking_System.ViewModels.UserCreateViewModel
+
+@{
+    ViewData["Title"] = "Create User";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid py-4" dir="rtl">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-person-plus-fill"></i>
+                إنشاء مستخدم
+            </h2>
+
+            <p class="text-muted mb-0">
+                إضافة مستخدم جديد وتحديد صلاحياته
+            </p>
+        </div>
+
+        <a asp-controller="Admin"
+           asp-action="Users"
+           class="btn btn-secondary">
+
+            <i class="bi bi-arrow-right"></i>
+            العودة للمستخدمين
+
+        </a>
+
+    </div>
+
+
+    <!-- Validation -->
+    <div asp-validation-summary="ModelOnly"
+         class="alert alert-danger"
+         role="alert">
+    </div>
+
+
+    <div class="row justify-content-center">
+
+        <div class="col-xl-8 col-lg-10">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-header bg-primary text-white">
+
+                    <h5 class="mb-0">
+                        <i class="bi bi-person-fill"></i>
+                        بيانات المستخدم
+                    </h5>
+
+                </div>
+
+
+                <div class="card-body p-4">
+
+                    <form asp-controller="Admin"
+                          asp-action="CreateUser"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+
+                        <!-- First Name -->
+                        <div class="mb-3">
+
+                            <label asp-for="FirstName"
+                                   class="form-label fw-bold">
+                            </label>
+
+                            <input asp-for="FirstName"
+                                   class="form-control"
+                                   placeholder="أدخل الاسم الأول" />
+
+                            <span asp-validation-for="FirstName"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+
+                        <!-- Last Name -->
+                        <div class="mb-3">
+
+                            <label asp-for="LastName"
+                                   class="form-label fw-bold">
+                            </label>
+
+                            <input asp-for="LastName"
+                                   class="form-control"
+                                   placeholder="أدخل اسم العائلة" />
+
+                            <span asp-validation-for="LastName"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+
+                        <!-- Email -->
+                        <div class="mb-3">
+
+                            <label asp-for="Email"
+                                   class="form-label fw-bold">
+                            </label>
+
+                            <input asp-for="Email"
+                                   class="form-control"
+                                   placeholder="example@email.com" />
+
+                            <span asp-validation-for="Email"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+
+                        <!-- Phone -->
+                        <div class="mb-3">
+
+                            <label asp-for="PhoneNumber"
+                                   class="form-label fw-bold">
+                            </label>
+
+                            <input asp-for="PhoneNumber"
+                                   class="form-control"
+                                   placeholder="رقم الهاتف" />
+
+                            <span asp-validation-for="PhoneNumber"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+
+                        <!-- Password -->
+                        <div class="mb-3">
+
+                            <label asp-for="Password"
+                                   class="form-label fw-bold">
+                            </label>
+
+                            <input asp-for="Password"
+                                   class="form-control"
+                                   placeholder="Password" />
+
+                            <span asp-validation-for="Password"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+
+                        <!-- Confirm Password -->
+                        <div class="mb-4">
+
+                            <label asp-for="ConfirmPassword"
+                                   class="form-label fw-bold">
+                            </label>
+
+                            <input asp-for="ConfirmPassword"
+                                   class="form-control"
+                                   placeholder="Confirm Password" />
+
+                            <span asp-validation-for="ConfirmPassword"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+
+                        <!-- Roles -->
+                        <div class="mb-4">
+
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-shield-lock-fill"></i>
+                                Roles / الصلاحيات
+                            </label>
+
+
+                            <div class="border rounded p-3">
+
+                                @if (ViewBag.Roles != null)
+                                {
+                                    foreach (var role in ViewBag.Roles)
+                                    {
+                                        <div class="form-check mb-2">
+
+                                            <input class="form-check-input"
+                                                   type="checkbox"
+                                                   name="SelectedRoles"
+                                                   value="@role.Name"
+                                                   id="role_@role.Id" />
+
+                                            <label class="form-check-label"
+                                                   for="role_@role.Id">
+
+                                                @role.Name
+
+                                            </label>
+
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="alert alert-warning mb-0">
+
+                                        لا توجد Roles في النظام.
+
+                                    </div>
+                                }
+
+                            </div>
+
+                            <small class="text-muted">
+                                يمكنك اختيار أكثر من Role للمستخدم.
+                            </small>
+
+                        </div>
+
+
+                        <!-- Buttons -->
+                        <div class="d-flex justify-content-between">
+
+                            <a asp-controller="Admin"
+                               asp-action="Users"
+                               class="btn btn-secondary">
+
+                                <i class="bi bi-x-circle"></i>
+                                إلغاء
+
+                            </a>
+
+
+                            <button type="submit"
+                                    class="btn btn-primary">
+
+                                <i class="bi bi-person-plus-fill"></i>
+                                إنشاء المستخدم
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+}
