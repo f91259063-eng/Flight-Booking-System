@@ -69,7 +69,7 @@ namespace Flight_Booking_System.Controllers
                     }
                 }
 
-                await LoadCitiesAsync();
+                await  LoadCitiesAsync();
                 return View(airport);
             }
 
