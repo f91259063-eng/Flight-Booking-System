@@ -1,0 +1,160 @@
+﻿```cshtml
+@model Flight_Booking_System.Models.AircraftClass
+
+@{
+    ViewData["Title"] = "Create Aircraft Class";
+    Layout = "_AdminLayout";
+
+    var aircrafts = ViewBag.Aircrafts
+        as IEnumerable<Flight_Booking_System.Models.Aircraft>;
+
+    var classes = ViewBag.Classes
+        as IEnumerable<Flight_Booking_System.Models.Class>;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-7 mx-auto">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header">
+                    <h4 class="mb-0">Create Aircraft Class</h4>
+                </div>
+
+                <div class="card-body">
+
+                    <form asp-controller="AircraftClasses"
+                          asp-action="Create"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="text-danger mb-3">
+                        </div>
+
+                        <!-- Aircraft -->
+                        <div class="mb-3">
+
+                            <label asp-for="AircraftId"
+                                   class="form-label">
+                                Aircraft
+                            </label>
+
+                            <select asp-for="AircraftId"
+                                    class="form-select">
+
+                                <option value="">
+                                    -- Select Aircraft --
+                                </option>
+
+                                @if (aircrafts != null)
+                                {
+                                    foreach (var aircraft in aircrafts)
+                                    {
+                                        <option value="@aircraft.Id">
+                                            @aircraft.Model
+                                            -
+                                            @aircraft.RegistrationNumber
+                                        </option>
+                                    }
+                                }
+
+                            </select>
+
+                            <span asp-validation-for="AircraftId"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+                        <!-- Class -->
+                        <div class="mb-3">
+
+                            <label asp-for="ClassId"
+                                   class="form-label">
+                                Class
+                            </label>
+
+                            <select asp-for="ClassId"
+                                    class="form-select">
+
+                                <option value="">
+                                    -- Select Class --
+                                </option>
+
+                                @if (classes != null)
+                                {
+                                    foreach (var item in classes)
+                                    {
+                                        <option value="@item.Id">
+                                            @item.Name
+                                        </option>
+                                    }
+                                }
+
+                            </select>
+
+                            <span asp-validation-for="ClassId"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+                        <!-- Number Of Seats -->
+                        <div class="mb-3">
+
+                            <label asp-for="NumberOfSeats"
+                                   class="form-label">
+                                Number of Seats
+                            </label>
+
+                            <input asp-for="NumberOfSeats"
+                                   type="number"
+                                   min="1"
+                                   class="form-control"
+                                   placeholder="Enter number of seats" />
+
+                            <span asp-validation-for="NumberOfSeats"
+                                  class="text-danger">
+                            </span>
+
+                            <small class="text-muted">
+                                Number of seats assigned to this class.
+                            </small>
+
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-flex gap-2">
+
+                            <button type="submit"
+                                    class="btn btn-success">
+                                <i class="bi bi-save"></i>
+                                Save
+                            </button>
+
+                            <a asp-controller="AircraftClasses"
+                               asp-action="Index"
+                               class="btn btn-secondary">
+                                Back
+                            </a>
+
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+}
+```

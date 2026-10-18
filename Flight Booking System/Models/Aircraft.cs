@@ -7,7 +7,7 @@
 
 
         public int AirlineId { get; set; }
-        public Airline Airline { get; set; }
+        public Airline? Airline { get; set; }
 
         public string RegistrationNumber { get; set; }
         public string Model { get; set; }

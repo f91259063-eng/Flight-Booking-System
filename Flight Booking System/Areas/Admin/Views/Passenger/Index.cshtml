@@ -1,0 +1,100 @@
+﻿@model IEnumerable<Flight_Booking_System.Models.Passenger>
+
+@{
+    ViewData["Title"] = "إدارة الركاب";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid py-4" dir="rtl">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">إدارة الركاب</h2>
+            <p class="text-muted mb-0">عرض وإدارة بيانات المسافرين</p>
+        </div>
+
+        <a asp-area="Admin"
+           asp-controller="Passenger"
+           asp-action="Create"
+           class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>
+            إضافة راكب
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0">قائمة الركاب</h5>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead style="background-color: #0b1729; color: white;">
+                        <tr>
+                            <th>الرقم</th>
+                            <th>اسم الراكب</th>
+                            <th>رقم جواز السفر</th>
+                            <th>الرقم القومي</th>
+                            <th>الهاتف</th>
+                            <th>البريد الإلكتروني</th>
+                            <th>تاريخ الميلاد</th>
+                            <th class="text-center">الإجراءات</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.Id</td>
+
+                                    <td class="fw-semibold">
+                                        @item.FirstName @item.MiddleName @item.LastName
+                                    </td>
+
+                                    <td>@item.PassportNumber</td>
+                                    <td>@item.NationalID</td>
+                                    <td dir="ltr" class="text-end">@item.Phone</td>
+                                    <td>@item.Email</td>
+                                    <td>@item.DateOfBirth.ToString("yyyy/MM/dd")</td>
+
+                                    <td>
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a asp-area="Admin"
+                                               asp-controller="Passenger"
+                                               asp-action="Edit"
+                                               asp-route-id="@item.Id"
+                                               class="btn btn-warning btn-sm">
+                                                تعديل
+                                            </a>
+
+                                            <a asp-area="Admin"
+                                               asp-controller="Passenger"
+                                               asp-action="Delete"
+                                               asp-route-id="@item.Id"
+                                               class="btn btn-danger btn-sm">
+                                                حذف
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center py-4 text-muted">
+                                    لا يوجد ركاب مسجلون حتى الآن.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+```

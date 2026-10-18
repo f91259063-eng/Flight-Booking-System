@@ -1,0 +1,139 @@
+﻿```cshtml
+@model IEnumerable<Flight_Booking_System.Models.Aircraft>
+
+@{
+    ViewData["Title"] = "الطائرات";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid py-4" dir="rtl">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-airplane"></i>
+                إدارة الطائرات
+            </h2>
+            <p class="text-muted mb-0">
+                عرض وإدارة الطائرات وبياناتها ودرجات السفر
+            </p>
+        </div>
+
+        <a asp-area="Admin"
+           asp-controller="Aircraft"
+           asp-action="Create"
+           class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i>
+            إضافة طائرة
+        </a>
+    </div>
+
+    <!-- Aircraft Table -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0 fw-bold">قائمة الطائرات</h5>
+        </div>
+
+        <div class="card-body">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered align-middle text-center">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>رقم تسجيل الطائرة</th>
+                                <th>موديل الطائرة</th>
+                                <th>شركة الطيران</th>
+                                <th>السعة الكلية</th>
+                                <th style="min-width: 250px;">الإجراءات</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @{
+                                var counter = 1;
+                            }
+
+                            @foreach (var aircraft in Model)
+                            {
+                                <tr>
+                                    <td>@counter</td>
+                                    <td class="fw-semibold">
+                                        @aircraft.RegistrationNumber
+                                    </td>
+                                    <td>@aircraft.Model</td>
+                                    <td>
+                                        @(aircraft.Airline?.Name ?? "غير محدد")
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info text-dark">
+                                            @aircraft.Capacity مقعد
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <div class="d-flex justify-content-center gap-2 flex-wrap">
+
+                                            <a asp-area="Admin"
+                                               asp-controller="Aircraft"
+                                               asp-action="Details"
+                                               asp-route-id="@aircraft.Id"
+                                               class="btn btn-sm btn-info text-white"
+                                               title="عرض التفاصيل">
+                                                <i class="bi bi-eye"></i>
+                                                التفاصيل
+                                            </a>
+
+                                            <a asp-area="Admin"
+                                               asp-controller="Aircraft"
+                                               asp-action="Edit"
+                                               asp-route-id="@aircraft.Id"
+                                               class="btn btn-sm btn-warning"
+                                               title="تعديل">
+                                                <i class="bi bi-pencil-square"></i>
+                                                تعديل
+                                            </a>
+
+                                            <a asp-area="Admin"
+                                               asp-controller="Aircraft"
+                                               asp-action="Delete"
+                                               asp-route-id="@aircraft.Id"
+                                               class="btn btn-sm btn-danger"
+                                               title="حذف">
+                                                <i class="bi bi-trash"></i>
+                                                حذف
+                                            </a>
+
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                counter++;
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-airplane display-4 text-muted"></i>
+                    <h5 class="mt-3">لا توجد طائرات مسجلة</h5>
+                    <p class="text-muted">ابدأ بإضافة أول طائرة إلى النظام.</p>
+
+                    <a asp-area="Admin"
+                       asp-controller="Aircraft"
+                       asp-action="Create"
+                       class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i>
+                        إضافة طائرة
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+```

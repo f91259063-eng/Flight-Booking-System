@@ -1,69 +1,73 @@
 ﻿
-
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>
-        @(ViewData["Title"] ?? "Admin Dashboard")
-        | Flight Booking System
+        @(ViewData["Title"] ?? "Admin Dashboard") | Flight Booking System
     </title>
 
-    <!-- Favicon -->
     <link rel="icon"
           type="image/png"
           href="~/assets/img/favicons/favicon-32x32.png" />
 
-    <!-- Falcon Configuration -->
     <script src="~/assets/js/config.js"></script>
 
-    <!-- Simplebar CSS -->
-    <link rel="stylesheet"
-          href="~/vendors/simplebar/simplebar.min.css" />
-
-    <!-- Falcon Theme CSS -->
-    <link rel="stylesheet"
-          href="~/assets/css/theme.min.css" />
-
-    <!-- Custom CSS -->
-    <link rel="stylesheet"
-          href="~/assets/css/user.min.css" />
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet"
-          href="~/vendors/fontawesome/all.min.css" />
+    <link rel="stylesheet" href="~/vendors/simplebar/simplebar.min.css" />
+    <link rel="stylesheet" href="~/assets/css/theme.min.css" />
+    <link rel="stylesheet" href="~/assets/css/user.min.css" />
+    <link rel="stylesheet" href="~/vendors/fontawesome/all.min.css" />
 
     <style>
-            .navbar-brand-text {
-                font-size: 1.15rem;
-                font-weight: 700;
-                color: #2c7be5;
-                white-space: nowrap;
-            }
+        .navbar-brand-text {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #2c7be5;
+            white-space: nowrap;
+        }
 
-            .navbar-brand img {
-                object-fit: contain;
-            }
+        .navbar-brand img {
+            object-fit: contain;
+        }
 
-            .content {
-                min-width: 0;
-            }
+        .content {
+            min-width: 0;
+        }
 
-            .sidebar-heading {
-                padding: 12px 20px 5px;
-                font-size: 11px;
-                color: #748194;
-                font-weight: 700;
-                text-transform: uppercase;
-            }
+        .sidebar-heading {
+            padding: 16px 20px 6px;
+            font-size: 11px;
+            color: #748194;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
 
-            .footer {
-                margin-top: auto;
-            }
+        .navbar-vertical .nav-link {
+            padding-top: .65rem;
+            padding-bottom: .65rem;
+        }
+
+        .navbar-vertical .nav-link-icon {
+            min-width: 1.8rem;
+            display: inline-flex;
+            justify-content: center;
+        }
+
+        .navbar-vertical .nav-link-text {
+            white-space: normal;
+        }
+
+        .footer {
+            margin-top: auto;
+        }
+
+        .content > .container-fluid {
+            min-height: 70vh;
+        }
     </style>
 
     @await RenderSectionAsync("Styles", required: false)
@@ -73,8 +77,7 @@
 
     <main class="main" id="top">
 
-        <div class="container-fluid"
-             data-layout="container">
+        <div class="container-fluid" data-layout="container">
 
             <!-- ========================= -->
             <!-- Sidebar -->
@@ -86,17 +89,16 @@
                 <div class="d-flex align-items-center">
 
                     <div class="toggle-icon-wrapper">
-                        <button class="btn navbar-toggler-humburger-icon
-                            navbar-vertical-toggle"
+                        <button class="btn navbar-toggler-humburger-icon navbar-vertical-toggle"
                                 type="button"
                                 data-bs-toggle="tooltip"
                                 data-bs-placement="left"
-                                title="Toggle Navigation">
+                                title="Toggle Navigation"
+                                aria-label="Toggle Navigation">
 
                             <span class="navbar-toggle-icon">
                                 <span class="toggle-line"></span>
                             </span>
-
                         </button>
                     </div>
 
@@ -115,12 +117,11 @@
                                  height="40" />
 
                             <span class="navbar-brand-text">
-                                Flight_Booking_System
+                                Flight Booking System
                             </span>
 
                         </div>
                     </a>
-
                 </div>
 
                 <!-- Sidebar Menu -->
@@ -135,103 +136,140 @@
                             <!-- Dashboard -->
                             <li class="nav-item">
 
-                                <a class="nav-link dropdown-indicator"
-                                   href="#dashboardMenu"
-                                   role="button"
-                                   data-bs-toggle="collapse"
-                                   aria-expanded="true"
-                                   aria-controls="dashboardMenu">
-
-                                    <div class="d-flex align-items-center">
-
-                                        <span class="nav-link-icon">
-                                            <i class="fas fa-chart-pie"></i>
-                                        </span>
-
-                                        <span class="nav-link-text ps-1">
-                                            Dashboard
-                                        </span>
-
-                                    </div>
-
-                                </a>
-
-                                <div class="collapse show"
-                                     id="dashboardMenu">
-
-                                    <ul class="nav flex-column">
-
-                                        <!-- Dashboard Home -->
-                                        <li class="nav-item">
-                                            <a class="nav-link"
-                                               asp-area="Admin"
-                                               asp-controller="Home"
-                                               asp-action="Index">
-
-                                                <div class="d-flex align-items-center">
-                                                    <span class="nav-link-text ps-1">
-                                                        Overview
-                                                    </span>
-                                                </div>
-
-                                            </a>
-                                        </li>
-
-                                        <!-- Cities -->
-                                        <li class="nav-item">
-                                            <a class="nav-link"
-                                               asp-area="Admin"
-                                               asp-controller="city"
-                                               asp-action="Index">
-
-                                                <div class="d-flex align-items-center">
-                                                    <span class="nav-link-text ps-1">
-                                                        Cities
-                                                    </span>
-                                                </div>
-
-                                            </a>
-                                        </li>
-
-                                        <!-- Routes -->
-                                        <li class="nav-item">
-                                            <a class="nav-link"
-                                               asp-area="Admin"
-                                               asp-controller="Routes"
-                                               asp-action="Index">
-
-                                                <div class="d-flex align-items-center">
-                                                    <span class="nav-link-text ps-1">
-                                                        Routes
-                                                    </span>
-                                                </div>
-
-                                            </a>
-                                        </li>
-
-                                        <!-- Airports -->
-                                        <li class="nav-item">
-                                            <a class="nav-link"
-                                               asp-area="Admin"
-                                               asp-controller="Airports"
-                                               asp-action="Index">
-
-                                                <div class="d-flex align-items-center">
-                                                    <span class="nav-link-text ps-1">
-                                                        Airports
-                                                    </span>
-                                                </div>
-
-                                            </a>
-                                        </li>
-
-                                    </ul>
-
+                                <div class="sidebar-heading">
+                                    Dashboard
                                 </div>
 
+                                <a class="nav-link"
+                                   asp-area="Admin"
+                                   asp-controller="Home"
+                                   asp-action="Index">
+
+                                    <span class="nav-link-icon">
+                                        <i class="fas fa-chart-pie"></i>
+                                    </span>
+
+                                    <span class="nav-link-text ps-1">
+                                        Overview
+                                    </span>
+                                </a>
                             </li>
 
-                            <!-- Flights Section -->
+                            <!-- Location Management -->
+                            <li class="nav-item">
+
+                                <div class="sidebar-heading">
+                                    Location Management
+                                </div>
+
+                                <a class="nav-link"
+                                   asp-area="Admin"
+                                   asp-controller="city"
+                                   asp-action="Index">
+
+                                    <span class="nav-link-icon">
+                                        <i class="fas fa-city"></i>
+                                    </span>
+
+                                    <span class="nav-link-text ps-1">
+                                        Cities
+                                    </span>
+                                </a>
+
+                                <a class="nav-link"
+                                   asp-area="Admin"
+                                   asp-controller="Airports"
+                                   asp-action="Index">
+
+                                    <span class="nav-link-icon">
+                                        <i class="fas fa-plane-arrival"></i>
+                                    </span>
+
+                                    <span class="nav-link-text ps-1">
+                                        Airports
+                                    </span>
+                                </a>
+
+                                <a class="nav-link"
+                                   asp-area="Admin"
+                                   asp-controller="Routes"
+                                   asp-action="Index">
+
+                                    <span class="nav-link-icon">
+                                        <i class="fas fa-route"></i>
+                                    </span>
+
+                                    <span class="nav-link-text ps-1">
+                                        Routes
+                                    </span>
+                                </a>
+                            </li>
+
+                            <!-- Aircraft Management -->
+                            <li class="nav-item">
+
+                                <div class="sidebar-heading">
+                                    Aircraft Management
+                                </div>
+
+                                <a class="nav-link"
+                                   asp-area="Admin"
+                                   asp-controller="Airline"
+                                   asp-action="Index">
+
+                                    <span class="nav-link-icon">
+                                        <i class="fas fa-building"></i>
+                                    </span>
+
+                                    <span class="nav-link-text ps-1">
+                                        Airlines
+                                    </span>
+                                </a>
+
+                                <a class="nav-link"
+                                   asp-area="Admin"
+                                   asp-controller="Aircraft"
+                                   asp-action="Index">
+
+                                    <span class="nav-link-icon">
+                                        <i class="fas fa-plane"></i>
+                                    </span>
+
+                                    <span class="nav-link-text ps-1">
+                                        Aircrafts
+                                    </span>
+                                </a>
+
+                                <a class="nav-link"
+                                   asp-area="Admin"
+                                   asp-controller="Class"
+                                   asp-action="Index">
+
+                                    <span class="nav-link-icon">
+                                        <i class="fas fa-layer-group"></i>
+                                    </span>
+
+                                    <span class="nav-link-text ps-1">
+                                        Classes
+                                    </span>
+                                </a>
+
+                                <a class="nav-link"
+                                   asp-area="Admin"
+                                   asp-controller="AircraftClasses"
+                                   asp-action="Index">
+
+                                    <span class="nav-link-icon">
+                                        <i class="fas fa-chair"></i>
+                                    </span>
+
+                                    <span class="nav-link-text ps-1">
+                                        Aircraft Classes &amp; Seats
+                                    </span>
+                                </a>
+                            </li>
+
+                            <!-- Flight Management -->
                             <li class="nav-item">
 
                                 <div class="sidebar-heading">
@@ -243,81 +281,53 @@
                                    asp-controller="Flights"
                                    asp-action="Index">
 
-                                    <div class="d-flex align-items-center">
-                                        <span class="nav-link-icon">
-                                            <i class="fas fa-plane"></i>
-                                        </span>
+                                    <span class="nav-link-icon">
+                                        <i class="fas fa-plane-departure"></i>
+                                    </span>
 
-                                        <span class="nav-link-text ps-1">
-                                            Flights
-                                        </span>
-                                    </div>
-
-                                </a>
-
-                            </li>
-
-                            <!-- Aircrafts -->
-                            <li class="nav-item">
-                                <a class="nav-link"
-                                   asp-area="Admin"
-                                   asp-controller="Aircrafts"
-                                   asp-action="Index">
-
-                                    <div class="d-flex align-items-center">
-                                        <span class="nav-link-icon">
-                                            <i class="fas fa-plane-departure"></i>
-                                        </span>
-
-                                        <span class="nav-link-text ps-1">
-                                            Aircrafts
-                                        </span>
-                                    </div>
-
+                                    <span class="nav-link-text ps-1">
+                                        Flights
+                                    </span>
                                 </a>
                             </li>
 
-                            <!-- Bookings -->
+                            <!-- Booking Management -->
                             <li class="nav-item">
+
+                                <div class="sidebar-heading">
+                                    Booking Management
+                                </div>
+
                                 <a class="nav-link"
                                    asp-area="Admin"
                                    asp-controller="Bookings"
                                    asp-action="Index">
 
-                                    <div class="d-flex align-items-center">
-                                        <span class="nav-link-icon">
-                                            <i class="fas fa-ticket-alt"></i>
-                                        </span>
+                                    <span class="nav-link-icon">
+                                        <i class="fas fa-ticket-alt"></i>
+                                    </span>
 
-                                        <span class="nav-link-text ps-1">
-                                            Bookings
-                                        </span>
-                                    </div>
-
+                                    <span class="nav-link-text ps-1">
+                                        Bookings
+                                    </span>
                                 </a>
-                            </li>
 
-                            <!-- Passengers -->
-                            <li class="nav-item">
                                 <a class="nav-link"
                                    asp-area="Admin"
                                    asp-controller="Passengers"
                                    asp-action="Index">
 
-                                    <div class="d-flex align-items-center">
-                                        <span class="nav-link-icon">
-                                            <i class="fas fa-users"></i>
-                                        </span>
+                                    <span class="nav-link-icon">
+                                        <i class="fas fa-users"></i>
+                                    </span>
 
-                                        <span class="nav-link-text ps-1">
-                                            Passengers
-                                        </span>
-                                    </div>
-
+                                    <span class="nav-link-text ps-1">
+                                        Passengers
+                                    </span>
                                 </a>
                             </li>
 
-                            <!-- Identity Management -->
+                            <!-- Security Management -->
                             <li class="nav-item">
 
                                 <div class="sidebar-heading">
@@ -326,48 +336,37 @@
 
                                 <a class="nav-link"
                                    asp-area="Admin"
-                                   asp-controller="Users"
-                                   asp-action="Index">
+                                   asp-controller="Admin"
+                                   asp-action="Users">
 
-                                    <div class="d-flex align-items-center">
-                                        <span class="nav-link-icon">
-                                            <i class="fas fa-user-shield"></i>
-                                        </span>
+                                    <span class="nav-link-icon">
+                                        <i class="fas fa-user-shield"></i>
+                                    </span>
 
-                                        <span class="nav-link-text ps-1">
-                                            Users
-                                        </span>
-                                    </div>
-
+                                    <span class="nav-link-text ps-1">
+                                        Users
+                                    </span>
                                 </a>
 
-                            </li>
-
-                            <li class="nav-item">
                                 <a class="nav-link"
                                    asp-area="Admin"
                                    asp-controller="Roles"
                                    asp-action="Index">
 
-                                    <div class="d-flex align-items-center">
-                                        <span class="nav-link-icon">
-                                            <i class="fas fa-user-tag"></i>
-                                        </span>
+                                    <span class="nav-link-icon">
+                                        <i class="fas fa-user-tag"></i>
+                                    </span>
 
-                                        <span class="nav-link-text ps-1">
-                                            Roles
-                                        </span>
-                                    </div>
-
+                                    <span class="nav-link-text ps-1">
+                                        Roles
+                                    </span>
                                 </a>
                             </li>
 
                         </ul>
 
                     </div>
-
                 </div>
-
             </nav>
 
             <!-- ========================= -->
@@ -377,12 +376,10 @@
             <div class="content">
 
                 <!-- Top Navbar -->
-                <nav class="navbar navbar-light navbar-glass
-                    navbar-top navbar-expand">
+                <nav class="navbar navbar-light navbar-glass navbar-top navbar-expand">
 
                     <!-- Mobile Sidebar Toggle -->
-                    <button class="btn navbar-toggler-humburger-icon
-                        navbar-toggler me-1 me-sm-3"
+                    <button class="btn navbar-toggler-humburger-icon navbar-toggler me-1 me-sm-3"
                             type="button"
                             data-bs-toggle="collapse"
                             data-bs-target="#navbarVerticalCollapse"
@@ -393,34 +390,32 @@
                         <span class="navbar-toggle-icon">
                             <span class="toggle-line"></span>
                         </span>
-
                     </button>
 
                     <!-- Page Title -->
                     <div class="d-flex align-items-center">
                         <h5 class="mb-0">
-                            @ViewData["Title"]
+                            @(ViewData["Title"] ?? "Admin Dashboard")
                         </h5>
                     </div>
 
                     <!-- Right Navbar -->
-                    <ul class="navbar-nav ms-auto flex-row
-                        align-items-center">
+                    <ul class="navbar-nav ms-auto flex-row align-items-center">
 
-                        <!-- Home -->
+                        <!-- Dashboard Home -->
                         <li class="nav-item">
                             <a class="nav-link px-2"
                                asp-area="Admin"
                                asp-controller="Home"
                                asp-action="Index"
-                               title="Dashboard">
+                               title="Dashboard"
+                               aria-label="Dashboard">
 
                                 <i class="fas fa-home"></i>
-
                             </a>
                         </li>
 
-                        <!-- User -->
+                        <!-- User Menu -->
                         <li class="nav-item dropdown">
 
                             <a class="nav-link pe-0 ps-2"
@@ -431,18 +426,15 @@
                                aria-expanded="false">
 
                                 <div class="avatar avatar-xl">
-                                    <div class="avatar-name rounded-circle
-                                        bg-soft-primary text-primary">
+                                    <div class="avatar-name rounded-circle bg-soft-primary text-primary">
                                         <span>
                                             <i class="fas fa-user"></i>
                                         </span>
                                     </div>
                                 </div>
-
                             </a>
 
-                            <div class="dropdown-menu dropdown-menu-end
-                                py-0"
+                            <div class="dropdown-menu dropdown-menu-end py-0"
                                  aria-labelledby="navbarDropdownUser">
 
                                 <div class="bg-white rounded-2 py-2">
@@ -457,6 +449,8 @@
                                        asp-area="Admin"
                                        asp-controller="Home"
                                        asp-action="Index">
+
+                                        <i class="fas fa-chart-pie me-2"></i>
                                         Dashboard
                                     </a>
 
@@ -470,50 +464,35 @@
 
                                         <button type="submit"
                                                 class="dropdown-item text-danger">
+
                                             <i class="fas fa-sign-out-alt me-2"></i>
                                             Logout
                                         </button>
-
                                     </form>
 
                                 </div>
-
                             </div>
-
                         </li>
-
                     </ul>
-
                 </nav>
 
-                <!-- ========================= -->
                 <!-- Page Content -->
-                <!-- ========================= -->
-
                 <div class="container-fluid py-3">
 
                     @RenderBody()
 
                 </div>
 
-                <!-- ========================= -->
                 <!-- Footer -->
-                <!-- ========================= -->
-
                 <footer class="footer">
 
-                    <div class="row g-0 justify-content-between
-                        align-items-center fs--1 mt-4 mb-3">
+                    <div class="row g-0 justify-content-between align-items-center fs--1 mt-4 mb-3">
 
                         <div class="col-12 col-sm-auto text-center">
                             <p class="mb-0 text-600">
                                 Flight Booking System
-                                <span class="d-none d-sm-inline-block">
-                                    |
-                                </span>
-                                <span class="d-sm-none">
-                                    <br />
-                                </span>
+                                <span class="d-none d-sm-inline-block">|</span>
+                                <span class="d-sm-none"><br /></span>
                                 &copy; 2026
                             </p>
                         </div>
@@ -525,32 +504,20 @@
                         </div>
 
                     </div>
-
                 </footer>
 
             </div>
-
         </div>
-
     </main>
 
-    <!-- ========================= -->
     <!-- JavaScript -->
-    <!-- ========================= -->
-
     <script src="~/vendors/popper/popper.min.js"></script>
-
     <script src="~/vendors/bootstrap/bootstrap.min.js"></script>
-
     <script src="~/vendors/simplebar/simplebar.min.js"></script>
-
     <script src="~/vendors/fontawesome/all.min.js"></script>
-
     <script src="~/assets/js/theme.js"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 
 </body>
-
 </html>
-```
