@@ -1,0 +1,75 @@
+﻿@model Flight_Booking_System.Models.Class
+
+@{
+    ViewData["Title"] = "إضافة درجة سفر";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid py-4" dir="rtl">
+
+    <div class="mb-4">
+        <h2 class="fw-bold">إضافة درجة سفر جديدة</h2>
+        <p class="text-muted">اختر درجة السفر التي تقدمها شركة الطيران.</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">بيانات درجة السفر</h5>
+                </div>
+
+                <div class="card-body p-4">
+
+                    <form asp-area="Admin"
+                          asp-controller="Class"
+                          asp-action="Create"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="text-danger mb-3"></div>
+
+                        <div class="mb-4">
+                            <label asp-for="Name"
+                                   class="form-label fw-semibold">
+                                نوع درجة السفر
+                            </label>
+
+                            <select asp-for="Name" class="form-select">
+                                <option value="">اختر درجة السفر</option>
+                                <option value="Economy">اقتصادي (Economy)</option>
+                                <option value="Business">رجال الأعمال (Business)</option>
+                            </select>
+
+                            <span asp-validation-for="Name"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                حفظ البيانات
+                            </button>
+
+                            <a asp-area="Admin"
+                               asp-controller="Class"
+                               asp-action="Index"
+                               class="btn btn-light border">
+                                إلغاء
+                            </a>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

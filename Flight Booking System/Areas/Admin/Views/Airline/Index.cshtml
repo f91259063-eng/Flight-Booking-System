@@ -1,0 +1,184 @@
+﻿@model IEnumerable<Flight_Booking_System.Models.Airline>
+
+@{
+    ViewData["Title"] = "شركات الطيران";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid py-4" dir="rtl">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">شركات الطيران</h2>
+
+            <p class="text-muted mb-0">
+                إدارة بيانات شركات الطيران
+            </p>
+        </div>
+
+        <a asp-area="Admin"
+           asp-controller="Airlines"
+           asp-action="Create"
+           class="btn btn-primary">
+
+            <i class="bi bi-plus-circle me-1"></i>
+            إضافة شركة طيران
+
+        </a>
+
+    </div>
+
+
+    <!-- Airlines Table -->
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white py-3">
+
+            <h5 class="mb-0">
+                قائمة شركات الطيران
+            </h5>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead style="background-color: #0b1729; color: white;">
+
+                        <tr>
+
+                            <th class="text-center">
+                                الرقم
+                            </th>
+
+                            <th>
+                                اسم شركة الطيران
+                            </th>
+
+                            <th>
+                                كود الشركة
+                            </th>
+
+                            <th>
+                                البريد الإلكتروني
+                            </th>
+
+                            <th>
+                                رقم الهاتف
+                            </th>
+
+                            <th class="text-center">
+                                الإجراءات
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var airline in Model)
+                            {
+                                <tr>
+
+                                    <!-- ID -->
+                                    <td class="text-center">
+                                        @airline.Id
+                                    </td>
+
+
+                                    <!-- Name -->
+                                    <td class="fw-semibold">
+                                        @airline.Name
+                                    </td>
+
+
+                                    <!-- Airline Code -->
+                                    <td>
+                                        @airline.AirlineCode
+                                    </td>
+
+
+                                    <!-- Email -->
+                                    <td dir="ltr" class="text-end">
+                                        @airline.Email
+                                    </td>
+
+
+                                    <!-- Phone -->
+                                    <td dir="ltr" class="text-end">
+                                        @airline.Phone
+                                    </td>
+
+
+                                    <!-- Actions -->
+                                    <td>
+
+                                        <div class="d-flex justify-content-center gap-2">
+
+                                            <!-- Edit -->
+                                            <a asp-area="Admin"
+                                               asp-controller="Airlines"
+                                               asp-action="Edit"
+                                               asp-route-id="@airline.Id"
+                                               class="btn btn-warning btn-sm">
+
+                                                <i class="bi bi-pencil-square"></i>
+                                                تعديل
+
+                                            </a>
+
+
+                                            <!-- Delete -->
+                                            <a asp-area="Admin"
+                                               asp-controller="Airlines"
+                                               asp-action="Delete"
+                                               asp-route-id="@airline.Id"
+                                               class="btn btn-danger btn-sm">
+
+                                                <i class="bi bi-trash"></i>
+                                                حذف
+
+                                            </a>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+
+                                <td colspan="6"
+                                    class="text-center py-4 text-muted">
+
+                                    لا توجد شركات طيران مسجلة حتى الآن.
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

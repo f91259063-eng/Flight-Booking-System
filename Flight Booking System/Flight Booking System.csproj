@@ -8,10 +8,33 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Areas\Admin\Views\NewFolder1\**" />
+    <Compile Remove="Areas\Admin\Views\NewFolder2\**" />
+    <Compile Remove="Areas\Admin\Views\NewFolder3\**" />
+    <Content Remove="Areas\Admin\Views\NewFolder1\**" />
+    <Content Remove="Areas\Admin\Views\NewFolder2\**" />
+    <Content Remove="Areas\Admin\Views\NewFolder3\**" />
+    <EmbeddedResource Remove="Areas\Admin\Views\NewFolder1\**" />
+    <EmbeddedResource Remove="Areas\Admin\Views\NewFolder2\**" />
+    <EmbeddedResource Remove="Areas\Admin\Views\NewFolder3\**" />
+    <None Remove="Areas\Admin\Views\NewFolder1\**" />
+    <None Remove="Areas\Admin\Views\NewFolder2\**" />
+    <None Remove="Areas\Admin\Views\NewFolder3\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Controllers\ClassController.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Areas\Customer\Controllers\" />
     <Folder Include="Areas\Customer\Views\" />
     <Folder Include="Areas\Identity\Controllers\" />
     <Folder Include="Areas\Identity\Views\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Areas\Admin\Controllers\ClassController.cs" />
   </ItemGroup>
 
   <ItemGroup>

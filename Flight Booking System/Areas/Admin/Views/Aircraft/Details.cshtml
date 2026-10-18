@@ -1,0 +1,265 @@
+﻿@model Flight_Booking_System.ViewModels.AircraftSeatsViewModel
+
+@{
+    ViewData["Title"] = "تفاصيل الطائرة";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid py-4" dir="rtl">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-airplane"></i>
+                تفاصيل الطائرة
+            </h2>
+            <p class="text-muted mb-0">
+                بيانات الطائرة ودرجات السفر والمقاعد
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a asp-area="Admin"
+               asp-controller="Aircraft"
+               asp-action="Edit"
+               asp-route-id="@Model.Id"
+               class="btn btn-warning">
+                <i class="bi bi-pencil-square"></i>
+                تعديل
+            </a>
+
+            <a asp-area="Admin"
+               asp-controller="Aircraft"
+               asp-action="Index"
+               class="btn btn-secondary">
+                <i class="bi bi-arrow-right"></i>
+                العودة
+            </a>
+        </div>
+    </div>
+
+    <!-- Aircraft Information -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-primary text-white py-3">
+            <h5 class="mb-0">
+                <i class="bi bi-info-circle"></i>
+                بيانات الطائرة
+            </h5>
+        </div>
+
+        <div class="card-body">
+            <div class="row g-4">
+
+                <div class="col-md-4">
+                    <div class="text-muted mb-1">رقم الطائرة</div>
+                    <h5 class="fw-bold">@Model.Id</h5>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="text-muted mb-1">رقم التسجيل</div>
+                    <h5 class="fw-bold">@Model.RegistrationNumber</h5>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="text-muted mb-1">موديل الطائرة</div>
+                    <h5 class="fw-bold">@Model.Model</h5>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="text-muted mb-1">شركة الطيران</div>
+                    <h5 class="fw-bold">@Model.AirlineName</h5>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="text-muted mb-1">السعة الكلية</div>
+                    <h5 class="fw-bold text-primary">
+                        @Model.Capacity مقعد
+                    </h5>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="text-muted mb-1">عدد درجات السفر</div>
+                    <h5 class="fw-bold">
+                        @(Model.Classes?.Count ?? 0)
+                    </h5>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Classes and Seats -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3">
+            <h5 class="fw-bold mb-0">
+                <i class="bi bi-grid-3x3-gap"></i>
+                درجات السفر والمقاعد
+            </h5>
+        </div>
+
+        <div class="card-body">
+
+            @if (Model.Classes != null && Model.Classes.Any())
+            {
+                @foreach (var aircraftClass in Model.Classes)
+                {
+                    <div class="card border-0 shadow-sm mb-4">
+
+                        <!-- Class Header -->
+                        <div class="card-header bg-light py-3">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+                                <div>
+                                    <h5 class="fw-bold mb-1">
+                                        <i class="bi bi-ticket-perforated text-primary"></i>
+                                        @aircraftClass.ClassName
+                                    </h5>
+
+                                    <small class="text-muted">
+                                        رقم ربط الطائرة بالدرجة:
+                                        @aircraftClass.AircraftClassId
+                                    </small>
+                                </div>
+
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <span class="badge bg-primary fs-6">
+                                        السعة المحددة:
+                                        @aircraftClass.NumberOfSeats
+                                    </span>
+
+                                    <span class="badge bg-success fs-6">
+                                        المقاعد المسجلة:
+                                        @(aircraftClass.Seats?.Count ?? 0)
+                                    </span>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Seats -->
+                        <div class="card-body">
+
+                            @if (aircraftClass.Seats != null &&
+                                 aircraftClass.Seats.Any())
+                            {
+                                <div class="row g-3">
+
+                                    @{
+                                        var seatCounter = 1;
+                                    }
+
+                                    @foreach (var seat in aircraftClass.Seats
+                                        .OrderBy(s => s.SeatNumber))
+                                    {
+                                        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+
+                                            <div class="seat-card h-100">
+
+                                                <div class="seat-icon">
+                                                    <i class="bi bi-armchair-fill"></i>
+                                                </div>
+
+                                                <div class="seat-number">
+                                                    @Model.Model-@aircraftClass.ClassName-@seat.SeatNumber
+                                                </div>
+
+                                                <div class="seat-details">
+                                                    <span class="badge bg-light text-dark">
+                                                        مقعد @seatCounter
+                                                    </span>
+                                                </div>
+
+                                                <small class="text-muted d-block mt-2">
+                                                    @aircraftClass.ClassName
+                                                </small>
+
+                                            </div>
+
+                                        </div>
+
+                                        seatCounter++;
+                                    }
+
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-warning mb-0">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    لا توجد مقاعد مسجلة لهذه الدرجة.
+                                </div>
+                            }
+
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-grid display-4 text-muted"></i>
+
+                    <h5 class="mt-3">
+                        لا توجد درجات سفر مرتبطة بالطائرة
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        أضف درجات السفر والمقاعد المرتبطة بها لعرضها هنا.
+                    </p>
+                </div>
+            }
+
+        </div>
+    </div>
+
+</div>
+
+<style>
+    .seat-card {
+        padding: 16px 8px;
+        text-align: center;
+        border: 1px solid #dee2e6;
+        border-radius: 12px;
+        background: #fff;
+        transition: all 0.2s ease;
+    }
+
+    .seat-card:hover {
+        border-color: #0d6efd;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
+
+    .seat-icon {
+        font-size: 28px;
+        color: #0d6efd;
+        margin-bottom: 8px;
+    }
+
+    .seat-number {
+        direction: ltr;
+        font-size: 12px;
+        font-weight: 700;
+        overflow-wrap: anywhere;
+        margin-bottom: 6px;
+    }
+
+    .seat-details {
+        margin-top: 6px;
+    }
+
+    .seat-card small {
+        font-size: 11px;
+    }
+
+    @@media (max-width: 576px) {
+        .seat-card {
+            padding: 12px 5px;
+        }
+
+        .seat-number {
+            font-size: 10px;
+        }
+    }
+</style>
