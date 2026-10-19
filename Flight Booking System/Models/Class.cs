@@ -6,7 +6,7 @@
 
         public int Id { get; set; }
         public string Name { get; set; }
-        public ICollection<AircraftClass> AircraftClasses { get; set; }
-     = new List<AircraftClass>();
+        public decimal DistancePercentage { get; set; }
+        public ICollection<AircraftClass> AircraftClasses { get; set; }= new List<AircraftClass>();
     }
 }
