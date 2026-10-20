@@ -440,6 +440,25 @@ namespace Flight_Booking_System.Migrations
                     b.ToTable("Seats");
                 });
 
+            modelBuilder.Entity("Flight_Booking_System.Models.Setting", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("PricePerKm")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("settings");
+                });
+
             modelBuilder.Entity("Flight_Booking_System.Models.city", b =>
                 {
                     b.Property<int>("Id")
