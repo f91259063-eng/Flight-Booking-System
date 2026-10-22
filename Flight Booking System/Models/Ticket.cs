@@ -1,4 +1,5 @@
-﻿using Flight_Booking_System.Models;
+﻿
+using Flight_Booking_System.Models;
 
 public class Ticket
 {
@@ -15,5 +16,7 @@ public class Ticket
 
     public int SeatId { get; set; }
     public Seat Seat { get; set; } = null!;
-    
+
+    // Save the ticket price at booking time
+    public decimal TicketPrice { get; set; }
 }
