@@ -1,0 +1,121 @@
+﻿@model IEnumerable<Flight_Booking_System.Models.Flight>
+
+@{
+    ViewData["Title"] = "إدارة الرحلات";
+    Layout = "_AdminLayout";
+
+}
+
+<div class="container-fluid py-4" dir="rtl">
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">إدارة الرحلات</h4>
+
+            <a asp-area="Admin" asp-controller="Flight"
+               asp-action="Create" class="btn btn-primary">
+                إضافة رحلة جديدة
+            </a>
+        </div>
+
+        <div class="card-body">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success">
+                    @TempData["Success"]
+                </div>
+            }
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover text-center align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>م</th>
+                            <th>رقم الرحلة</th>
+                            <th>رقم الطائرة</th>
+                            <th>شركة الطيران</th>
+                            <th>رقم المسار</th>
+                            <th>موعد المغادرة</th>
+                            <th>موعد الوصول</th>
+                            <th>يوم الرحلة</th>
+                            <th>الحالة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (Model.Any())
+                        {
+                            var count = 1;
+
+                            @foreach (var flight in Model)
+                            {
+                                <tr>
+                                    <td>@count</td>
+                                    <td>@flight.FlightNumber</td>
+                                    <td>@flight.AircraftId</td>
+                                    <td>@flight.Airline.Name</td>
+                                    <td>@flight.RouteId</td>
+                                    <td>@flight.DepartureDateTime.ToString("yyyy/MM/dd HH:mm")</td>
+                                    <td>@flight.ArrivalDateTime.ToString("yyyy/MM/dd HH:mm")</td>
+                                    <td>
+                                        @{
+                                            var day = flight.DayOfWeek switch
+                                            {
+                                                DayOfWeek.Saturday => "السبت",
+                                                DayOfWeek.Sunday => "الأحد",
+                                                DayOfWeek.Monday => "الاثنين",
+                                                DayOfWeek.Tuesday => "الثلاثاء",
+                                                DayOfWeek.Wednesday => "الأربعاء",
+                                                DayOfWeek.Thursday => "الخميس",
+                                                DayOfWeek.Friday => "الجمعة",
+                                                _ => "غير محدد"
+                                            };
+                                        }
+                                        @day
+                                    </td>
+                                    <td>
+                                        @if (flight.FlightStatus)
+                                        {
+                                            <span class="badge bg-success">نشطة</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">غير نشطة</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="d-flex gap-1 justify-content-center">
+                                            <a asp-area="Admin"
+                                               asp-controller="Flight"
+                                               asp-action="Edit"
+                                               asp-route-id="@flight.Id"
+                                               class="btn btn-sm btn-warning">
+                                                تعديل
+                                            </a>
+
+                                            <a asp-area="Admin"
+                                               asp-controller="Flight"
+                                               asp-action="Delete"
+                                               asp-route-id="@flight.Id"
+                                               class="btn btn-sm btn-danger">
+                                                حذف
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                count++;
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="10">لا توجد رحلات مسجلة حتى الآن.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

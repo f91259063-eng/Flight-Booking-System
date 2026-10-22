@@ -52,6 +52,9 @@ namespace Flight_Booking_System
             builder.Services.AddScoped<IRepository<Passenger>, Repository<Passenger>>();
             builder.Services.AddScoped<IRepository<Airline>, Repository<Airline>>();
             builder.Services.AddScoped<IRepository<Aircraft>, Repository<Aircraft>>();
+            builder.Services.AddScoped<IRepository<Flight>, Repository<Flight>>();
+            builder.Services.AddScoped<IRepository<Setting>, Repository<Setting>>();
+
 
 
 

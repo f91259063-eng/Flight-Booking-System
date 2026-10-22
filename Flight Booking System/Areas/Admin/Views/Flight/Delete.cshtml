@@ -1,0 +1,57 @@
+﻿@model Flight_Booking_System.Models.Flight
+
+@{
+    ViewData["Title"] = "حذف رحلة";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid py-4" dir="rtl">
+    <div class="card shadow-sm border-danger">
+        <div class="card-header bg-danger text-white">
+            <h4 class="mb-0">حذف رحلة</h4>
+        </div>
+
+        <div class="card-body">
+            <div class="alert alert-warning">
+                هل أنت متأكد أنك تريد حذف هذه الرحلة؟
+            </div>
+
+            <dl class="row">
+                <dt class="col-sm-3">رقم الرحلة</dt>
+                <dd class="col-sm-9">@Model.FlightNumber</dd>
+
+                <dt class="col-sm-3">رقم الطائرة</dt>
+                <dd class="col-sm-9">@Model.AircraftId</dd>
+
+                <dt class="col-sm-3">شركة الطيران</dt>
+                <dd class="col-sm-9">@Model.Airline.Name</dd>
+
+                <dt class="col-sm-3">رقم المسار</dt>
+                <dd class="col-sm-9">@Model.RouteId</dd>
+
+                <dt class="col-sm-3">موعد المغادرة</dt>
+                <dd class="col-sm-9">
+                    @Model.DepartureDateTime.ToString("yyyy/MM/dd HH:mm")
+                </dd>
+
+                <dt class="col-sm-3">موعد الوصول</dt>
+                <dd class="col-sm-9">
+                    @Model.ArrivalDateTime.ToString("yyyy/MM/dd HH:mm")
+                </dd>
+            </dl>
+
+            <form asp-area="Admin" asp-controller="Flight"
+                  asp-action="Delete" asp-route-id="@Model.Id" method="post">
+
+                <button type="submit" class="btn btn-danger">
+                    تأكيد الحذف
+                </button>
+
+                <a asp-area="Admin" asp-controller="Flight"
+                   asp-action="Index" class="btn btn-secondary">
+                    إلغاء
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
