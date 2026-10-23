@@ -1,0 +1,202 @@
+﻿@model Flight_Booking_System.ViewModels.Customer.PassengerBookingViewModel
+
+@{
+    ViewData["Title"] = "Passenger Details";
+    Layout = "~/Areas/Customer/Views/Shared/_CustomerLayout.cshtml";
+}
+
+<div class="container py-4">
+
+    <div class="mb-4">
+        <h2 class="fw-bold">Passenger Details</h2>
+        <p class="text-muted">
+            Enter passenger details for each selected seat.
+            Search for an existing passenger using passport number or national ID.
+        </p>
+    </div>
+
+    <div id="searchMessage" class="alert d-none" role="alert" aria-live="polite"></div>
+
+    <form asp-area="Customer"
+          asp-controller="Passenger"
+          asp-action="Create"
+          method="post"
+          id="passengerForm"
+          data-search-url="@Url.Action("SearchPassenger", "Passenger", new { area = "Customer" })">
+
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" asp-for="FlightId" />
+        <input type="hidden" asp-for="ClassId" />
+        <input type="hidden" asp-for="TicketPrice" />
+
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+        @if (Model.Passengers == null || !Model.Passengers.Any())
+        {
+            <div class="alert alert-warning">
+                No seats selected. Please return and select your seats.
+            </div>
+        }
+        else
+        {
+            @for (int i = 0; i < Model.Passengers.Count; i++)
+            {
+                <div class="card shadow-sm mb-4 passenger-card">
+
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            Passenger @(i + 1) - Seat @Model.Passengers[i].SeatNumber
+                        </h5>
+                    </div>
+
+                    <div class="card-body">
+
+                        <input type="hidden" asp-for="Passengers[i].SeatId" />
+                        <input type="hidden" asp-for="Passengers[i].SeatNumber" />
+
+                        <input type="hidden"
+                               asp-for="Passengers[i].SelectedPassengerId"
+                               class="selected-passenger-id" />
+
+                        <div class="border rounded p-3 mb-4 bg-light">
+                            <h6 class="fw-bold mb-3">Search Existing Passenger</h6>
+
+                            <div class="row g-3">
+                                <div class="col-md-5">
+                                    <label class="form-label" for="search-passport-@i">Passport Number</label>
+                                    <input type="text"
+                                           id="search-passport-@i"
+                                           class="form-control search-passport"
+                                           placeholder="Enter passport number"
+                                           autocomplete="off" />
+                                </div>
+
+                                <div class="col-md-5">
+                                    <label class="form-label" for="search-national-id-@i">National ID</label>
+                                    <input type="text"
+                                           id="search-national-id-@i"
+                                           class="form-control search-national-id"
+                                           placeholder="Enter national ID"
+                                           autocomplete="off" />
+                                </div>
+
+                                <div class="col-md-2 d-flex align-items-end">
+                                    <button type="button"
+                                            class="btn btn-primary w-100 search-passenger-btn">
+                                        Search
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="mt-3 d-flex gap-2 flex-wrap">
+                                <button type="button"
+                                        class="btn btn-outline-secondary btn-sm clear-passenger-btn">
+                                    Clear Passenger
+                                </button>
+
+                                <span class="small text-muted align-self-center">
+                                    Enter at least one number to search.
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label asp-for="Passengers[i].FirstName" class="form-label">First Name</label>
+                                <input asp-for="Passengers[i].FirstName"
+                                       class="form-control passenger-first-name" />
+                                <span asp-validation-for="Passengers[i].FirstName" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="Passengers[i].MiddleName" class="form-label">Middle Name</label>
+                                <input asp-for="Passengers[i].MiddleName"
+                                       class="form-control passenger-middle-name" />
+                                <span asp-validation-for="Passengers[i].MiddleName" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="Passengers[i].LastName" class="form-label">Last Name</label>
+                                <input asp-for="Passengers[i].LastName"
+                                       class="form-control passenger-last-name" />
+                                <span asp-validation-for="Passengers[i].LastName" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Passengers[i].PassportNumber" class="form-label">Passport Number</label>
+                                <input asp-for="Passengers[i].PassportNumber"
+                                       class="form-control passenger-passport" />
+                                <span asp-validation-for="Passengers[i].PassportNumber" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Passengers[i].NationalID" class="form-label">National ID</label>
+                                <input asp-for="Passengers[i].NationalID"
+                                       class="form-control passenger-national-id" />
+                                <span asp-validation-for="Passengers[i].NationalID" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Passengers[i].Phone" class="form-label">Phone</label>
+                                <input asp-for="Passengers[i].Phone"
+                                       class="form-control passenger-phone"
+                                       type="tel" />
+                                <span asp-validation-for="Passengers[i].Phone" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Passengers[i].Email" class="form-label">Email</label>
+                                <input asp-for="Passengers[i].Email"
+                                       class="form-control passenger-email"
+                                       type="email" />
+                                <span asp-validation-for="Passengers[i].Email" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Passengers[i].DateOfBirth" class="form-label">Date of Birth</label>
+                                <input asp-for="Passengers[i].DateOfBirth"
+                                       class="form-control passenger-date-of-birth"
+                                       type="date"
+                                       asp-format="{0:yyyy-MM-dd}" />
+                                <span asp-validation-for="Passengers[i].DateOfBirth" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div>
+                            <div>
+                                <strong>Number of Passengers:</strong>
+                                @Model.Passengers.Count
+                            </div>
+
+                            <div>
+                                <strong>Price per Ticket:</strong>
+                                @Model.TicketPrice.ToString("N2")
+                            </div>
+
+                            <div>
+                                <strong>Total Price:</strong>
+                                @((Model.TicketPrice * Model.Passengers.Count).ToString("N2"))
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success btn-lg">
+                            Continue to Booking
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/passenger-create.js" asp-append-version="true"></script>
+}

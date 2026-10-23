@@ -16,6 +16,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
         private readonly IRepository<Class> _classRepository;
         private readonly IRepository<Seat> _seatRepository;
         private readonly IRepository<Setting> _settingRepository;
+        private readonly IRepository<Ticket> _ticketRepository;
 
         public FlightsController(
             IRepository<Flight> flightRepository,
@@ -23,7 +24,8 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             IRepository<AircraftClass> aircraftClassRepository,
             IRepository<Class> classRepository,
             IRepository<Seat> seatRepository,
-            IRepository<Setting> settingRepository)
+            IRepository<Setting> settingRepository,
+            IRepository<Ticket> ticketRepository)
         {
             _flightRepository = flightRepository;
             _airportRepository = airportRepository;
@@ -31,6 +33,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             _classRepository = classRepository;
             _seatRepository = seatRepository;
             _settingRepository = settingRepository;
+            _ticketRepository = ticketRepository;
         }
 
         // GET: /Customer/Flights
@@ -108,16 +111,11 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             );
 
             if (flight == null)
-            {
                 return NotFound();
-            }
 
             if (flight.Route == null)
-            {
                 return NotFound("Flight route was not found.");
-            }
 
-            // Get airport names using the existing repository
             var fromAirport = await _airportRepository.GetOneAsync(
                 filter: a => a.Id == flight.Route.FromAirportId,
                 IsTracking: false
@@ -128,7 +126,6 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 IsTracking: false
             );
 
-            // Get the current ticket pricing setting
             var setting = await _settingRepository.GetOneAsync(
                 filter: s => true,
                 IsTracking: false
@@ -141,7 +138,6 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 );
             }
 
-            // Get classes belonging to this aircraft
             var aircraftClasses = await _aircraftClassRepository.GetAllAsync(
                 filter: ac => ac.AircraftId == flight.AircraftId,
                 IsTracking: false
@@ -169,19 +165,13 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 );
 
                 if (classInfo == null)
-                {
                     continue;
-                }
 
                 var seats = await _seatRepository.GetAllAsync(
-                    filter: s =>
-                        s.AircraftClassId == aircraftClass.ID,
+                    filter: s => s.AircraftClassId == aircraftClass.ID,
                     IsTracking: false
                 );
 
-                // IMPORTANT:
-                // Your current Class model uses DistancePercentage.
-                // It is used here as the class price multiplier.
                 decimal multiplier = classInfo.DistancePercentage;
 
                 decimal ticketPrice =
@@ -189,12 +179,26 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                     * setting.PricePerKm
                     * multiplier;
 
+                // Count seats not booked for this flight.
+                var bookedTickets = await _ticketRepository.GetAllAsync(
+                    filter: t => t.FlightId == flight.Id,
+                    IsTracking: false
+                );
+
+                var bookedSeatIds = bookedTickets
+                    .Select(t => t.SeatId)
+                    .ToHashSet();
+
+                int availableSeats = seats.Count(
+                    s => !bookedSeatIds.Contains(s.Id)
+                );
+
                 model.Classes.Add(new ClassOptionViewModel
                 {
                     ClassId = classInfo.Id,
                     ClassName = classInfo.Name,
                     DistancePercentage = classInfo.DistancePercentage,
-                    AvailableSeats = seats.Count(),
+                    AvailableSeats = availableSeats,
                     TicketPrice = ticketPrice
                 });
             }
@@ -202,8 +206,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             return View(model);
         }
 
-
-
+        // GET: /Customer/Flights/ChooseSeat
         [HttpGet]
         public async Task<IActionResult> ChooseSeat(int flightId, int classId)
         {
@@ -215,8 +218,8 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                     f.DepartureDateTime >= DateTime.Now,
                 includes: new Expression<Func<Flight, object>>[]
                 {
-            f => f.Aircraft,
-            f => f.Route
+                    f => f.Aircraft,
+                    f => f.Route
                 },
                 IsTracking: false
             );
@@ -236,7 +239,9 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             );
 
             if (aircraftClass == null)
-                return NotFound("This class is not available on this aircraft.");
+                return NotFound(
+                    "This class is not available on this aircraft."
+                );
 
             // 3. Get class details
             var classInfo = await _classRepository.GetOneAsync(
@@ -253,7 +258,9 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             );
 
             if (setting == null)
-                return Problem("Ticket pricing settings have not been configured.");
+                return Problem(
+                    "Ticket pricing settings have not been configured."
+                );
 
             // 5. Calculate ticket price
             decimal ticketPrice =
@@ -268,14 +275,24 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 IsTracking: false
             );
 
-            // 7. Prepare ViewModel
+            // 7. Get tickets booked on this flight
+            var bookedTickets = await _ticketRepository.GetAllAsync(
+                filter: t => t.FlightId == flight.Id,
+                IsTracking: false
+            );
+
+            var bookedSeatIds = bookedTickets
+                .Select(t => t.SeatId)
+                .ToHashSet();
+
+            // 8. Prepare ViewModel
             var model = new ChooseSeatViewModel
             {
                 FlightId = flight.Id,
                 ClassId = classInfo.Id,
                 FlightNumber = flight.FlightNumber,
                 AircraftName = flight.Aircraft?.RegistrationNumber
-                               ?? "Unknown Aircraft",
+                    ?? "Unknown Aircraft",
                 ClassName = classInfo.Name,
                 TicketPrice = ticketPrice,
 
@@ -285,13 +302,12 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                     {
                         SeatId = s.Id,
                         SeatNumber = s.SeatNumber,
-                        IsAvailable = true
+                        IsAvailable = !bookedSeatIds.Contains(s.Id)
                     })
                     .ToList()
             };
 
             return View(model);
         }
-
     }
 }
