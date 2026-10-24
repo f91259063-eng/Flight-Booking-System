@@ -1,4 +1,4 @@
-﻿
+﻿```cshtml
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
@@ -176,9 +176,10 @@
                                     Booking Management
                                 </div>
 
+                                <!-- My Bookings -->
                                 <a class="nav-link"
                                    asp-area="Customer"
-                                   asp-controller="Bookings"
+                                   asp-controller="Booking"
                                    asp-action="Index">
 
                                     <span class="nav-link-icon">
@@ -190,6 +191,7 @@
                                     </span>
                                 </a>
 
+                                <!-- My Tickets -->
                                 <a class="nav-link"
                                    asp-area="Customer"
                                    asp-controller="Tickets"
@@ -342,7 +344,8 @@
 
                         <div class="col-12 col-sm-auto text-center">
                             <p class="mb-0 text-600">
-                                Flight Booking System
+                                Flight 
+                                System
                                 <span class="d-none d-sm-inline-block">|</span>
                                 <span class="d-sm-none"><br /></span>
                                 &copy; @DateTime.Now.Year
@@ -373,3 +376,4 @@
 
 </body>
 </html>
+```
