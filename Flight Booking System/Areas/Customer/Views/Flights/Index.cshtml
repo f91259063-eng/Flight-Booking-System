@@ -6,61 +6,149 @@
 
     var flights = Model?.ToList()
         ?? new List<Flight_Booking_System.ViewModels.Customer.AvailableFlightViewModel>();
+
+    var departureAirport = Context.Request.Query["departureAirport"].ToString();
+    var arrivalAirport = Context.Request.Query["arrivalAirport"].ToString();
+    var departureDate = Context.Request.Query["departureDate"].ToString();
 }
 
-<div class="container-fluid py-3">
+<div class="container-fluid py-2">
 
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
         <div>
-            <h3 class="mb-1 fw-bold">Available Flights</h3>
-            <p class="text-600 mb-0">
+            <h4 class="mb-1 fw-bold">Available Flights</h4>
+            <small class="text-muted">
                 Find your flight and explore the details.
-            </p>
+            </small>
         </div>
 
-        <span class="badge bg-primary fs-9 p-2">
+        <span class="badge bg-primary rounded-pill px-3 py-2">
             Total Flights: @flights.Count
         </span>
     </div>
 
+    <!-- Flight Search -->
+    <div class="card shadow-sm mb-3">
+        <div class="card-body p-3">
+
+            <form asp-area="Customer"
+                  asp-controller="Flights"
+                  asp-action="Index"
+                  method="get">
+
+                <div class="row g-2 align-items-end">
+
+                    <div class="col-12 col-md-4">
+                        <label for="departureAirport"
+                               class="form-label small fw-semibold">
+                            Departure Airport
+                        </label>
+
+                        <input type="text"
+                               id="departureAirport"
+                               name="departureAirport"
+                               value="@departureAirport"
+                               class="form-control form-control-sm"
+                               placeholder="Enter departure airport" />
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <label for="arrivalAirport"
+                               class="form-label small fw-semibold">
+                            Arrival Airport
+                        </label>
+
+                        <input type="text"
+                               id="arrivalAirport"
+                               name="arrivalAirport"
+                               value="@arrivalAirport"
+                               class="form-control form-control-sm"
+                               placeholder="Enter arrival airport" />
+                    </div>
+
+                    <div class="col-12 col-md-2">
+                        <label for="departureDate"
+                               class="form-label small fw-semibold">
+                            Departure Date
+                        </label>
+
+                        <input type="date"
+                               id="departureDate"
+                               name="departureDate"
+                               value="@departureDate"
+                               class="form-control form-control-sm" />
+                    </div>
+
+                    <div class="col-12 col-md-2 d-flex gap-2">
+                        <button type="submit"
+                                class="btn btn-sm btn-primary flex-grow-1">
+                            <i class="fas fa-search me-1"></i>
+                            Search
+                        </button>
+
+                        <a asp-area="Customer"
+                           asp-controller="Flights"
+                           asp-action="Index"
+                           class="btn btn-sm btn-outline-secondary"
+                           title="Clear Search">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    </div>
+
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- Flight Results -->
     @if (!flights.Any())
     {
-        <div class="card">
-            <div class="card-body text-center py-5">
-                <i class="fas fa-plane fa-3x text-300 mb-3"></i>
+        <div class="card shadow-sm">
+            <div class="card-body text-center py-4">
+                <i class="fas fa-plane fa-2x text-muted mb-2"></i>
 
-                <h5 class="mb-2">No Flights Available</h5>
+                <h6 class="mb-2">No Flights Found</h6>
 
-                <p class="text-600 mb-0">
-                    There are currently no upcoming flights available.
+                <p class="text-muted small mb-3">
+                    No upcoming flights match your search.
+                    Try changing the airport or departure date.
                 </p>
+
+                <a asp-area="Customer"
+                   asp-controller="Flights"
+                   asp-action="Index"
+                   class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-redo me-1"></i>
+                    Show All Flights
+                </a>
             </div>
         </div>
     }
     else
     {
-        <div class="row g-3">
+        <div class="row g-2">
 
             @foreach (var flight in flights)
             {
-                <div class="col-12 col-xl-6">
+                <div class="col-12 col-lg-6 col-xxl-4">
 
-                    <div class="card h-100 overflow-hidden">
+                    <div class="card h-100 shadow-sm">
 
-                        <!-- Card Header -->
-                        <div class="card-header bg-body-tertiary">
+                        <!-- Compact Header -->
+                        <div class="card-header py-2 px-3 bg-body-tertiary">
                             <div class="d-flex justify-content-between align-items-center gap-2">
 
-                                <div>
-                                    <h5 class="mb-1">
-                                        <i class="fas fa-plane-departure text-primary me-2"></i>
+                                <div class="overflow-hidden">
+                                    <div class="fw-bold">
+                                        <i class="fas fa-plane-departure text-primary me-1"></i>
                                         @flight.FlightNumber
-                                    </h5>
+                                    </div>
 
-                                    <span class="text-600 fs-9">
+                                    <small class="text-muted">
                                         @flight.AirlineName
-                                    </span>
+                                    </small>
                                 </div>
 
                                 <span class="badge bg-success">
@@ -70,109 +158,105 @@
                             </div>
                         </div>
 
-                        <!-- Card Body -->
-                        <div class="card-body">
+                        <!-- Compact Body -->
+                        <div class="card-body p-3">
 
                             <div class="row align-items-center g-2">
 
                                 <!-- Departure -->
                                 <div class="col-5">
-                                    <div class="text-600 fs-9 mb-2">
+                                    <small class="text-muted d-block mb-1">
                                         FROM
+                                    </small>
+
+                                    <div class="fw-bold text-break">
+                                        @flight.DepartureAirport
                                     </div>
 
-                                    <h5 class="fw-bold mb-2">
-                                        @flight.DepartureAirport
-                                    </h5>
-
-                                    <div class="text-600 fs-9 mb-1">
+                                    <div class="small text-muted mt-2">
                                         Departure
                                     </div>
 
-                                    <div class="fw-bold">
+                                    <div class="small fw-semibold">
                                         @flight.DepartureDateTime.ToString("dd MMM yyyy")
                                     </div>
 
-                                    <div class="text-primary fw-bold fs-8">
+                                    <div class="small text-primary fw-bold">
                                         @flight.DepartureDateTime.ToString("hh:mm tt")
                                     </div>
                                 </div>
 
                                 <!-- Route -->
                                 <div class="col-2 text-center">
-                                    <div class="text-600 fs-9 mb-2">
+                                    <small class="text-muted d-block mb-2">
                                         ROUTE
-                                    </div>
+                                    </small>
 
-                                    <i class="fas fa-plane text-primary fa-lg"></i>
+                                    <i class="fas fa-plane text-primary"></i>
 
                                     <div class="border-top border-2 border-dashed my-2"></div>
 
-                                    <span class="text-600 fs-10">
+                                    <small class="text-muted text-nowrap">
                                         @flight.Distance.ToString("N0") km
-                                    </span>
+                                    </small>
                                 </div>
 
                                 <!-- Arrival -->
                                 <div class="col-5">
-                                    <div class="text-600 fs-9 mb-2">
+                                    <small class="text-muted d-block mb-1">
                                         TO
+                                    </small>
+
+                                    <div class="fw-bold text-break">
+                                        @flight.ArrivalAirport
                                     </div>
 
-                                    <h5 class="fw-bold mb-2">
-                                        @flight.ArrivalAirport
-                                    </h5>
-
-                                    <div class="text-600 fs-9 mb-1">
+                                    <div class="small text-muted mt-2">
                                         Arrival
                                     </div>
 
-                                    <div class="fw-bold">
+                                    <div class="small fw-semibold">
                                         @flight.ArrivalDateTime.ToString("dd MMM yyyy")
                                     </div>
 
-                                    <div class="text-primary fw-bold fs-8">
+                                    <div class="small text-primary fw-bold">
                                         @flight.ArrivalDateTime.ToString("hh:mm tt")
                                     </div>
                                 </div>
 
                             </div>
 
-                            <hr class="my-4" />
+                            <hr class="my-3" />
 
-                            <!-- Flight Information -->
-                            <div class="row g-3">
+                            <!-- Aircraft Information -->
+                            <div class="row g-2">
 
-                                <div class="col-6">
-                                    <div class="d-flex align-items-center">
-                                        <div class="me-2 text-primary">
-                                            <i class="fas fa-plane"></i>
-                                        </div>
+                                <div class="col-7">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="fas fa-plane text-primary"></i>
 
-                                        <div>
-                                            <div class="text-600 fs-9">
+                                        <div class="overflow-hidden">
+                                            <small class="text-muted d-block">
                                                 Aircraft
-                                            </div>
+                                            </small>
 
-                                            <div class="fw-semibold">
+                                            <div class="small fw-semibold text-break">
                                                 @flight.AircraftName
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="col-6">
-                                    <div class="d-flex align-items-center">
-                                        <div class="me-2 text-primary">
-                                            <i class="fas fa-calendar-alt"></i>
-                                        </div>
+                                <div class="col-5">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="fas fa-calendar-alt text-primary"></i>
 
                                         <div>
-                                            <div class="text-600 fs-9">
+                                            <small class="text-muted d-block">
                                                 Day
-                                            </div>
+                                            </small>
 
-                                            <div class="fw-semibold">
+                                            <div class="small fw-semibold">
                                                 @flight.DepartureDateTime.ToString("dddd")
                                             </div>
                                         </div>
@@ -181,13 +265,13 @@
 
                             </div>
 
-                            <!-- Actions -->
-                            <div class="d-flex justify-content-end mt-4">
+                            <!-- Flight Details Button -->
+                            <div class="text-end mt-3">
                                 <a asp-area="Customer"
                                    asp-controller="Flights"
                                    asp-action="Details"
                                    asp-route-id="@flight.FlightId"
-                                   class="btn btn-primary">
+                                   class="btn btn-sm btn-primary">
 
                                     <i class="fas fa-info-circle me-1"></i>
                                     Flight Details
@@ -196,9 +280,11 @@
 
                         </div>
                     </div>
+
                 </div>
             }
 
         </div>
     }
+
 </div>
