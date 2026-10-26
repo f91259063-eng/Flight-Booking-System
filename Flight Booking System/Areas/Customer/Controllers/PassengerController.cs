@@ -5,6 +5,7 @@ using Flight_Booking_System.ViewModels.Customer;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq.Expressions;
 using System.Security.Claims;
+using Flight_Booking_System.Models.ENUM;
 
 namespace Flight_Booking_System.Areas.Customer.Controllers
 {
@@ -20,6 +21,9 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
         private readonly IRepository<Setting> _settingRepository;
         private readonly IRepository<AircraftClass> _aircraftClassRepository;
 
+        // Added for creating the payment record
+        private readonly IRepository<Payment> _paymentRepository;
+
         public PassengerController(
             IRepository<Passenger> passengerRepository,
             IRepository<Seat> seatRepository,
@@ -28,7 +32,8 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             IRepository<Booking> bookingRepository,
             IRepository<Ticket> ticketRepository,
             IRepository<Setting> settingRepository,
-            IRepository<AircraftClass> aircraftClassRepository)
+            IRepository<AircraftClass> aircraftClassRepository,
+            IRepository<Payment> paymentRepository)
         {
             _passengerRepository = passengerRepository;
             _seatRepository = seatRepository;
@@ -38,6 +43,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             _ticketRepository = ticketRepository;
             _settingRepository = settingRepository;
             _aircraftClassRepository = aircraftClassRepository;
+            _paymentRepository = paymentRepository;
         }
 
         // =========================================================
@@ -409,6 +415,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             });
         }
 
+
         // =========================================================
         // POST: Customer/Passenger/Create
         // =========================================================
@@ -675,11 +682,9 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                     }
                 }
                 else if (
-                    !string.IsNullOrWhiteSpace(
-                        passport)
+                    !string.IsNullOrWhiteSpace(passport)
                     ||
-                    !string.IsNullOrWhiteSpace(
-                        nationalId))
+                    !string.IsNullOrWhiteSpace(nationalId))
                 {
                     // =============================================
                     // Search by Passport OR National ID
@@ -745,8 +750,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                         await _passengerRepository
                             .GetAllAsync(
                                 filter: p =>
-                                    p.Id !=
-                                        matchedPassenger.Id
+                                    p.Id != matchedPassenger.Id
                                     &&
                                     (
                                         (
@@ -786,12 +790,9 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                     // =============================================
 
                     if (
-                        string.IsNullOrWhiteSpace(
-                            passport)
+                        string.IsNullOrWhiteSpace(passport)
                         &&
-                        string.IsNullOrWhiteSpace(
-                            nationalId)
-                    )
+                        string.IsNullOrWhiteSpace(nationalId))
                     {
                         ModelState.AddModelError(
                             "",
@@ -802,9 +803,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                     }
                 }
 
-                matchedPassengers.Add(
-                    matchedPassenger
-                );
+                matchedPassengers.Add(matchedPassenger);
             }
 
             // =====================================================
@@ -846,46 +845,36 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                     }
 
                     string passport1 =
-                        first.PassportNumber?
-                            .Trim()
+                        first.PassportNumber?.Trim()
                         ?? string.Empty;
 
                     string passport2 =
-                        second.PassportNumber?
-                            .Trim()
+                        second.PassportNumber?.Trim()
                         ?? string.Empty;
 
                     string national1 =
-                        first.NationalID?
-                            .Trim()
+                        first.NationalID?.Trim()
                         ?? string.Empty;
 
                     string national2 =
-                        second.NationalID?
-                            .Trim()
+                        second.NationalID?.Trim()
                         ?? string.Empty;
 
                     bool samePassport =
-                        !string.IsNullOrWhiteSpace(
-                            passport1)
+                        !string.IsNullOrWhiteSpace(passport1)
                         &&
-                        !string.IsNullOrWhiteSpace(
-                            passport2)
+                        !string.IsNullOrWhiteSpace(passport2)
                         &&
                         passport1 == passport2;
 
                     bool sameNationalId =
-                        !string.IsNullOrWhiteSpace(
-                            national1)
+                        !string.IsNullOrWhiteSpace(national1)
                         &&
-                        !string.IsNullOrWhiteSpace(
-                            national2)
+                        !string.IsNullOrWhiteSpace(national2)
                         &&
                         national1 == national2;
 
-                    if (
-                        samePassport ||
-                        sameNationalId)
+                    if (samePassport || sameNationalId)
                     {
                         ModelState.AddModelError(
                             "",
@@ -1024,11 +1013,9 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                         ?? string.Empty;
 
                     passenger.DateOfBirth =
-                        passengerModel
-                            .DateOfBirth;
+                        passengerModel.DateOfBirth;
 
-                    _passengerRepository
-                        .Update(passenger);
+                    _passengerRepository.Update(passenger);
 
                     var updateResult =
                         await _passengerRepository
@@ -1088,8 +1075,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                                 ?? string.Empty,
 
                             DateOfBirth =
-                                passengerModel
-                                    .DateOfBirth
+                                passengerModel.DateOfBirth
                         };
 
                     await _passengerRepository
@@ -1129,8 +1115,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                             flight.Id,
 
                         SeatId =
-                            passengerModel
-                                .SeatId,
+                            passengerModel.SeatId,
 
                         TicketPrice =
                             ticketPrice
@@ -1155,18 +1140,53 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             }
 
             // =====================================================
-            // Success
+            // Create Payment Record
+            // =====================================================
+
+            decimal totalAmount =
+                ticketPrice * model.Passengers.Count;
+
+            var payment =
+                new Payment
+                {
+                    BookingId = booking.Id,
+                    PaymentDate = DateTime.Now,
+                    PaymentMethod = PaymentMethod.CreditCard,
+                    Amount = totalAmount,
+                    PaymentStatus = false
+                };
+
+            await _paymentRepository
+                .InsertAsync(payment);
+
+            var paymentResult =
+                await _paymentRepository
+                    .CommitAsync();
+
+            if (
+                paymentResult <= 0 ||
+                payment.Id <= 0)
+            {
+                ModelState.AddModelError(
+                    "",
+                    "Unable to create payment record."
+                );
+
+                return View(model);
+            }
+
+            // =====================================================
+            // Redirect To Stripe Checkout
             // =====================================================
 
             return RedirectToAction(
-                "Confirmation",
-                "Booking",
+                "Checkout",
+                "Payment",
                 new
                 {
                     area = "Customer",
-                    id = booking.Id
-                }
-            );
+                    bookingId = booking.Id
+                });
         }
 
         // =========================================================
@@ -1187,8 +1207,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                         IsTracking: false
                     );
 
-            return aircraftClasses
-                .FirstOrDefault();
+            return aircraftClasses.FirstOrDefault();
         }
 
         // =========================================================
@@ -1204,8 +1223,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                     );
 
             return settings
-                .OrderByDescending(
-                    s => s.Id)
+                .OrderByDescending(s => s.Id)
                 .FirstOrDefault();
         }
 

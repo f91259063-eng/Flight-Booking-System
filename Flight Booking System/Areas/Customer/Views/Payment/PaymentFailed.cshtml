@@ -1,0 +1,16 @@
+﻿@{
+    ViewData["Title"] = "Payment Failed";
+    Layout = "~/Areas/Customer/Views/Shared/_CustomerLayout.cshtml";
+}
+
+<div class="container py-5 text-center">
+    <h2>Payment Not Completed</h2>
+    <p>We could not confirm your payment. Your booking has not been confirmed.</p>
+
+    <a asp-area="Customer"
+       asp-controller="Booking"
+       asp-action="Index"
+       class="btn btn-primary">
+        My Bookings
+    </a>
+</div>
