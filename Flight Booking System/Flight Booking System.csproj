@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Flight_Booking_System</RootNamespace>
+    <UserSecretsId>9ad2e642-27f7-483c-bcef-9dd0b80ccd65</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
