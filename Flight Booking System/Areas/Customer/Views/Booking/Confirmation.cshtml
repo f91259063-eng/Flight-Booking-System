@@ -1,0 +1,160 @@
+﻿
+@model Flight_Booking_System.ViewModels.Customer.BookingConfirmationViewModel
+
+@{
+    ViewData["Title"] = "Booking Confirmation";
+    Layout = "~/Areas/Customer/Views/Shared/_CustomerLayout.cshtml";
+}
+
+<div class="container py-5">
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body text-center py-5">
+
+            <i class="fas fa-check-circle text-success fa-4x mb-3"></i>
+
+            <h2 class="fw-bold">Booking Confirmed!</h2>
+
+            <p class="text-muted mb-1">
+                Your booking has been created successfully.
+            </p>
+
+            <div class="mt-3">
+                <span class="text-muted">Booking Reference</span>
+                <h4 class="fw-bold text-primary">
+                    @Model.BookingReference
+                </h4>
+            </div>
+
+            <span class="badge bg-success">
+                @Model.Status
+            </span>
+
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Flight Information</h5>
+        </div>
+
+        <div class="card-body">
+            <div class="row g-4">
+
+                <div class="col-md-4">
+                    <div class="text-muted small">Flight Number</div>
+                    <div class="fw-bold">@Model.FlightNumber</div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="text-muted small">From</div>
+                    <div class="fw-bold">@Model.FromAirport</div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="text-muted small">To</div>
+                    <div class="fw-bold">@Model.ToAirport</div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="text-muted small">Departure</div>
+                    <div class="fw-bold">
+                        @Model.DepartureDateTime.ToString("dd MMM yyyy, hh:mm tt")
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="text-muted small">Arrival</div>
+                    <div class="fw-bold">
+                        @Model.ArrivalDateTime.ToString("dd MMM yyyy, hh:mm tt")
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="text-muted small">Booking Date</div>
+                    <div class="fw-bold">
+                        @Model.BookingDate.ToString("dd MMM yyyy, hh:mm tt")
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="text-muted small">Number of Tickets</div>
+                    <div class="fw-bold">@Model.Tickets.Count</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Passenger Tickets</h5>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Passenger</th>
+                        <th>Seat</th>
+                        <th class="text-end">Ticket Price</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @for (int i = 0; i < Model.Tickets.Count; i++)
+                    {
+                        var ticket = Model.Tickets[i];
+
+                        <tr>
+                            <td>@(i + 1)</td>
+                            <td>@ticket.PassengerName</td>
+                            <td>
+                                <span class="badge bg-primary">
+                                    @ticket.SeatNumber
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                @ticket.TicketPrice.ToString("N2") EGP
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+
+                <tfoot class="table-light">
+                    <tr>
+                        <th colspan="3" class="text-end">
+                            Total Price
+                        </th>
+                        <th class="text-end text-primary">
+                            @Model.TotalPrice.ToString("N2") EGP
+                        </th>
+                    </tr>
+                </tfoot>
+
+            </table>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between flex-wrap gap-2">
+
+        <a asp-area="Customer"
+           asp-controller="Flights"
+           asp-action="Index"
+           class="btn btn-primary">
+            <i class="fas fa-plane me-2"></i>
+            Browse Flights
+        </a>
+
+        <button type="button"
+                onclick="window.print()"
+                class="btn btn-outline-secondary">
+            <i class="fas fa-print me-2"></i>
+            Print Confirmation
+        </button>
+
+    </div>
+
+</div>

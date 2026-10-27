@@ -12,6 +12,8 @@ namespace Flight_Booking_System.Data
             : base(options)
         { 
         }
+
+        public DbSet<Setting> settings { get; set; }
         public DbSet<city> Cities { get; set;  }
         public DbSet<Airline> Airlines { get; set; }
         public DbSet<Aircraft> Aircrafts { get; set; }

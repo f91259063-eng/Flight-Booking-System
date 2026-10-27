@@ -52,13 +52,13 @@ namespace Flight_Booking_System
             builder.Services.AddScoped<IRepository<Passenger>, Repository<Passenger>>();
             builder.Services.AddScoped<IRepository<Airline>, Repository<Airline>>();
             builder.Services.AddScoped<IRepository<Aircraft>, Repository<Aircraft>>();
-
-
-
-
-
-
+            builder.Services.AddScoped<IRepository<Flight>, Repository<Flight>>();
+            builder.Services.AddScoped<IRepository<Setting>, Repository<Setting>>();
+            builder.Services.AddScoped<IRepository<Ticket>, Repository<Ticket>>();
+            builder.Services.AddScoped<IRepository<Booking>, Repository<Booking>>();
             builder.Services.AddScoped<IRepository<Seat>, Repository<Seat>>();
+            builder.Services.AddScoped<IRepository<Payment>, Repository<Payment>>();
+
             //////servies 
             builder.Services.AddHttpClient<AirportCoordinateService>();
             builder.Services.AddScoped<DistanceCalculatorService>();
@@ -77,6 +77,9 @@ namespace Flight_Booking_System
             builder.Services.AddTransient<IAppEmailSender, SmtpEmailSender>();
 
 
+            // Stripe
+            builder.Services.Configure<StripeSettings>(
+                builder.Configuration.GetSection("Stripe"));
 
 
             // MVC

@@ -1,0 +1,364 @@
+﻿@model Flight_Booking_System.ViewModels.Customer.ChooseSeatViewModel
+
+@{
+    ViewData["Title"] = "Choose Seats";
+    Layout = "~/Areas/Customer/Views/Shared/_CustomerLayout.cshtml";
+}
+
+<style>
+    .seat-page {
+        max-width: 1100px;
+        margin: 30px auto;
+    }
+
+    .seat-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, .08);
+    }
+
+    .seat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .seat-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px;
+        margin-bottom: 25px;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 14px;
+    }
+
+    .legend-color {
+        width: 17px;
+        height: 17px;
+        border-radius: 4px;
+        display: inline-block;
+    }
+
+    .legend-available {
+        background: #d1fae5;
+        border: 1px solid #10b981;
+    }
+
+    .legend-booked {
+        background: #fecaca;
+        border: 1px solid #ef4444;
+    }
+
+    .legend-selected {
+        background: #d1d5db;
+        border: 1px solid #6b7280;
+    }
+
+    .plane {
+        max-width: 750px;
+        margin: 0 auto;
+        padding: 25px 15px;
+        background: #f8fafc;
+        border-radius: 15px;
+    }
+
+    .cockpit {
+        text-align: center;
+        padding: 15px;
+        margin-bottom: 25px;
+        background: #e2e8f0;
+        border-radius: 50% 50% 10px 10px;
+        color: #475569;
+        font-weight: bold;
+    }
+
+    .seats-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .seat {
+        min-height: 75px;
+        border: 1px solid #10b981;
+        border-radius: 7px;
+        background: #d1fae5;
+        color: #047857;
+        font-weight: bold;
+        position: relative;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+        .seat:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, .12);
+        }
+
+    .seat-number {
+        display: block;
+        font-size: 15px;
+        margin-top: 15px;
+    }
+
+    .seat-icon {
+        position: absolute;
+        top: 6px;
+        left: 7px;
+        font-size: 15px;
+    }
+
+    .seat.booked {
+        background: #fecaca;
+        border-color: #ef4444;
+        color: #b91c1c;
+        cursor: not-allowed;
+        opacity: .9;
+    }
+
+    .seat.selected {
+        background: #d1d5db;
+        border-color: #6b7280;
+        color: #1f2937;
+    }
+
+    .seat:disabled {
+        cursor: not-allowed;
+    }
+
+    .booking-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 25px;
+    }
+
+    .selected-badge {
+        background: #2563eb;
+        color: white;
+        border-radius: 5px;
+        padding: 8px 12px;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    @@media (max-width: 576px) {
+        .seat-card {
+            padding: 12px;
+        }
+
+        .seats-grid {
+            gap: 6px;
+        }
+
+        .seat {
+            min-height: 60px;
+        }
+
+        .seat-number {
+            font-size: 12px;
+        }
+    }
+</style>
+
+<div class="container seat-page">
+    <div class="seat-card">
+
+        <div class="seat-header">
+            <div>
+                <h3>Choose Your Seats</h3>
+
+                <div class="text-muted">
+                    Flight: <strong>@Model.FlightNumber</strong>
+                </div>
+
+                <div class="text-muted">
+                    Aircraft: <strong>@Model.AircraftName</strong>
+                    |
+                    Class: <strong>@Model.ClassName</strong>
+                </div>
+
+                <div class="mt-2">
+                    Ticket Price:
+                    <strong>@Model.TicketPrice.ToString("N2")</strong>
+                </div>
+            </div>
+
+            <div class="selected-badge">
+                Selected: <span id="selectedCount">0</span>
+            </div>
+        </div>
+
+        <div class="seat-legend">
+            <div class="legend-item">
+                <span class="legend-color legend-available"></span>
+                Available
+            </div>
+
+            <div class="legend-item">
+                <span class="legend-color legend-booked"></span>
+                Booked
+            </div>
+
+            <div class="legend-item">
+                <span class="legend-color legend-selected"></span>
+                Selected
+            </div>
+        </div>
+
+        @if (Model.Seats == null || !Model.Seats.Any())
+        {
+            <div class="alert alert-warning">
+                No seats were found for this class.
+            </div>
+        }
+        else
+        {
+            <div class="plane">
+                <div class="cockpit">
+                    FRONT OF AIRCRAFT
+                </div>
+
+                <div class="seats-grid">
+                    @foreach (var seat in Model.Seats)
+                    {
+                        <button type="button"
+                                class="seat @(seat.IsAvailable ? "" : "booked")"
+                                data-seat-id="@seat.SeatId"
+                                data-seat-number="@seat.SeatNumber"
+                                disabled="@(!seat.IsAvailable)"
+                                title="@(seat.IsAvailable ? "Available" : "Already booked")">
+
+                            <span class="seat-icon">
+                                @(seat.IsAvailable ? "♙" : "🔒")
+                            </span>
+
+                            <span class="seat-number">
+                                @seat.SeatNumber
+                            </span>
+                        </button>
+                    }
+                </div>
+            </div>
+        }
+
+        <form id="seatForm"
+              asp-area="Customer"
+              asp-controller="Passenger"
+              asp-action="Create"
+              method="get">
+
+            <input type="hidden"
+                   name="flightId"
+                   value="@Model.FlightId" />
+
+            <input type="hidden"
+                   name="classId"
+                   value="@Model.ClassId" />
+
+            <input type="hidden"
+                   id="seatIds"
+                   name="seatIds" />
+
+            <div class="booking-footer">
+                <a asp-area="Customer"
+                   asp-controller="Flights"
+                   asp-action="Details"
+                   asp-route-id="@Model.FlightId"
+                   class="btn btn-outline-secondary">
+                    Back
+                </a>
+
+                <button type="submit"
+                        id="continueButton"
+                        class="btn btn-primary"
+                        disabled>
+                    Continue
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const seatButtons =
+            document.querySelectorAll(".seat:not(:disabled)");
+
+        const selectedCount =
+            document.getElementById("selectedCount");
+
+        const seatIdsInput =
+            document.getElementById("seatIds");
+
+        const continueButton =
+            document.getElementById("continueButton");
+
+        const seatForm =
+            document.getElementById("seatForm");
+
+        // Check elements before using them
+        if (
+            !(selectedCount instanceof HTMLElement) ||
+            !(seatIdsInput instanceof HTMLInputElement) ||
+            !(continueButton instanceof HTMLButtonElement) ||
+            !(seatForm instanceof HTMLFormElement)
+        ) {
+            return;
+        }
+
+        const selectedSeats = new Map();
+
+        seatButtons.forEach(function (element) {
+            if (!(element instanceof HTMLButtonElement)) {
+                return;
+            }
+
+            const button = element;
+
+            button.addEventListener("click", function () {
+                const seatId = button.dataset.seatId;
+                const seatNumber = button.dataset.seatNumber;
+
+                if (!seatId || !seatNumber) {
+                    return;
+                }
+
+                if (selectedSeats.has(seatId)) {
+                    selectedSeats.delete(seatId);
+                    button.classList.remove("selected");
+                } else {
+                    selectedSeats.set(seatId, seatNumber);
+                    button.classList.add("selected");
+                }
+
+                selectedCount.textContent =
+                    String(selectedSeats.size);
+
+                seatIdsInput.value =
+                    Array.from(selectedSeats.keys()).join(",");
+
+                continueButton.disabled =
+                    selectedSeats.size === 0;
+            });
+        });
+
+        seatForm.addEventListener("submit", function (event) {
+            if (selectedSeats.size === 0) {
+                event.preventDefault();
+                alert("Please select at least one available seat.");
+            }
+        });
+    });
+</script>
