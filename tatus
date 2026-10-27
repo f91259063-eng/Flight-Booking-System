@@ -1,0 +1,31 @@
+
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+
+  "AllowedHosts": "*",
+
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=.;Database=FlightBookingDB;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
+  },
+
+  "Email": {
+    "Host": "",
+    "Port": 587,
+    "EnableSsl": true,
+    "UserName": "",
+    "Password": "",
+    "FromAddress": "no-reply@flightbooking.com",
+    "FromName": "Flight Booking"
+  },
+
+    "Stripe": {
+  "PublishableKey": "احتفظ_بالمفتاح_العام_الموجود_عندك",
+  "SecretKey": "",
+  "Currency": "egp"
+}
+}
