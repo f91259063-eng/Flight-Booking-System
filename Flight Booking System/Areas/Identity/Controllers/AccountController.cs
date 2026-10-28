@@ -193,6 +193,9 @@ public IActionResult Login(string? returnUrl = null)
                     //);
                 }
 
+                return Redirect("/Customer/Flights/Index");
+
+
                 // Normal user
                 return RedirectToLocal(model.ReturnUrl);
             }

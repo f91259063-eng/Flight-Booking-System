@@ -1,0 +1,314 @@
+﻿@model IEnumerable<Flight_Booking_System.ViewModels.Customer.MyBookingViewModel>
+
+@{
+    ViewData["Title"] = "My Bookings";
+    Layout = "~/Areas/Customer/Views/Shared/_CustomerLayout.cshtml";
+
+    var bookings = Model?.ToList()
+        ?? new List<Flight_Booking_System.ViewModels.Customer.MyBookingViewModel>();
+}
+
+<div class="container-fluid py-3">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+
+        <div>
+            <h4 class="mb-1 fw-bold">
+                <i class="fas fa-ticket-alt text-primary me-2"></i>
+                My Bookings
+            </h4>
+
+            <small class="text-muted">
+                View your flight bookings.
+            </small>
+        </div>
+
+        <span class="badge bg-primary rounded-pill px-3 py-2">
+            Total Bookings: @bookings.Count
+        </span>
+
+    </div>
+
+
+    @if (!bookings.Any())
+    {
+        <!-- No Bookings -->
+
+        <div class="card shadow-sm">
+
+            <div class="card-body text-center py-5">
+
+                <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
+
+                <h5 class="fw-bold">
+                    No Bookings Found
+                </h5>
+
+                <p class="text-muted mb-4">
+                    You have not made any flight bookings yet.
+                </p>
+
+                <a asp-area="Customer"
+                   asp-controller="Flights"
+                   asp-action="Index"
+                   class="btn btn-primary">
+
+                    <i class="fas fa-plane me-1"></i>
+                    Browse Flights
+
+                </a>
+
+            </div>
+
+        </div>
+    }
+    else
+    {
+        <!-- Booking Cards -->
+
+        <div class="row g-3">
+
+            @foreach (var booking in bookings)
+            {
+                <div class="col-12 col-lg-6 col-xxl-4">
+
+                    <div class="card h-100 shadow-sm">
+
+                        <!-- Header -->
+
+                        <div class="card-header py-2 px-3 bg-body-tertiary">
+
+                            <div class="d-flex justify-content-between align-items-center">
+
+                                <div>
+
+                                    <div class="fw-bold">
+
+                                        <i class="fas fa-ticket-alt text-primary me-1"></i>
+
+                                        @booking.BookingReference
+
+                                    </div>
+
+                                    <small class="text-muted">
+
+                                        @booking.BookingDate.ToString("dd MMM yyyy hh:mm tt")
+
+                                    </small>
+
+                                </div>
+
+
+                                @if (booking.Status == "Pending")
+                                {
+                                    <span class="badge bg-warning text-dark">
+                                        Pending
+                                    </span>
+                                }
+                                else if (booking.Status == "Confirmed")
+                                {
+                                    <span class="badge bg-success">
+                                        Confirmed
+                                    </span>
+                                }
+                                else if (booking.Status == "Cancelled")
+                                {
+                                    <span class="badge bg-danger">
+                                        Cancelled
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">
+                                        @booking.Status
+                                    </span>
+                                }
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Body -->
+
+                        <div class="card-body p-3">
+
+                            <!-- Flight -->
+
+                            <div class="mb-3">
+
+                                <small class="text-muted d-block">
+                                    Flight
+                                </small>
+
+                                <div class="fw-bold">
+
+                                    <i class="fas fa-plane-departure text-primary me-1"></i>
+
+                                    @(string.IsNullOrWhiteSpace(booking.FlightNumber)
+                                        ? "-"
+                                        : booking.FlightNumber)
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Route -->
+
+                            <div class="row g-2 align-items-center">
+
+                                <!-- From -->
+
+                                <div class="col-5">
+
+                                    <small class="text-muted d-block">
+                                        FROM
+                                    </small>
+
+                                    <div class="fw-bold text-break">
+
+                                        @(string.IsNullOrWhiteSpace(booking.DepartureAirport)
+                                            ? "-"
+                                            : booking.DepartureAirport)
+
+                                    </div>
+
+                                    <small class="text-muted d-block mt-1">
+
+                                        @booking.DepartureDateTime.ToString("dd MMM yyyy")
+
+                                    </small>
+
+                                    <div class="small text-primary fw-bold">
+
+                                        @booking.DepartureDateTime.ToString("hh:mm tt")
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- Plane -->
+
+                                <div class="col-2 text-center">
+
+                                    <i class="fas fa-plane text-primary"></i>
+
+                                    <div class="border-top border-2 border-dashed my-2"></div>
+
+                                    <small class="text-muted">
+                                        →
+                                    </small>
+
+                                </div>
+
+
+                                <!-- To -->
+
+                                <div class="col-5">
+
+                                    <small class="text-muted d-block">
+                                        TO
+                                    </small>
+
+                                    <div class="fw-bold text-break">
+
+                                        @(string.IsNullOrWhiteSpace(booking.ArrivalAirport)
+                                            ? "-"
+                                            : booking.ArrivalAirport)
+
+                                    </div>
+
+                                    <small class="text-muted d-block mt-1">
+
+                                        @booking.ArrivalDateTime.ToString("dd MMM yyyy")
+
+                                    </small>
+
+                                    <div class="small text-primary fw-bold">
+
+                                        @booking.ArrivalDateTime.ToString("hh:mm tt")
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <hr class="my-3" />
+
+
+                            <!-- Booking Info -->
+
+                            <div class="row g-2">
+
+                                <div class="col-6">
+
+                                    <small class="text-muted d-block">
+                                        Passengers
+                                    </small>
+
+                                    <div class="fw-bold">
+
+                                        <i class="fas fa-users text-primary me-1"></i>
+
+                                        @booking.NumberOfTickets
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="col-6">
+
+                                    <small class="text-muted d-block">
+                                        Total Price
+                                    </small>
+
+                                    <div class="fw-bold text-success">
+
+                                        @booking.TotalPrice.ToString("N2")
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Footer -->
+
+                        <div class="card-footer py-2 px-3 bg-body-tertiary">
+
+                            <div class="d-flex justify-content-end">
+
+                                <a asp-area="Customer"
+                                   asp-controller="Booking"
+                                   asp-action="Confirmation"
+                                   asp-route-id="@booking.BookingId"
+                                   class="btn btn-sm btn-primary">
+
+                                    <i class="fas fa-eye me-1"></i>
+
+                                    View Booking
+
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+    }
+
+</div>

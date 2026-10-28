@@ -37,9 +37,14 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
         }
 
         // GET: /Customer/Flights
+        // GET: /Customer/Flights?departureAirport=Cairo&arrivalAirport=Alexandria&departureDate=2026-11-01
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(
+            string? departureAirport,
+            string? arrivalAirport,
+            DateTime? departureDate)
         {
+            // 1. Get active upcoming flights
             var flights = await _flightRepository.GetAllAsync(
                 filter: f =>
                     f.FlightStatus &&
@@ -53,6 +58,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 IsTracking: false
             );
 
+            // 2. Build the ViewModel
             var model = new List<AvailableFlightViewModel>();
 
             foreach (var flight in flights.OrderBy(f => f.DepartureDateTime))
@@ -77,17 +83,68 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 {
                     FlightId = flight.Id,
                     FlightNumber = flight.FlightNumber,
-                    AirlineName = flight.Airline?.Name ?? "Unknown Airline",
+
+                    AirlineName = flight.Airline?.Name
+                        ?? "Unknown Airline",
+
                     AircraftName = flight.Aircraft?.RegistrationNumber
                         ?? "Not specified",
-                    DepartureAirport = fromAirport?.Name ?? "Unknown Airport",
-                    ArrivalAirport = toAirport?.Name ?? "Unknown Airport",
+
+                    DepartureAirport = fromAirport?.Name
+                        ?? "Unknown Airport",
+
+                    ArrivalAirport = toAirport?.Name
+                        ?? "Unknown Airport",
+
                     Distance = flight.Route?.Distance ?? 0,
+
                     DepartureDateTime = flight.DepartureDateTime,
                     ArrivalDateTime = flight.ArrivalDateTime,
                     FlightStatus = flight.FlightStatus
                 });
             }
+
+            // 3. Search by departure airport
+            if (!string.IsNullOrWhiteSpace(departureAirport))
+            {
+                string searchDeparture = departureAirport.Trim();
+
+                model = model
+                    .Where(f =>
+                        f.DepartureAirport.Contains(
+                            searchDeparture,
+                            StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
+            // 4. Search by arrival airport
+            if (!string.IsNullOrWhiteSpace(arrivalAirport))
+            {
+                string searchArrival = arrivalAirport.Trim();
+
+                model = model
+                    .Where(f =>
+                        f.ArrivalAirport.Contains(
+                            searchArrival,
+                            StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
+            // 5. Search by departure date
+            if (departureDate.HasValue)
+            {
+                DateTime selectedDate = departureDate.Value.Date;
+
+                model = model
+                    .Where(f =>
+                        f.DepartureDateTime.Date == selectedDate)
+                    .ToList();
+            }
+
+            // 6. Sort by departure date and time
+            model = model
+                .OrderBy(f => f.DepartureDateTime)
+                .ToList();
 
             return View(model);
         }
@@ -147,16 +204,25 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             {
                 FlightId = flight.Id,
                 FlightNumber = flight.FlightNumber,
-                AirlineName = flight.Airline?.Name ?? "Unknown Airline",
+
+                AirlineName = flight.Airline?.Name
+                    ?? "Unknown Airline",
+
                 AircraftName = flight.Aircraft?.RegistrationNumber
                     ?? "Unknown Aircraft",
-                DepartureAirport = fromAirport?.Name ?? "Unknown Airport",
-                ArrivalAirport = toAirport?.Name ?? "Unknown Airport",
+
+                DepartureAirport = fromAirport?.Name
+                    ?? "Unknown Airport",
+
+                ArrivalAirport = toAirport?.Name
+                    ?? "Unknown Airport",
+
                 Distance = flight.Route.Distance,
                 DepartureDateTime = flight.DepartureDateTime,
                 ArrivalDateTime = flight.ArrivalDateTime
             };
 
+            // Get available classes and calculate ticket prices
             foreach (var aircraftClass in aircraftClasses)
             {
                 var classInfo = await _classRepository.GetOneAsync(
@@ -179,7 +245,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                     * setting.PricePerKm
                     * multiplier;
 
-                // Count seats not booked for this flight.
+                // Tickets already booked for this flight
                 var bookedTickets = await _ticketRepository.GetAllAsync(
                     filter: t => t.FlightId == flight.Id,
                     IsTracking: false
@@ -206,11 +272,11 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             return View(model);
         }
 
-        // GET: /Customer/Flights/ChooseSeat
+        // GET: /Customer/Flights/ChooseSeat?flightId=1&classId=1
         [HttpGet]
         public async Task<IActionResult> ChooseSeat(int flightId, int classId)
         {
-            // 1. Get available flight
+            // 1. Get active upcoming flight
             var flight = await _flightRepository.GetOneAsync(
                 filter: f =>
                     f.Id == flightId &&
@@ -239,9 +305,11 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             );
 
             if (aircraftClass == null)
+            {
                 return NotFound(
                     "This class is not available on this aircraft."
                 );
+            }
 
             // 3. Get class details
             var classInfo = await _classRepository.GetOneAsync(
@@ -252,15 +320,17 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             if (classInfo == null)
                 return NotFound("Class not found.");
 
-            // 4. Get general pricing settings
+            // 4. Get pricing settings
             var setting = await _settingRepository.GetOneAsync(
                 IsTracking: false
             );
 
             if (setting == null)
+            {
                 return Problem(
                     "Ticket pricing settings have not been configured."
                 );
+            }
 
             // 5. Calculate ticket price
             decimal ticketPrice =
@@ -275,7 +345,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 IsTracking: false
             );
 
-            // 7. Get tickets booked on this flight
+            // 7. Get tickets already booked for this flight
             var bookedTickets = await _ticketRepository.GetAllAsync(
                 filter: t => t.FlightId == flight.Id,
                 IsTracking: false
@@ -291,8 +361,10 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 FlightId = flight.Id,
                 ClassId = classInfo.Id,
                 FlightNumber = flight.FlightNumber,
+
                 AircraftName = flight.Aircraft?.RegistrationNumber
                     ?? "Unknown Aircraft",
+
                 ClassName = classInfo.Name,
                 TicketPrice = ticketPrice,
 

@@ -12,7 +12,7 @@ namespace Flight_Booking_System.Data
             : base(options)
         { 
         }
-
+        public DbSet<ActivityLog> ActivityLogs { get; set; }
         public DbSet<Setting> settings { get; set; }
         public DbSet<city> Cities { get; set;  }
         public DbSet<Airline> Airlines { get; set; }

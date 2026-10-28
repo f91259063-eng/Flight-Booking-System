@@ -1,115 +1,102 @@
 ﻿
-"use strict";
-
 document.addEventListener("DOMContentLoaded", function () {
-    const messageBox = document.getElementById("searchMessage");
-    const passengerForm = document.getElementById("passengerForm");
 
-    const searchUrl =
-        passengerForm instanceof HTMLFormElement
-            ? passengerForm.dataset.searchUrl
-            : undefined;
+    const form = document.getElementById("passengerForm");
 
-    /**
-     * Display a message to the user.
-     * @param {string} message
-     * @param {string} type
-     * @returns {void}
-     */
-    function showMessage(message, type) {
-        if (!(messageBox instanceof HTMLElement)) {
-            return;
+    if (!form) {
+        console.error("Passenger form not found.");
+        return;
+    }
+
+    const searchUrl = form.dataset.searchUrl;
+
+    if (!searchUrl) {
+        console.error("Passenger search URL not found.");
+        return;
+    }
+
+    // =========================================================
+    // Show Message
+    // =========================================================
+
+    function showMessage(card, message, type = "info") {
+
+        let messageBox = card.querySelector(".passenger-message");
+
+        if (!messageBox) {
+            messageBox = document.createElement("div");
+            messageBox.className = "passenger-message";
+            card.querySelector(".card-body")?.prepend(messageBox);
         }
 
-        messageBox.className = "alert alert-" + type;
+        if (!messageBox) return;
+
+        // Correct Bootstrap alert classes
+        messageBox.className =
+            `alert alert - ${ type } passenger - message`;
+
         messageBox.textContent = message;
-        messageBox.classList.remove("d-none");
     }
 
-    /**
-     * Set the value of an input inside a passenger card.
-     * @param {HTMLElement} card
-     * @param {string} selector
-     * @param {string | number | null | undefined} value
-     * @returns {void}
-     */
-    function setValue(card, selector, value) {
-        const element = card.querySelector(selector);
+    // =========================================================
+    // Get Value From JSON
+    // =========================================================
 
-        if (
-            element instanceof HTMLInputElement ||
-            element instanceof HTMLSelectElement ||
-            element instanceof HTMLTextAreaElement
-        ) {
-            element.value = value == null ? "" : String(value);
-        }
-    }
+    function getValue(object, ...keys) {
 
-    /**
-     * Read a value from an input inside a passenger card.
-     * @param {HTMLElement} card
-     * @param {string} selector
-     * @returns {string}
-     */
-    function getInputValue(card, selector) {
-        const element = card.querySelector(selector);
-
-        if (
-            element instanceof HTMLInputElement ||
-            element instanceof HTMLSelectElement ||
-            element instanceof HTMLTextAreaElement
-        ) {
-            return element.value.trim();
+        for (const key of keys) {
+            if (
+                Object.prototype.hasOwnProperty.call(object, key) &&
+                object[key] !== null &&
+                object[key] !== undefined
+            ) {
+                return object[key];
+            }
         }
 
         return "";
     }
 
-    /**
-     * Clear the passenger details for one seat.
-     * @param {HTMLElement} card
-     * @returns {void}
-     */
-    function clearPassenger(card) {
-        setValue(card, ".selected-passenger-id", "");
-        setValue(card, ".passenger-first-name", "");
-        setValue(card, ".passenger-middle-name", "");
-        setValue(card, ".passenger-last-name", "");
-        setValue(card, ".passenger-passport", "");
-        setValue(card, ".passenger-national-id", "");
-        setValue(card, ".passenger-phone", "");
-        setValue(card, ".passenger-email", "");
-        setValue(card, ".passenger-date-of-birth", "");
-        setValue(card, ".search-passport", "");
-        setValue(card, ".search-national-id", "");
-    }
+    // =========================================================
+    // Set Input Value
+    // =========================================================
 
-    /**
-     * Search for an existing passenger and fill the form.
-     * @param {HTMLElement} card
-     * @returns {Promise<void>}
-     */
-    async function searchPassenger(card) {
-        if (!searchUrl) {
-            showMessage(
-                "Search URL is missing. Check the form data-search-url attribute.",
-                "danger"
-            );
+    function setInputValue(card, selector, value) {
+
+        const input = card.querySelector(selector);
+
+        if (!input) {
+            console.warn("Input not found:", selector);
             return;
         }
 
-        const passportNumber = getInputValue(
-            card,
-            ".search-passport"
-        );
+        input.value = value ?? "";
 
-        const nationalID = getInputValue(
-            card,
-            ".search-national-id"
-        );
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+
+    // =========================================================
+    // Search Passenger
+    // =========================================================
+
+    async function searchPassenger(card) {
+
+        const searchPassportInput =
+            card.querySelector(".search-passport");
+
+        const searchNationalIdInput =
+            card.querySelector(".search-national-id");
+
+        const passportNumber =
+            searchPassportInput?.value.trim() ?? "";
+
+        const nationalID =
+            searchNationalIdInput?.value.trim() ?? "";
 
         if (!passportNumber && !nationalID) {
             showMessage(
+                card,
                 "Enter a passport number or national ID.",
                 "warning"
             );
@@ -118,178 +105,254 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const url = new URL(searchUrl, window.location.origin);
 
-        if (passportNumber) {
-            url.searchParams.set("passportNumber", passportNumber);
-        }
+        // Always send both parameters.
+        // This avoids accidentally reusing a missing search parameter.
+        url.searchParams.set("passportNumber", passportNumber);
+        url.searchParams.set("nationalID", nationalID);
 
-        if (nationalID) {
-            url.searchParams.set("nationalID", nationalID);
-        }
+        const searchButton =
+            card.querySelector(".search-passenger-btn");
 
-        const searchButton = card.querySelector(
-            ".search-passenger-btn"
-        );
-
-        if (searchButton instanceof HTMLButtonElement) {
+        if (searchButton) {
             searchButton.disabled = true;
             searchButton.textContent = "Searching...";
         }
 
         try {
+            showMessage(card, "Searching passenger...", "info");
+
             const response = await fetch(url.toString(), {
                 method: "GET",
                 headers: {
                     "Accept": "application/json"
-                }
+                },
+                credentials: "same-origin"
             });
 
-            if (!response.ok) {
-                showMessage(
-                    "Unable to search for this passenger.",
-                    "danger"
-                );
-                return;
-            }
+            const data = await response.json();
 
-            /** @type {unknown} */
-            const rawData = await response.json();
+            console.log("Passenger search response:", data);
 
-            if (
-                typeof rawData !== "object" ||
-                rawData === null ||
-                !("id" in rawData)
-            ) {
+            if (!response.ok || !data.success || !data.passenger) {
                 showMessage(
-                    "No existing passenger was found.",
+                    card,
+                    data.message || "Passenger not found.",
                     "warning"
                 );
                 return;
             }
 
-            const data = /** @type {{
-                id: number | string,
-                firstName?: string | null,
-                middleName?: string | null,
-                lastName?: string | null,
-                passportNumber?: string | null,
-                nationalID?: string | null,
-                phone?: string | null,
-                email?: string | null,
-                dateOfBirth?: string | null
-            }} */ (rawData);
+            const passenger = data.passenger;
 
-            if (data.id == null || String(data.id) === "") {
-                showMessage(
-                    "No existing passenger was found.",
-                    "warning"
-                );
-                return;
-            }
+            // Passenger ID
+            setInputValue(
+                card,
+                ".selected-passenger-id",
+                getValue(passenger, "id", "Id")
+            );
 
-            setValue(card, ".selected-passenger-id", data.id);
-            setValue(card, ".passenger-first-name", data.firstName);
-            setValue(card, ".passenger-middle-name", data.middleName);
-            setValue(card, ".passenger-last-name", data.lastName);
-            setValue(card, ".passenger-passport", data.passportNumber);
-            setValue(card, ".passenger-national-id", data.nationalID);
-            setValue(card, ".passenger-phone", data.phone);
-            setValue(card, ".passenger-email", data.email);
+            // Passenger details
+            setInputValue(
+                card,
+                ".passenger-first-name",
+                getValue(passenger, "firstName", "FirstName")
+            );
 
-            if (data.dateOfBirth) {
-                const date = new Date(data.dateOfBirth);
+            setInputValue(
+                card,
+                ".passenger-middle-name",
+                getValue(passenger, "middleName", "MiddleName")
+            );
 
-                if (!Number.isNaN(date.getTime())) {
-                    const formattedDate =
-                        date.getFullYear() + "-" +
-                        String(date.getMonth() + 1).padStart(2, "0") + "-" +
-                        String(date.getDate()).padStart(2, "0");
+            setInputValue(
+                card,
+                ".passenger-last-name",
+                getValue(passenger, "lastName", "LastName")
+            );
 
-                    setValue(
-                        card,
-                        ".passenger-date-of-birth",
-                        formattedDate
-                    );
+            setInputValue(
+                card,
+                ".passenger-passport",
+                getValue(passenger, "passportNumber", "PassportNumber")
+            );
+
+            setInputValue(
+                card,
+                ".passenger-national-id",
+                getValue(passenger, "nationalID", "NationalID")
+            );
+
+            setInputValue(
+                card,
+                ".passenger-phone",
+                getValue(passenger, "phone", "Phone")
+            );
+
+            setInputValue(
+                card,
+                ".passenger-email",
+                getValue(passenger, "email", "Email")
+            );
+
+            // Format date for <input type="date">
+            const rawDate = getValue(
+                passenger,
+                "dateOfBirth",
+                "DateOfBirth"
+            );
+
+            let formattedDate = "";
+
+            if (rawDate) {
+                const dateString = String(rawDate);
+
+                // Handles ISO strings such as 2000-05-20T00:00:00
+                if (/^\d{4}-\d{2}-\d{2}/.test(dateString)) {
+                    formattedDate = dateString.substring(0, 10);
                 } else {
-                    setValue(
-                        card,
-                        ".passenger-date-of-birth",
-                        data.dateOfBirth
-                    );
+                    const parsedDate = new Date(rawDate);
+
+                    if (!Number.isNaN(parsedDate.getTime())) {
+                        const year = parsedDate.getFullYear();
+                        const month = String(
+                            parsedDate.getMonth() + 1
+                        ).padStart(2, "0");
+                        const day = String(
+                            parsedDate.getDate()
+                        ).padStart(2, "0");
+
+                        formattedDate = `${ year } -${ month } -${ day }`;
+                    }
                 }
-            } else {
-                setValue(card, ".passenger-date-of-birth", "");
             }
+
+            setInputValue(
+                card,
+                ".passenger-date-of-birth",
+                formattedDate
+            );
+
+            // Copy the returned identity numbers into search fields
+            setInputValue(
+                card,
+                ".search-passport",
+                getValue(passenger, "passportNumber", "PassportNumber")
+            );
+
+            setInputValue(
+                card,
+                ".search-national-id",
+                getValue(passenger, "nationalID", "NationalID")
+            );
 
             showMessage(
+                card,
                 "Passenger information loaded successfully.",
                 "success"
             );
-        } catch (error) {
+        }
+        catch (error) {
+            console.error("Passenger search error:", error);
+
             showMessage(
-                "An error occurred while searching for the passenger.",
+                card,
+                "An error occurred while searching. Please try again.",
                 "danger"
             );
-
-            console.error("Passenger search failed:", error);
-        } finally {
-            if (searchButton instanceof HTMLButtonElement) {
+        }
+        finally {
+            if (searchButton) {
                 searchButton.disabled = false;
                 searchButton.textContent = "Search";
             }
         }
     }
 
-    document.querySelectorAll(".passenger-card").forEach(
-        function (element) {
-            if (!(element instanceof HTMLElement)) {
-                return;
-            }
+    // =========================================================
+    // Search Button - No Form Submission
+    // =========================================================
 
-            const card = element;
+    form.addEventListener("click", function (event) {
 
-            const searchButton = card.querySelector(
-                ".search-passenger-btn"
-            );
+        const button = event.target.closest(".search-passenger-btn");
 
-            const clearButton = card.querySelector(
-                ".clear-passenger-btn"
-            );
-
-            if (searchButton instanceof HTMLButtonElement) {
-                searchButton.addEventListener("click", function () {
-                    void searchPassenger(card);
-                });
-            }
-
-            if (clearButton instanceof HTMLButtonElement) {
-                clearButton.addEventListener("click", function () {
-                    clearPassenger(card);
-                });
-            }
-
-            const searchPassport = card.querySelector(
-                ".search-passport"
-            );
-
-            const searchNationalId = card.querySelector(
-                ".search-national-id"
-            );
-
-            [searchPassport, searchNationalId].forEach(
-                function (element) {
-                    if (element instanceof HTMLInputElement) {
-                        element.addEventListener(
-                            "keydown",
-                            function (event) {
-                                if (event.key === "Enter") {
-                                    event.preventDefault();
-                                    void searchPassenger(card);
-                                }
-                            }
-                        );
-                    }
-                }
-            );
+        if (!button || !form.contains(button)) {
+            return;
         }
-    );
+
+        event.preventDefault();
+
+        const card = button.closest(".passenger-card");
+
+        if (card) {
+            searchPassenger(card);
+        }
+    });
+
+    // =========================================================
+    // Enter Key - Search Instead of Submit
+    // =========================================================
+
+    form.addEventListener("keydown", function (event) {
+
+        const input = event.target.closest(
+            ".search-passport, .search-national-id"
+        );
+
+        if (!input || event.key !== "Enter") {
+            return;
+        }
+
+        event.preventDefault();
+
+        const card = input.closest(".passenger-card");
+
+        if (card) {
+            searchPassenger(card);
+        }
+    });
+
+    // =========================================================
+    // Clear Passenger
+    // =========================================================
+
+    form.addEventListener("click", function (event) {
+
+        const button = event.target.closest(".clear-passenger-btn");
+
+        if (!button || !form.contains(button)) {
+            return;
+        }
+
+        event.preventDefault();
+
+        const card = button.closest(".passenger-card");
+
+        if (!card) return;
+
+        const fields = [
+            ".selected-passenger-id",
+            ".passenger-first-name",
+            ".passenger-middle-name",
+            ".passenger-last-name",
+            ".passenger-passport",
+            ".passenger-national-id",
+            ".passenger-phone",
+            ".passenger-email",
+            ".passenger-date-of-birth",
+            ".search-passport",
+            ".search-national-id"
+        ];
+
+        fields.forEach(function (selector) {
+            setInputValue(card, selector, "");
+        });
+
+        const messageBox = card.querySelector(".passenger-message");
+
+        if (messageBox) {
+            messageBox.remove();
+        }
+    });
+
 });

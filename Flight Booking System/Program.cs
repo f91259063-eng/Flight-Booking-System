@@ -1,6 +1,9 @@
+
+
 using Flight_Booking_System.Data;
 using Flight_Booking_System.Models;
 using Flight_Booking_System.Models.Identity;
+using Flight_Booking_System.ModelsServices;
 using Flight_Booking_System.Repositories;
 using Flight_Booking_System.Services;
 using Microsoft.AspNetCore.Identity;
@@ -11,7 +14,7 @@ namespace Flight_Booking_System
     public class Program
     {
         public static async Task Main(string[] args)
-         {
+        {
             var builder = WebApplication.CreateBuilder(args);
 
             // Database
@@ -23,8 +26,6 @@ namespace Flight_Booking_System
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
                 options.User.RequireUniqueEmail = true;
-
-                // Users must confirm their email before they can log in
                 options.SignIn.RequireConfirmedAccount = true;
 
                 options.Password.RequiredLength = 8;
@@ -34,55 +35,69 @@ namespace Flight_Booking_System
                 options.Password.RequireNonAlphanumeric = false;
 
                 options.Lockout.MaxFailedAccessAttempts = 5;
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                options.Lockout.DefaultLockoutTimeSpan =
+                    TimeSpan.FromMinutes(5);
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddDefaultTokenProviders();   // needed for email confirmation, password reset and 2FA tokens
+            .AddDefaultTokenProviders();
+
+            // Repositories
             builder.Services.AddScoped<IRepository<Flight>, Repository<Flight>>();
             builder.Services.AddScoped<IRepository<Booking>, Repository<Booking>>();
             builder.Services.AddScoped<IRepository<Passenger>, Repository<Passenger>>();
             builder.Services.AddScoped<IRepository<Aircraft>, Repository<Aircraft>>();
             builder.Services.AddScoped<IRepository<AirPort>, Repository<AirPort>>();
-            builder.Services.AddScoped<IRepository<Flight_Booking_System.Models.Route>, Repository<Flight_Booking_System.Models.Route>>();
+            builder.Services.AddScoped<IRepository<Flight_Booking_System.Models.Route>,
+                Repository<Flight_Booking_System.Models.Route>>();
             builder.Services.AddScoped<IRepository<Seat>, Repository<Seat>>();
             builder.Services.AddScoped<IRepository<Payment>, Repository<Payment>>();
             builder.Services.AddScoped<IRepository<city>, Repository<city>>();
             builder.Services.AddScoped<IRepository<AircraftClass>, Repository<AircraftClass>>();
             builder.Services.AddScoped<IRepository<Class>, Repository<Class>>();
-            builder.Services.AddScoped<IRepository<Passenger>, Repository<Passenger>>();
             builder.Services.AddScoped<IRepository<Airline>, Repository<Airline>>();
-            builder.Services.AddScoped<IRepository<Aircraft>, Repository<Aircraft>>();
-            builder.Services.AddScoped<IRepository<Flight>, Repository<Flight>>();
             builder.Services.AddScoped<IRepository<Setting>, Repository<Setting>>();
             builder.Services.AddScoped<IRepository<Ticket>, Repository<Ticket>>();
-            builder.Services.AddScoped<IRepository<Booking>, Repository<Booking>>();
-            builder.Services.AddScoped<IRepository<Seat>, Repository<Seat>>();
-            //////servies 
+
+            // Activity Log
+            builder.Services.AddScoped<IRepository<ActivityLog>,
+                Repository<ActivityLog>>();
+
+            builder.Services.AddHttpContextAccessor();
+
+            builder.Services.AddScoped<IActivityLogService,
+                ActivityLogService>();
+
+            // Other services
             builder.Services.AddHttpClient<AirportCoordinateService>();
             builder.Services.AddScoped<DistanceCalculatorService>();
-            builder.Services.AddScoped<Flight_Booking_System.Services.ISeatService, SeatService>();
 
+            builder.Services.AddScoped<
+                Flight_Booking_System.Services.ISeatService,
+                SeatService>();
 
-            // Where to send users who are not logged in / not allowed
+            // Cookies
             builder.Services.ConfigureApplicationCookie(options =>
             {
                 options.LoginPath = "/Identity/Account/Login";
                 options.AccessDeniedPath = "/Identity/Account/AccessDenied";
             });
 
-            // Email (settings come from the "Email" section in appsettings.json)
-            builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Email"));
+            // Email
+            builder.Services.Configure<EmailSettings>(
+                builder.Configuration.GetSection("Email"));
+
             builder.Services.AddTransient<IAppEmailSender, SmtpEmailSender>();
 
-
-
+            // Stripe
+            builder.Services.Configure<StripeSettings>(
+                builder.Configuration.GetSection("Stripe"));
 
             // MVC
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
 
-            // Create the roles (Admin, Customer) and a default admin on startup
+            // Seed Identity
             using (var scope = app.Services.CreateScope())
             {
                 await IdentitySeeder.SeedAsync(scope.ServiceProvider);
@@ -95,27 +110,20 @@ namespace Flight_Booking_System
             }
 
             app.UseHttpsRedirection();
-
             app.UseRouting();
 
-            // Authentication must be before Authorization
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapStaticAssets();
 
-            // Areas route must come BEFORE the default route
-
-            // Identity Area Route
+            // Identity / Default route
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{area=identity}/{controller=Account}/{action=login}/{id?}")
-          
-            .WithStaticAssets();
-
+                .WithStaticAssets();
 
             app.Run();
-
         }
     }
 }

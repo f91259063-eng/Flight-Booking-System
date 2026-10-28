@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Flight_Booking_System</RootNamespace>
+    <UserSecretsId>9ad2e642-27f7-483c-bcef-9dd0b80ccd65</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -47,6 +48,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Stripe.net" Version="53.0.0" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
   </ItemGroup>
 
