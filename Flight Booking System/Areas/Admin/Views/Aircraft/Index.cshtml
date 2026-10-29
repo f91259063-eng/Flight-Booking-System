@@ -2,21 +2,22 @@
 @model IEnumerable<Flight_Booking_System.Models.Aircraft>
 
 @{
-    ViewData["Title"] = "الطائرات";
+    ViewData["Title"] = "Aircraft";
     Layout = "_AdminLayout";
 }
 
-<div class="container-fluid py-4" dir="rtl">
+<div class="container-fluid py-4" dir="ltr">
 
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold mb-1">
-                <i class="bi bi-airplane"></i>
-                إدارة الطائرات
+                <i class="bi bi-airplane me-1"></i>
+                Manage Aircraft
             </h2>
+
             <p class="text-muted mb-0">
-                عرض وإدارة الطائرات وبياناتها ودرجات السفر
+                View and manage aircraft, their information, and travel classes.
             </p>
         </div>
 
@@ -24,30 +25,53 @@
            asp-controller="Aircraft"
            asp-action="Create"
            class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i>
-            إضافة طائرة
+            <i class="bi bi-plus-circle me-1"></i>
+            Add Aircraft
         </a>
     </div>
+
+    <!-- Success and Error Messages -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close"></button>
+        </div>
+    }
 
     <!-- Aircraft Table -->
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white py-3">
-            <h5 class="mb-0 fw-bold">قائمة الطائرات</h5>
+            <h5 class="mb-0 fw-bold">Aircraft List</h5>
         </div>
 
         <div class="card-body">
             @if (Model != null && Model.Any())
             {
                 <div class="table-responsive">
-                    <table class="table table-hover table-bordered align-middle text-center">
+                    <table class="table table-hover table-bordered align-middle text-center mb-0">
                         <thead class="table-light">
                             <tr>
                                 <th>#</th>
-                                <th>رقم تسجيل الطائرة</th>
-                                <th>موديل الطائرة</th>
-                                <th>شركة الطيران</th>
-                                <th>السعة الكلية</th>
-                                <th style="min-width: 250px;">الإجراءات</th>
+                                <th>Registration Number</th>
+                                <th>Aircraft Model</th>
+                                <th>Airline</th>
+                                <th>Total Capacity</th>
+                                <th style="min-width: 250px;">Actions</th>
                             </tr>
                         </thead>
 
@@ -60,16 +84,20 @@
                             {
                                 <tr>
                                     <td>@counter</td>
+
                                     <td class="fw-semibold">
                                         @aircraft.RegistrationNumber
                                     </td>
+
                                     <td>@aircraft.Model</td>
+
                                     <td>
-                                        @(aircraft.Airline?.Name ?? "غير محدد")
+                                        @(aircraft.Airline?.Name ?? "Not specified")
                                     </td>
+
                                     <td>
                                         <span class="badge bg-info text-dark">
-                                            @aircraft.Capacity مقعد
+                                            @aircraft.Capacity Seats
                                         </span>
                                     </td>
 
@@ -81,9 +109,9 @@
                                                asp-action="Details"
                                                asp-route-id="@aircraft.Id"
                                                class="btn btn-sm btn-info text-white"
-                                               title="عرض التفاصيل">
-                                                <i class="bi bi-eye"></i>
-                                                التفاصيل
+                                               title="View Details">
+                                                <i class="bi bi-eye me-1"></i>
+                                                Details
                                             </a>
 
                                             <a asp-area="Admin"
@@ -91,9 +119,9 @@
                                                asp-action="Edit"
                                                asp-route-id="@aircraft.Id"
                                                class="btn btn-sm btn-warning"
-                                               title="تعديل">
-                                                <i class="bi bi-pencil-square"></i>
-                                                تعديل
+                                               title="Edit Aircraft">
+                                                <i class="bi bi-pencil-square me-1"></i>
+                                                Edit
                                             </a>
 
                                             <a asp-area="Admin"
@@ -101,9 +129,9 @@
                                                asp-action="Delete"
                                                asp-route-id="@aircraft.Id"
                                                class="btn btn-sm btn-danger"
-                                               title="حذف">
-                                                <i class="bi bi-trash"></i>
-                                                حذف
+                                               title="Delete Aircraft">
+                                                <i class="bi bi-trash me-1"></i>
+                                                Delete
                                             </a>
 
                                         </div>
@@ -120,15 +148,19 @@
             {
                 <div class="text-center py-5">
                     <i class="bi bi-airplane display-4 text-muted"></i>
-                    <h5 class="mt-3">لا توجد طائرات مسجلة</h5>
-                    <p class="text-muted">ابدأ بإضافة أول طائرة إلى النظام.</p>
+
+                    <h5 class="mt-3">No Aircraft Registered</h5>
+
+                    <p class="text-muted">
+                        Start by adding the first aircraft to the system.
+                    </p>
 
                     <a asp-area="Admin"
                        asp-controller="Aircraft"
                        asp-action="Create"
                        class="btn btn-primary">
-                        <i class="bi bi-plus-circle"></i>
-                        إضافة طائرة
+                        <i class="bi bi-plus-circle me-1"></i>
+                        Add Aircraft
                     </a>
                 </div>
             }

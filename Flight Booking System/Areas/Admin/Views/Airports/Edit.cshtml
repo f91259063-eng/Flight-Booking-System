@@ -1,68 +1,144 @@
-﻿
-@model Flight_Booking_System.Models.AirPort
+﻿@model Flight_Booking_System.Models.AirPort
 
 @{
-    ViewData["Title"] = "تعديل بيانات المطار";
+    ViewData["Title"] = "Edit Airport";
+    Layout = "_AdminLayout";
 }
 
-<h2 class="mb-4">تعديل بيانات المطار</h2>
+<div class="container-fluid py-4" dir="ltr">
 
-<form asp-controller="Airports"
-      asp-action="Edit"
-      asp-route-id="@Model.Id"
-      method="post">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Edit Airport</h2>
+            <p class="text-muted mb-0">
+                Update airport information and geographical coordinates.
+            </p>
+        </div>
 
-    @Html.AntiForgeryToken()
-
-    <input type="hidden" asp-for="Id" />
-
-    <div asp-validation-summary="All"
-         class="text-danger mb-3"></div>
-
-    <div class="mb-3">
-        <label asp-for="Name" class="form-label">اسم المطار</label>
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name" class="text-danger"></span>
+        <a asp-area="Admin"
+           asp-controller="Airports"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Airports
+        </a>
     </div>
 
-    <div class="mb-3">
-        <label asp-for="cityId" class="form-label">المدينة</label>
-        <select asp-for="cityId"
-                asp-items="ViewBag.Cities"
-                class="form-select">
-            <option value="">-- اختر المدينة --</option>
-        </select>
-        <span asp-validation-for="cityId" class="text-danger"></span>
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">Airport Information</h5>
+                </div>
+
+                <div class="card-body p-4">
+
+                    <form asp-area="Admin"
+                          asp-controller="Airports"
+                          asp-action="Edit"
+                          asp-route-id="@Model.Id"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden" asp-for="Id" />
+
+                        <div asp-validation-summary="All"
+                             class="text-danger mb-3">
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Name"
+                                   class="form-label fw-semibold">
+                                Airport Name
+                            </label>
+
+                            <input asp-for="Name"
+                                   class="form-control"
+                                   placeholder="Enter airport name" />
+
+                            <span asp-validation-for="Name"
+                                  class="text-danger">
+                            </span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="cityId"
+                                   class="form-label fw-semibold">
+                                City
+                            </label>
+
+                            <select asp-for="cityId"
+                                    asp-items="ViewBag.Cities"
+                                    class="form-select">
+                                <option value="">-- Select a City --</option>
+                            </select>
+
+                            <span asp-validation-for="cityId"
+                                  class="text-danger">
+                            </span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Latitude"
+                                   class="form-label fw-semibold">
+                                Latitude
+                            </label>
+
+                            <input asp-for="Latitude"
+                                   type="number"
+                                   step="any"
+                                   class="form-control"
+                                   dir="ltr" />
+
+                            <span asp-validation-for="Latitude"
+                                  class="text-danger">
+                            </span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Longitude"
+                                   class="form-label fw-semibold">
+                                Longitude
+                            </label>
+
+                            <input asp-for="Longitude"
+                                   type="number"
+                                   step="any"
+                                   class="form-control"
+                                   dir="ltr" />
+
+                            <span asp-validation-for="Longitude"
+                                  class="text-danger">
+                            </span>
+                        </div>
+
+                        <hr />
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i>
+                                Save Changes
+                            </button>
+
+                            <a asp-area="Admin"
+                               asp-controller="Airports"
+                               asp-action="Index"
+                               class="btn btn-light border">
+                                Cancel
+                            </a>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
     </div>
-
-    <div class="mb-3">
-        <label asp-for="Latitude" class="form-label">خط العرض</label>
-        <input asp-for="Latitude"
-               type="number"
-               step="any"
-               class="form-control" />
-        <span asp-validation-for="Latitude" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Longitude" class="form-label">خط الطول</label>
-        <input asp-for="Longitude"
-               type="number"
-               step="any"
-               class="form-control" />
-        <span asp-validation-for="Longitude" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary">
-        حفظ التعديلات
-    </button>
-
-    <a asp-action="Index" class="btn btn-secondary">
-        رجوع
-    </a>
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
-s

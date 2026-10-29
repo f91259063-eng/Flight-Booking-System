@@ -1,9 +1,10 @@
-﻿
+﻿using System.Linq.Expressions;
+
 using Flight_Booking_System.Models;
+using Flight_Booking_System.ModelsServices;
 using Flight_Booking_System.Repositories;
 using Flight_Booking_System.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq.Expressions;
 
 namespace Flight_Booking_System.Areas.Admin.Controllers
 {
@@ -14,17 +15,20 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
         private readonly IRepository<Airline> _repositoryAirline;
         private readonly IRepository<AircraftClass> _repositoryAircraftClass;
         private readonly IRepository<Seat> _repositorySeat;
+        private readonly IActivityLogService _activityLogService;
 
         public AircraftController(
             IRepository<Aircraft> repositoryAircraft,
             IRepository<Airline> repositoryAirline,
             IRepository<AircraftClass> repositoryAircraftClass,
-            IRepository<Seat> repositorySeat)
+            IRepository<Seat> repositorySeat,
+            IActivityLogService activityLogService)
         {
             _repositoryAircraft = repositoryAircraft;
             _repositoryAirline = repositoryAirline;
             _repositoryAircraftClass = repositoryAircraftClass;
             _repositorySeat = repositorySeat;
+            _activityLogService = activityLogService;
         }
 
         // GET: Admin/Aircraft
@@ -67,7 +71,7 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 RegistrationNumber = aircraft.RegistrationNumber,
                 Model = aircraft.Model,
                 Capacity = aircraft.Capacity,
-                AirlineName = aircraft.Airline?.Name ?? "غير محدد"
+                AirlineName = aircraft.Airline?.Name ?? "Not specified"
             };
 
             foreach (var aircraftClass in aircraftClasses)
@@ -78,10 +82,8 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 model.Classes.Add(new AircraftClassSeatsViewModel
                 {
                     AircraftClassId = aircraftClass.ID,
-                    ClassName = aircraftClass.Class?.Name ?? "غير محدد",
+                    ClassName = aircraftClass.Class?.Name ?? "Not specified",
                     NumberOfSeats = aircraftClass.NumberOfSeats,
-
-                    // الاحتفاظ ببيانات كل Seat كاملة
                     Seats = seats
                         .OrderBy(s => s.SeatNumber)
                         .ToList()
@@ -96,7 +98,6 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
         public async Task<IActionResult> Create()
         {
             ViewBag.Airlines = await _repositoryAirline.GetAllAsync();
-
             return View();
         }
 
@@ -115,15 +116,27 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
 
             var result = await _repositoryAircraft.CommitAsync();
 
-            if (result < 0)
+            if (result <= 0)
             {
                 ModelState.AddModelError(
-                    "",
-                    "تعذر حفظ بيانات الطائرة.");
+                    string.Empty,
+                    "Unable to save the aircraft.");
 
                 ViewBag.Airlines = await _repositoryAirline.GetAllAsync();
                 return View(aircraft);
             }
+
+            await _activityLogService.LogAsync(
+                "AircraftController",
+                "Create",
+                "Aircraft",
+                aircraft.Id.ToString(),
+                $"Created aircraft: {aircraft.Model}, " +
+                $"Registration: {aircraft.RegistrationNumber}, " +
+                $"Capacity: {aircraft.Capacity}."
+            );
+
+            TempData["Success"] = "Aircraft created successfully.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -163,6 +176,23 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
             if (existingAircraft == null)
                 return NotFound();
 
+            // Prevent capacity from becoming smaller than allocated seats.
+            var aircraftClasses = await _repositoryAircraftClass.GetAllAsync(
+                x => x.AircraftId == id);
+
+            var allocatedSeats = aircraftClasses.Sum(x => x.NumberOfSeats);
+
+            if (aircraft.Capacity < allocatedSeats)
+            {
+                ModelState.AddModelError(
+                    nameof(aircraft.Capacity),
+                    $"Capacity cannot be less than the {allocatedSeats} " +
+                    "seats already allocated to this aircraft.");
+
+                ViewBag.Airlines = await _repositoryAirline.GetAllAsync();
+                return View(aircraft);
+            }
+
             existingAircraft.AirlineId = aircraft.AirlineId;
             existingAircraft.RegistrationNumber = aircraft.RegistrationNumber;
             existingAircraft.Model = aircraft.Model;
@@ -173,12 +203,24 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
             if (result < 0)
             {
                 ModelState.AddModelError(
-                    "",
-                    "تعذر تحديث بيانات الطائرة.");
+                    string.Empty,
+                    "Unable to update the aircraft.");
 
                 ViewBag.Airlines = await _repositoryAirline.GetAllAsync();
                 return View(aircraft);
             }
+
+            await _activityLogService.LogAsync(
+                "AircraftController",
+                "Edit",
+                "Aircraft",
+                existingAircraft.Id.ToString(),
+                $"Updated aircraft: {existingAircraft.Model}, " +
+                $"Registration: {existingAircraft.RegistrationNumber}, " +
+                $"Capacity: {existingAircraft.Capacity}."
+            );
+
+            TempData["Success"] = "Aircraft updated successfully.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -207,14 +249,40 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
             if (aircraft == null)
                 return NotFound();
 
-            _repositoryAircraft.Delete(aircraft);
+            // Save details before deletion for the audit log.
+            var aircraftId = aircraft.Id.ToString();
+            var aircraftModel = aircraft.Model;
+            var registrationNumber = aircraft.RegistrationNumber;
 
-            var result = await _repositoryAircraft.CommitAsync();
-
-            if (result < 0)
+            try
             {
-                return BadRequest(
-                    "تعذر حذف الطائرة، قد تكون مرتبطة بسجلات أخرى.");
+                _repositoryAircraft.Delete(aircraft);
+
+                var result = await _repositoryAircraft.CommitAsync();
+
+                if (result <= 0)
+                {
+                    TempData["Error"] =
+                        "Unable to delete the aircraft. It may be referenced by other records.";
+
+                    return RedirectToAction(nameof(Index));
+                }
+
+                await _activityLogService.LogAsync(
+                    "AircraftController",
+                    "Delete",
+                    "Aircraft",
+                    aircraftId,
+                    $"Deleted aircraft: {aircraftModel}, " +
+                    $"Registration: {registrationNumber}."
+                );
+
+                TempData["Success"] = "Aircraft deleted successfully.";
+            }
+            catch (Microsoft.EntityFrameworkCore.DbUpdateException)
+            {
+                TempData["Error"] =
+                    "Unable to delete the aircraft because it is referenced by other records.";
             }
 
             return RedirectToAction(nameof(Index));

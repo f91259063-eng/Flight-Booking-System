@@ -1,0 +1,84 @@
+﻿
+@model Flight_Booking_System.Models.AirPort
+
+@{
+    ViewData["Title"] = "Delete Airport";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid py-4" dir="ltr">
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">Delete Airport</h2>
+        <p class="text-muted mb-0">
+            Review the airport information before confirming deletion.
+        </p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 text-danger">
+                        <i class="bi bi-exclamation-triangle me-1"></i>
+                        Confirm Deletion
+                    </h5>
+                </div>
+
+                <div class="card-body p-4">
+                    <div class="alert alert-warning">
+                        Are you sure you want to delete this airport?
+                        This action cannot be easily undone.
+                    </div>
+
+                    <dl class="row mb-4">
+                        <dt class="col-sm-4">Airport ID</dt>
+                        <dd class="col-sm-8">@Model.Id</dd>
+
+                        <dt class="col-sm-4">Airport Name</dt>
+                        <dd class="col-sm-8">@Model.Name</dd>
+
+                        <dt class="col-sm-4">City</dt>
+                        <dd class="col-sm-8">
+                            @(Model.City?.Name ?? "Not specified")
+                        </dd>
+
+                        <dt class="col-sm-4">Latitude</dt>
+                        <dd class="col-sm-8">
+                            @(Model.Latitude?.ToString("F6") ?? "Not available")
+                        </dd>
+
+                        <dt class="col-sm-4">Longitude</dt>
+                        <dd class="col-sm-8">
+                            @(Model.Longitude?.ToString("F6") ?? "Not available")
+                        </dd>
+                    </dl>
+
+                    <hr />
+
+                    <form asp-area="Admin"
+                          asp-controller="Airports"
+                          asp-action="Delete"
+                          asp-route-id="@Model.Id"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash me-1"></i>
+                                Confirm Delete
+                            </button>
+
+                            <a asp-area="Admin"
+                               asp-controller="Airports"
+                               asp-action="Index"
+                               class="btn btn-light border">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
