@@ -1,51 +1,115 @@
-﻿@model Flight_Booking_System.Models.AirPort
+﻿```cshtml
+@model Flight_Booking_System.Models.AirPort
 
 @{
-    ViewData["Title"] = "إضافة مطار";
+    ViewData["Title"] = "Create Airport";
+    Layout = "_AdminLayout";
 }
 
-<h2 class="mb-4">إضافة مطار جديد</h2>
+<div class="container-fluid py-4" dir="ltr">
 
-<form asp-controller="Airports"
-      asp-action="Create"
-      method="post">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Add New Airport</h2>
+            <p class="text-muted mb-0">
+                Enter the airport name and select its city to retrieve coordinates.
+            </p>
+        </div>
 
-    @Html.AntiForgeryToken()
-
-    <div asp-validation-summary="ModelOnly"
-         class="text-danger mb-3"></div>
-
-    <div class="mb-3">
-        <label asp-for="Name" class="form-label">اسم المطار</label>
-        <input asp-for="Name"
-               class="form-control"
-               placeholder="مثال: Cairo International Airport" />
-        <span asp-validation-for="Name"
-              class="text-danger"></span>
+        <a asp-area="Admin"
+           asp-controller="Airports"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Airports
+        </a>
     </div>
 
-    <div class="mb-3">
-        <label asp-for="cityId" class="form-label">المدينة</label>
-        <select asp-for="cityId"
-                asp-items="ViewBag.Cities"
-                class="form-select">
-            <option value="">-- اختر المدينة --</option>
-        </select>
-        <span asp-validation-for="cityId"
-              class="text-danger"></span>
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">Airport Information</h5>
+                </div>
+
+                <div class="card-body p-4">
+
+                    <form asp-area="Admin"
+                          asp-controller="Airports"
+                          asp-action="Create"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="text-danger mb-3">
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Name"
+                                   class="form-label fw-semibold">
+                                Airport Name
+                            </label>
+
+                            <input asp-for="Name"
+                                   class="form-control"
+                                   placeholder="e.g. Cairo International Airport" />
+
+                            <span asp-validation-for="Name"
+                                  class="text-danger">
+                            </span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="cityId"
+                                   class="form-label fw-semibold">
+                                City
+                            </label>
+
+                            <select asp-for="cityId"
+                                    asp-items="ViewBag.Cities"
+                                    class="form-select">
+                                <option value="">-- Select a City --</option>
+                            </select>
+
+                            <span asp-validation-for="cityId"
+                                  class="text-danger">
+                            </span>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Airport coordinates will be retrieved automatically
+                            based on the airport name and selected city.
+                        </div>
+
+                        <hr />
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i>
+                                Save Airport
+                            </button>
+
+                            <a asp-area="Admin"
+                               asp-controller="Airports"
+                               asp-action="Index"
+                               class="btn btn-light border">
+                                Cancel
+                            </a>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
     </div>
-
-    <button type="submit" class="btn btn-primary">
-        حفظ المطار وجلب الإحداثيات
-    </button>
-
-    <a asp-controller="Airports"
-       asp-action="Index"
-       class="btn btn-secondary">
-        رجوع
-    </a>
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
+```

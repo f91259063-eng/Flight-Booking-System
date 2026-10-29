@@ -1,17 +1,18 @@
-﻿@model IEnumerable<Flight_Booking_System.Models.Class>
+﻿
+@model IEnumerable<Flight_Booking_System.Models.Class>
 
 @{
-    ViewData["Title"] = "درجات السفر";
+    ViewData["Title"] = "Travel Classes";
     Layout = "_AdminLayout";
 }
 
-<div class="container-fluid py-4" dir="rtl">
+<div class="container-fluid py-4" dir="ltr">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold mb-1">درجات السفر</h2>
+            <h2 class="fw-bold mb-1">Travel Classes</h2>
             <p class="text-muted mb-0">
-                إدارة درجات السفر المتاحة في نظام حجز الطيران
+                Manage the available travel classes in the flight booking system.
             </p>
         </div>
 
@@ -20,13 +21,13 @@
            asp-action="Create"
            class="btn btn-primary">
             <i class="bi bi-plus-circle me-1"></i>
-            إضافة درجة سفر
+            Add Travel Class
         </a>
     </div>
 
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-white py-3">
-            <h5 class="mb-0">قائمة درجات السفر</h5>
+            <h5 class="mb-0">Travel Classes List</h5>
         </div>
 
         <div class="card-body">
@@ -35,9 +36,9 @@
 
                     <thead style="background-color: #0b1729; color: white;">
                         <tr>
-                            <th class="text-center">الرقم</th>
-                            <th>درجة السفر</th>
-                            <th class="text-center">الإجراءات</th>
+                            <th>Travel Class</th>
+                            <th class="text-center">Price Multiplier</th>
+                            <th class="text-center">Actions</th>
                         </tr>
                     </thead>
 
@@ -47,21 +48,12 @@
                             foreach (var item in Model)
                             {
                                 <tr>
-                                    <td class="text-center">@item.Id</td>
-
                                     <td class="fw-semibold">
-                                        @if (item.Name == "Economy")
-                                        {
-                                            <span>اقتصادي (Economy)</span>
-                                        }
-                                        else if (item.Name == "Business")
-                                        {
-                                            <span>رجال الأعمال (Business)</span>
-                                        }
-                                        else
-                                        {
-                                            @item.Name
-                                        }
+                                        @item.Name
+                                    </td>
+
+                                    <td class="text-center">
+                                        @item.DistancePercentage.ToString("0.00")
                                     </td>
 
                                     <td>
@@ -72,7 +64,7 @@
                                                asp-action="Edit"
                                                asp-route-id="@item.Id"
                                                class="btn btn-warning btn-sm">
-                                                تعديل
+                                                Edit
                                             </a>
 
                                             <a asp-area="Admin"
@@ -80,7 +72,7 @@
                                                asp-action="Delete"
                                                asp-route-id="@item.Id"
                                                class="btn btn-danger btn-sm">
-                                                حذف
+                                                Delete
                                             </a>
 
                                         </div>
@@ -93,7 +85,7 @@
                             <tr>
                                 <td colspan="3"
                                     class="text-center py-4 text-muted">
-                                    لا توجد درجات سفر مسجلة حتى الآن.
+                                    No travel classes have been added yet.
                                 </td>
                             </tr>
                         }

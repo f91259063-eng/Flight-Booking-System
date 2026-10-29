@@ -1,27 +1,29 @@
-﻿@model Flight_Booking_System.Models.Class
+﻿
+@model Flight_Booking_System.Models.Class
 
 @{
-    ViewData["Title"] = "تعديل درجة السفر";
+    ViewData["Title"] = "Edit Travel Class";
     Layout = "_AdminLayout";
 }
 
-<div class="container-fluid py-4" dir="rtl">
+<div class="container-fluid py-4" dir="ltr">
 
     <div class="mb-4">
-        <h2 class="fw-bold">تعديل درجة السفر</h2>
-        <p class="text-muted">تعديل نوع درجة السفر المسجلة.</p>
+        <h2 class="fw-bold">Edit Travel Class</h2>
+        <p class="text-muted">
+            Update the travel class name and price multiplier.
+        </p>
     </div>
 
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
-
             <div class="card border-0 shadow-sm">
+
                 <div class="card-header bg-white py-3">
-                    <h5 class="mb-0">بيانات درجة السفر</h5>
+                    <h5 class="mb-0">Travel Class Information</h5>
                 </div>
 
                 <div class="card-body p-4">
-
                     <form asp-area="Admin"
                           asp-controller="Class"
                           asp-action="Edit"
@@ -38,37 +40,54 @@
                         <div class="mb-4">
                             <label asp-for="Name"
                                    class="form-label fw-semibold">
-                                نوع درجة السفر
+                                Travel Class Name
                             </label>
 
-                            <select asp-for="Name" class="form-select">
-                                <option value="">اختر درجة السفر</option>
-                                <option value="Economy">اقتصادي (Economy)</option>
-                                <option value="Business">رجال الأعمال (Business)</option>
-                            </select>
+                            <input asp-for="Name"
+                                   class="form-control"
+                                   placeholder="Enter travel class name" />
 
                             <span asp-validation-for="Name"
                                   class="text-danger"></span>
                         </div>
 
+                        <div class="mb-4">
+                            <label asp-for="DistancePercentage"
+                                   class="form-label fw-semibold">
+                                Price Multiplier
+                            </label>
+
+                            <input asp-for="DistancePercentage"
+                                   type="number"
+                                   step="0.01"
+                                   min="0.01"
+                                   class="form-control" />
+
+                            <span asp-validation-for="DistancePercentage"
+                                  class="text-danger"></span>
+
+                            <small class="text-muted">
+                                Example: 1.00 = standard price, 1.25 = 25% higher,
+                                1.50 = 50% higher.
+                            </small>
+                        </div>
+
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">
-                                حفظ التعديلات
+                                Save Changes
                             </button>
 
                             <a asp-area="Admin"
                                asp-controller="Class"
                                asp-action="Index"
                                class="btn btn-light border">
-                                إلغاء
+                                Cancel
                             </a>
                         </div>
 
                     </form>
-
                 </div>
             </div>
-
         </div>
     </div>
 </div>
@@ -76,3 +95,4 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
+```

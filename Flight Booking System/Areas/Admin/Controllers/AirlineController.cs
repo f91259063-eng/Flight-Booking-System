@@ -1,5 +1,6 @@
 ﻿
 using Flight_Booking_System.Models;
+using Flight_Booking_System.ModelsServices;
 using Flight_Booking_System.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,10 +10,14 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
     public class AirlineController : Controller
     {
         private readonly IRepository<Airline> _repositoryairline;
+        private readonly IActivityLogService _activityLogService;
 
-        public AirlineController(IRepository<Airline> repository)
+        public AirlineController(
+            IRepository<Airline> repository,
+            IActivityLogService activityLogService)
         {
             _repositoryairline = repository;
+            _activityLogService = activityLogService;
         }
 
         [HttpGet]
@@ -33,13 +38,32 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Airline airline)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                await _repositoryairline.InsertAsync(airline);
-                await _repositoryairline.CommitAsync();
+                return View(airline);
+            }
+
+            await _repositoryairline.InsertAsync(airline);
+
+            var result = await _repositoryairline.CommitAsync();
+
+            if (result > 0)
+            {
+                await _activityLogService.LogAsync(
+                    "AirlineController",
+                    "Create",
+                    "Airline",
+                    airline.Id.ToString(),
+                    $"Created airline: {airline.Name}"
+                );
 
                 return RedirectToAction(nameof(Index));
             }
+
+            ModelState.AddModelError(
+                "",
+                "Unable to create the airline."
+            );
 
             return View(airline);
         }
@@ -85,9 +109,27 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
             existingAirline.Email = airline.Email;
             existingAirline.Phone = airline.Phone;
 
-            await _repositoryairline.CommitAsync();
+            var result = await _repositoryairline.CommitAsync();
 
-            return RedirectToAction(nameof(Index));
+            if (result > 0)
+            {
+                await _activityLogService.LogAsync(
+                    "AirlineController",
+                    "Edit",
+                    "Airline",
+                    existingAirline.Id.ToString(),
+                    $"Updated airline: {existingAirline.Name}"
+                );
+
+                return RedirectToAction(nameof(Index));
+            }
+
+            ModelState.AddModelError(
+                "",
+                "Unable to update the airline."
+            );
+
+            return View(airline);
         }
 
         [HttpGet]
@@ -116,10 +158,29 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            _repositoryairline.Delete(airline);
-            await _repositoryairline.CommitAsync();
+            var airlineId = airline.Id.ToString();
+            var airlineName = airline.Name;
 
-            return RedirectToAction(nameof(Index));
+            _repositoryairline.Delete(airline);
+
+            var result = await _repositoryairline.CommitAsync();
+
+            if (result > 0)
+            {
+                await _activityLogService.LogAsync(
+                    "AirlineController",
+                    "Delete",
+                    "Airline",
+                    airlineId,
+                    $"Deleted airline: {airlineName}"
+                );
+
+                return RedirectToAction(nameof(Index));
+            }
+
+            return BadRequest(
+                "Unable to delete the airline. It may be referenced by another record."
+            );
         }
     }
 }
