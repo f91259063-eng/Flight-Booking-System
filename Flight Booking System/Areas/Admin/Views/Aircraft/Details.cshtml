@@ -1,21 +1,22 @@
-﻿@model Flight_Booking_System.ViewModels.AircraftSeatsViewModel
+﻿```cshtml
+@model Flight_Booking_System.ViewModels.AircraftSeatsViewModel
 
 @{
-    ViewData["Title"] = "تفاصيل الطائرة";
+    ViewData["Title"] = "Aircraft Details";
     Layout = "_AdminLayout";
 }
 
-<div class="container-fluid py-4" dir="rtl">
+<div class="container-fluid py-4" dir="ltr">
 
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
         <div>
             <h2 class="fw-bold mb-1">
                 <i class="bi bi-airplane"></i>
-                تفاصيل الطائرة
+                Aircraft Details
             </h2>
             <p class="text-muted mb-0">
-                بيانات الطائرة ودرجات السفر والمقاعد
+                Aircraft information, travel classes, and seats
             </p>
         </div>
 
@@ -26,15 +27,15 @@
                asp-route-id="@Model.Id"
                class="btn btn-warning">
                 <i class="bi bi-pencil-square"></i>
-                تعديل
+                Edit
             </a>
 
             <a asp-area="Admin"
                asp-controller="Aircraft"
                asp-action="Index"
                class="btn btn-secondary">
-                <i class="bi bi-arrow-right"></i>
-                العودة
+                <i class="bi bi-arrow-left"></i>
+                Back to List
             </a>
         </div>
     </div>
@@ -44,7 +45,7 @@
         <div class="card-header bg-primary text-white py-3">
             <h5 class="mb-0">
                 <i class="bi bi-info-circle"></i>
-                بيانات الطائرة
+                Aircraft Information
             </h5>
         </div>
 
@@ -52,34 +53,34 @@
             <div class="row g-4">
 
                 <div class="col-md-4">
-                    <div class="text-muted mb-1">رقم الطائرة</div>
+                    <div class="text-muted mb-1">Aircraft ID</div>
                     <h5 class="fw-bold">@Model.Id</h5>
                 </div>
 
                 <div class="col-md-4">
-                    <div class="text-muted mb-1">رقم التسجيل</div>
+                    <div class="text-muted mb-1">Registration Number</div>
                     <h5 class="fw-bold">@Model.RegistrationNumber</h5>
                 </div>
 
                 <div class="col-md-4">
-                    <div class="text-muted mb-1">موديل الطائرة</div>
+                    <div class="text-muted mb-1">Aircraft Model</div>
                     <h5 class="fw-bold">@Model.Model</h5>
                 </div>
 
                 <div class="col-md-4">
-                    <div class="text-muted mb-1">شركة الطيران</div>
-                    <h5 class="fw-bold">@Model.AirlineName</h5>
+                    <div class="text-muted mb-1">Airline</div>
+                    <h5 class="fw-bold">@(Model.AirlineName ?? "Not specified")</h5>
                 </div>
 
                 <div class="col-md-4">
-                    <div class="text-muted mb-1">السعة الكلية</div>
+                    <div class="text-muted mb-1">Total Capacity</div>
                     <h5 class="fw-bold text-primary">
-                        @Model.Capacity مقعد
+                        @Model.Capacity Seats
                     </h5>
                 </div>
 
                 <div class="col-md-4">
-                    <div class="text-muted mb-1">عدد درجات السفر</div>
+                    <div class="text-muted mb-1">Number of Travel Classes</div>
                     <h5 class="fw-bold">
                         @(Model.Classes?.Count ?? 0)
                     </h5>
@@ -94,7 +95,7 @@
         <div class="card-header bg-white py-3">
             <h5 class="fw-bold mb-0">
                 <i class="bi bi-grid-3x3-gap"></i>
-                درجات السفر والمقاعد
+                Travel Classes and Seats
             </h5>
         </div>
 
@@ -117,19 +118,19 @@
                                     </h5>
 
                                     <small class="text-muted">
-                                        رقم ربط الطائرة بالدرجة:
+                                        Aircraft Class ID:
                                         @aircraftClass.AircraftClassId
                                     </small>
                                 </div>
 
                                 <div class="d-flex gap-2 flex-wrap">
                                     <span class="badge bg-primary fs-6">
-                                        السعة المحددة:
+                                        Allocated Seats:
                                         @aircraftClass.NumberOfSeats
                                     </span>
 
                                     <span class="badge bg-success fs-6">
-                                        المقاعد المسجلة:
+                                        Registered Seats:
                                         @(aircraftClass.Seats?.Count ?? 0)
                                     </span>
                                 </div>
@@ -166,7 +167,7 @@
 
                                                 <div class="seat-details">
                                                     <span class="badge bg-light text-dark">
-                                                        مقعد @seatCounter
+                                                        Seat @seatCounter
                                                     </span>
                                                 </div>
 
@@ -187,7 +188,7 @@
                             {
                                 <div class="alert alert-warning mb-0">
                                     <i class="bi bi-exclamation-triangle"></i>
-                                    لا توجد مقاعد مسجلة لهذه الدرجة.
+                                    No seats have been registered for this class.
                                 </div>
                             }
 
@@ -201,11 +202,11 @@
                     <i class="bi bi-grid display-4 text-muted"></i>
 
                     <h5 class="mt-3">
-                        لا توجد درجات سفر مرتبطة بالطائرة
+                        No Travel Classes Assigned
                     </h5>
 
                     <p class="text-muted mb-0">
-                        أضف درجات السفر والمقاعد المرتبطة بها لعرضها هنا.
+                        Add travel classes and their associated seats to display them here.
                     </p>
                 </div>
             }
@@ -225,11 +226,11 @@
         transition: all 0.2s ease;
     }
 
-    .seat-card:hover {
-        border-color: #0d6efd;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        transform: translateY(-2px);
-    }
+        .seat-card:hover {
+            border-color: #0d6efd;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
 
     .seat-icon {
         font-size: 28px;
@@ -263,3 +264,4 @@
         }
     }
 </style>
+```
