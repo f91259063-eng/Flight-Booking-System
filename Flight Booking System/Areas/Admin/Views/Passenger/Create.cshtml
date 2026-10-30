@@ -1,21 +1,21 @@
-﻿
-@model Flight_Booking_System.Models.Passenger
+﻿@model Flight_Booking_System.Models.Passenger
 
 @{
-    ViewData["Title"] = "Add Passenger";
+    ViewData["Title"] = "Add New Passenger";
     Layout = "_AdminLayout";
 }
 
 <div class="container-fluid py-4" dir="ltr">
 
-    <!-- Header -->
+    <!-- Page Header -->
     <div class="mb-4">
         <h2 class="fw-bold">
             <i class="bi bi-person-plus me-1"></i>
             Add New Passenger
         </h2>
-        <p class="text-muted">
-            Enter the passenger's information to save it in the system.
+
+        <p class="text-muted mb-0">
+            Enter the passenger's personal and contact information.
         </p>
     </div>
 
@@ -24,8 +24,12 @@
 
             <div class="card border-0 shadow-sm">
 
+                <!-- Card Header -->
                 <div class="card-header bg-white py-3">
-                    <h5 class="mb-0">Passenger Information</h5>
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-person-vcard me-1"></i>
+                        Passenger Information
+                    </h5>
                 </div>
 
                 <div class="card-body p-4">
@@ -41,7 +45,12 @@
                              class="text-danger mb-3">
                         </div>
 
-                        <!-- Passenger Name -->
+                        <!-- Personal Information -->
+                        <h6 class="fw-bold text-primary mb-3">
+                            <i class="bi bi-person me-1"></i>
+                            Personal Information
+                        </h6>
+
                         <div class="row">
 
                             <div class="col-md-4 mb-3">
@@ -50,7 +59,8 @@
                                 </label>
 
                                 <input asp-for="FirstName"
-                                       class="form-control" />
+                                       class="form-control"
+                                       placeholder="Enter first name" />
 
                                 <span asp-validation-for="FirstName"
                                       class="text-danger"></span>
@@ -62,7 +72,8 @@
                                 </label>
 
                                 <input asp-for="MiddleName"
-                                       class="form-control" />
+                                       class="form-control"
+                                       placeholder="Enter middle name" />
 
                                 <span asp-validation-for="MiddleName"
                                       class="text-danger"></span>
@@ -74,7 +85,8 @@
                                 </label>
 
                                 <input asp-for="LastName"
-                                       class="form-control" />
+                                       class="form-control"
+                                       placeholder="Enter last name" />
 
                                 <span asp-validation-for="LastName"
                                       class="text-danger"></span>
@@ -82,7 +94,14 @@
 
                         </div>
 
-                        <!-- Identification -->
+                        <hr class="my-3" />
+
+                        <!-- Identification Details -->
+                        <h6 class="fw-bold text-primary mb-3">
+                            <i class="bi bi-card-text me-1"></i>
+                            Identification Details
+                        </h6>
+
                         <div class="row">
 
                             <div class="col-md-6 mb-3">
@@ -92,7 +111,8 @@
 
                                 <input asp-for="PassportNumber"
                                        class="form-control"
-                                       dir="ltr" />
+                                       dir="ltr"
+                                       placeholder="Enter passport number" />
 
                                 <span asp-validation-for="PassportNumber"
                                       class="text-danger"></span>
@@ -107,7 +127,8 @@
                                        class="form-control"
                                        dir="ltr"
                                        maxlength="14"
-                                       inputmode="numeric" />
+                                       inputmode="numeric"
+                                       placeholder="Enter 14-digit National ID" />
 
                                 <span asp-validation-for="NationalID"
                                       class="text-danger"></span>
@@ -115,7 +136,14 @@
 
                         </div>
 
+                        <hr class="my-3" />
+
                         <!-- Contact Information -->
+                        <h6 class="fw-bold text-primary mb-3">
+                            <i class="bi bi-telephone me-1"></i>
+                            Contact Information
+                        </h6>
+
                         <div class="row">
 
                             <div class="col-md-6 mb-3">
@@ -128,6 +156,7 @@
                                        dir="ltr"
                                        maxlength="11"
                                        inputmode="numeric"
+                                       placeholder="Enter phone number"
                                        oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11)" />
 
                                 <span asp-validation-for="Phone"
@@ -142,7 +171,8 @@
                                 <input asp-for="Email"
                                        type="email"
                                        class="form-control"
-                                       dir="ltr" />
+                                       dir="ltr"
+                                       placeholder="Enter email address" />
 
                                 <span asp-validation-for="Email"
                                       class="text-danger"></span>
@@ -150,7 +180,14 @@
 
                         </div>
 
+                        <hr class="my-3" />
+
                         <!-- Date of Birth -->
+                        <h6 class="fw-bold text-primary mb-3">
+                            <i class="bi bi-calendar-date me-1"></i>
+                            Date of Birth
+                        </h6>
+
                         <div class="mb-4">
                             <label asp-for="DateOfBirth" class="form-label">
                                 Date of Birth
@@ -165,7 +202,7 @@
                                   class="text-danger"></span>
                         </div>
 
-                        <!-- Actions -->
+                        <!-- Form Actions -->
                         <div class="d-flex gap-2 flex-wrap">
 
                             <button type="submit" class="btn btn-primary">
@@ -177,8 +214,8 @@
                                asp-controller="Passenger"
                                asp-action="Index"
                                class="btn btn-light border">
-                                <i class="bi bi-x-circle me-1"></i>
-                                Cancel
+                                <i class="bi bi-arrow-left me-1"></i>
+                                Back to Passenger List
                             </a>
 
                         </div>
@@ -190,7 +227,6 @@
 
         </div>
     </div>
-
 </div>
 
 @section Scripts {

@@ -1,0 +1,179 @@
+﻿@model IEnumerable<Flight_Booking_System.ViewModels.Customer.TicketDetailsViewModel>
+
+@{
+    ViewData["Title"] = "My Tickets";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold">My Tickets</h2>
+            <p class="text-muted">
+                View your flight tickets and travel information.
+            </p>
+        </div>
+
+        <a asp-area="Customer"
+           asp-controller="Flights"
+           asp-action="Index"
+           class="btn btn-primary">
+            Book a Flight
+        </a>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info text-center p-5">
+            <h4>No Tickets Found</h4>
+
+            <p class="mb-3">
+                You don't have any flight tickets yet.
+            </p>
+
+            <a asp-area="Customer"
+               asp-controller="Flights"
+               asp-action="Index"
+               class="btn btn-primary">
+                Explore Flights
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+
+            @foreach (var ticket in Model)
+            {
+                <div class="col-12">
+
+                    <div class="card shadow-sm border-0">
+
+                        <div class="card-header bg-primary text-white
+                            d-flex justify-content-between">
+
+                            <strong>
+                                Ticket #@ticket.TicketId
+                            </strong>
+
+                            <span>
+                                Booking: @ticket.BookingReference
+                            </span>
+
+                        </div>
+
+                        <div class="card-body">
+
+                            <div class="row g-3">
+
+                                <div class="col-md-4">
+                                    <small class="text-muted">
+                                        Passenger
+                                    </small>
+
+                                    <h5>
+                                        @ticket.PassengerName
+                                    </h5>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <small class="text-muted">
+                                        Flight Number
+                                    </small>
+
+                                    <h5>
+                                        @ticket.FlightNumber
+                                    </h5>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <small class="text-muted">
+                                        Booking Status
+                                    </small>
+
+                                    <h5>
+                                        @ticket.BookingStatus
+                                    </h5>
+                                </div>
+
+                                <div class="col-md-5">
+                                    <small class="text-muted">
+                                        From
+                                    </small>
+
+                                    <h5>
+                                        @ticket.DepartureAirport
+                                    </h5>
+                                </div>
+
+                                <div class="col-md-2 text-center">
+                                    <i class="bi bi-airplane fs-3"></i>
+                                </div>
+
+                                <div class="col-md-5">
+                                    <small class="text-muted">
+                                        To
+                                    </small>
+
+                                    <h5>
+                                        @ticket.ArrivalAirport
+                                    </h5>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <small class="text-muted">
+                                        Departure
+                                    </small>
+
+                                    <h6>
+                                        @ticket.DepartureDateTime.ToString("dd MMM yyyy")
+                                    </h6>
+
+                                    <h6>
+                                        @ticket.DepartureDateTime.ToString("hh:mm tt")
+                                    </h6>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <small class="text-muted">
+                                        Seat
+                                    </small>
+
+                                    <h5>
+                                        @ticket.SeatNumber
+                                    </h5>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <small class="text-muted">
+                                        Class
+                                    </small>
+
+                                    <h5>
+                                        @ticket.ClassName
+                                    </h5>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <small class="text-muted">
+                                        Ticket Price
+                                    </small>
+
+                                    <h5 class="text-success">
+                                        @ticket.TicketPrice.ToString("N2") EGP
+                                    </h5>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+    }
+
+</div>

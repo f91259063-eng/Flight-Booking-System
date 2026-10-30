@@ -1,11 +1,13 @@
 ﻿
+using System.Linq.Expressions;
+using System.Security.Claims;
 using Flight_Booking_System.Models;
+using Flight_Booking_System.ModelsServices;
 using Flight_Booking_System.Repositories;
+using Flight_Booking_System.Services;
 using Flight_Booking_System.ViewModels.Customer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq.Expressions;
-using System.Security.Claims;
 
 namespace Flight_Booking_System.Areas.Customer.Controllers
 {
@@ -19,6 +21,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
         private readonly IRepository<Flight> _flightRepository;
         private readonly IRepository<Seat> _seatRepository;
         private readonly IRepository<AirPort> _airportRepository;
+        private readonly IActivityLogService _activityLogService;
 
         public BookingController(
             IRepository<Booking> bookingRepository,
@@ -26,7 +29,8 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             IRepository<Passenger> passengerRepository,
             IRepository<Flight> flightRepository,
             IRepository<Seat> seatRepository,
-            IRepository<AirPort> airportRepository)
+            IRepository<AirPort> airportRepository,
+            IActivityLogService activityLogService)
         {
             _bookingRepository = bookingRepository;
             _ticketRepository = ticketRepository;
@@ -34,9 +38,14 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             _flightRepository = flightRepository;
             _seatRepository = seatRepository;
             _airportRepository = airportRepository;
+            _activityLogService = activityLogService;
         }
 
+        // =========================================================
         // GET: Customer/Booking/Confirmation/5
+        // Booking Confirmation
+        // =========================================================
+
         [HttpGet]
         public async Task<IActionResult> Confirmation(int id)
         {
@@ -46,6 +55,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             if (string.IsNullOrWhiteSpace(userId))
                 return Challenge();
 
+            // Get booking belonging to current user
             var booking = await _bookingRepository.GetOneAsync(
                 filter: b => b.Id == id && b.UserId == userId,
                 IsTracking: false);
@@ -53,6 +63,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             if (booking == null)
                 return NotFound();
 
+            // Get booking tickets
             var tickets = await _ticketRepository.GetAllAsync(
                 filter: t => t.BookingId == booking.Id,
                 IsTracking: false);
@@ -62,6 +73,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             if (!ticketList.Any())
                 return NotFound("No tickets were found for this booking.");
 
+            // Get flight from first ticket
             var firstTicket = ticketList.First();
 
             var flight = await _flightRepository.GetOneAsync(
@@ -75,6 +87,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             if (flight == null || flight.Route == null)
                 return NotFound("Flight information was not found.");
 
+            // Get airports
             var fromAirport = await _airportRepository.GetOneAsync(
                 filter: a => a.Id == flight.Route.FromAirportId,
                 IsTracking: false);
@@ -83,6 +96,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 filter: a => a.Id == flight.Route.ToAirportId,
                 IsTracking: false);
 
+            // Create ViewModel
             var model = new BookingConfirmationViewModel
             {
                 BookingId = booking.Id,
@@ -96,6 +110,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 ArrivalDateTime = flight.ArrivalDateTime
             };
 
+            // Get passengers and seats
             foreach (var ticket in ticketList)
             {
                 var passenger = await _passengerRepository.GetOneAsync(
@@ -119,8 +134,21 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 });
             }
 
+            // =====================================================
+            // Activity Log: Booking Confirmation Viewed
+            // =====================================================
+
+            await _activityLogService.LogAsync(
+                nameof(BookingController),
+                nameof(Confirmation),
+                nameof(Booking),
+                booking.Id.ToString(),
+                $"Customer viewed booking confirmation. Booking Reference: {booking.BookingReference}. Tickets: {ticketList.Count}."
+            );
+
             return View(model);
         }
+
         // =========================================================
         // GET: Customer/Booking
         // My Bookings
@@ -177,7 +205,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                     filter: f => f.Id == firstTicket.FlightId,
                     includes: new Expression<Func<Flight, object>>[]
                     {
-                f => f.Route
+                        f => f.Route
                     },
                     IsTracking: false);
 
@@ -216,7 +244,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                     toAirport = to?.Name ?? "Unknown Airport";
                 }
 
-                // Calculate total
+                // Calculate total price
                 decimal totalPrice = ticketList.Sum(
                     t => t.TicketPrice);
 
@@ -256,8 +284,19 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 });
             }
 
+            // =====================================================
+            // Activity Log: My Bookings Viewed
+            // =====================================================
+
+            await _activityLogService.LogAsync(
+                nameof(BookingController),
+                nameof(Index),
+                nameof(Booking),
+                null,
+                $"Customer viewed their bookings list. Total bookings: {bookingList.Count}."
+            );
+
             return View(model);
         }
-
     }
 }

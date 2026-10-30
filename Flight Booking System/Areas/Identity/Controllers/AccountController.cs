@@ -440,5 +440,28 @@ public IActionResult Login(string? returnUrl = null)
 
             return RedirectToAction("Index", "Home", new { area = "" });
         }
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> MyAccount()
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+                return Challenge();
+
+            var model = new MyAccountViewModel
+            {
+                FirstName = user.FirstName,
+                MiddleName = user.MiddelName,
+                LastName = user.LastName,
+                Email = user.Email ?? string.Empty,
+                PhoneNumber = user.PhoneNumber ?? string.Empty
+            };
+
+            return View(model);
+        }
+
     }
 }

@@ -1,4 +1,7 @@
+
 using Flight_Booking_System.Models.Identity;
+using Flight_Booking_System.ModelsServices;
+using Flight_Booking_System.Services;
 using Flight_Booking_System.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -9,20 +12,21 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
 {
     [Authorize(Roles = "Admin")]
     [Area("Admin")]
-
     public class AdminController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IActivityLogService _activityLogService;
 
         public AdminController(
             UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager)
+            RoleManager<IdentityRole> roleManager,
+            IActivityLogService activityLogService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _activityLogService = activityLogService;
         }
-
 
         // =========================================================
         // USERS LIST
@@ -42,25 +46,18 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 rows.Add(new UserRowViewModel
                 {
                     Id = u.Id,
-
                     FullName = $"{u.FirstName} {u.LastName}".Trim(),
-
                     Email = u.Email ?? string.Empty,
-
                     EmailConfirmed = u.EmailConfirmed,
-
                     IsAdmin = await _userManager.IsInRoleAsync(u, "Admin"),
-
                     IsLocked = u.LockoutEnd.HasValue &&
                                u.LockoutEnd > DateTimeOffset.UtcNow,
-
                     TwoFactorEnabled = u.TwoFactorEnabled
                 });
             }
 
             return View(rows);
         }
-
 
         // =========================================================
         // CREATE USER - GET
@@ -75,7 +72,6 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
 
             return View();
         }
-
 
         // =========================================================
         // CREATE USER - POST
@@ -94,7 +90,6 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 return View(model);
             }
 
-
             // Check Email
             var existingUser = await _userManager.FindByEmailAsync(model.Email);
 
@@ -111,7 +106,6 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 return View(model);
             }
 
-
             // Create User
             var user = new ApplicationUser
             {
@@ -120,17 +114,13 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 Email = model.Email,
                 UserName = model.Email,
                 PhoneNumber = model.PhoneNumber,
-
                 EmailConfirmed = true,
-
                 LockoutEnabled = true
             };
-
 
             var result = await _userManager.CreateAsync(
                 user,
                 model.Password);
-
 
             if (!result.Succeeded)
             {
@@ -148,11 +138,7 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 return View(model);
             }
 
-
-            // =====================================================
-            // ASSIGN MULTIPLE ROLES
-            // =====================================================
-
+            // Assign Multiple Roles
             if (model.SelectedRoles != null &&
                 model.SelectedRoles.Any())
             {
@@ -160,20 +146,37 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 {
                     if (await _roleManager.RoleExistsAsync(role))
                     {
-                        await _userManager.AddToRoleAsync(
+                        var roleResult = await _userManager.AddToRoleAsync(
                             user,
                             role);
+
+                        if (!roleResult.Succeeded)
+                        {
+                            foreach (var error in roleResult.Errors)
+                            {
+                                ModelState.AddModelError(
+                                    "",
+                                    error.Description);
+                            }
+                        }
                     }
                 }
             }
 
+            // Activity Log
+            await _activityLogService.LogAsync(
+                "Admin",
+                "CreateUser",
+                "ApplicationUser",
+                user.Id,
+                $"Created user: {user.Email}"
+            );
 
             TempData["Success"] =
                 $"{user.Email} was created successfully.";
 
             return RedirectToAction(nameof(Users));
         }
-
 
         // =========================================================
         // EDIT USER - GET
@@ -185,47 +188,33 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
             if (string.IsNullOrEmpty(id))
                 return NotFound();
 
-
             var user = await _userManager.FindByIdAsync(id);
 
             if (user == null)
                 return NotFound();
 
-
             var roles = await _userManager.GetRolesAsync(user);
-
 
             var model = new UserEditViewModel
             {
                 Id = user.Id,
-
                 FirstName = user.FirstName,
-
                 LastName = user.LastName,
-
                 Email = user.Email ?? string.Empty,
-
                 PhoneNumber = user.PhoneNumber,
-
                 SelectedRoles = roles.ToList(),
-
                 EmailConfirmed = user.EmailConfirmed,
-
                 TwoFactorEnabled = user.TwoFactorEnabled,
-
                 IsLocked = user.LockoutEnd.HasValue &&
                            user.LockoutEnd > DateTimeOffset.UtcNow
             };
-
 
             ViewBag.Roles = await _roleManager.Roles
                 .OrderBy(r => r.Name)
                 .ToListAsync();
 
-
             return View(model);
         }
-
 
         // =========================================================
         // EDIT USER - POST
@@ -245,28 +234,19 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 return View(model);
             }
 
-
             var user = await _userManager.FindByIdAsync(model.Id);
 
             if (user == null)
                 return NotFound();
 
-
-            // Update basic information
+            // Update Basic Information
             user.FirstName = model.FirstName;
-
             user.LastName = model.LastName;
-
             user.Email = model.Email;
-
             user.UserName = model.Email;
-
             user.PhoneNumber = model.PhoneNumber;
 
-
-            var updateResult =
-                await _userManager.UpdateAsync(user);
-
+            var updateResult = await _userManager.UpdateAsync(user);
 
             if (!updateResult.Succeeded)
             {
@@ -284,16 +264,10 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 return View(model);
             }
 
+            // Update Roles
+            var currentRoles = await _userManager.GetRolesAsync(user);
 
-            // =====================================================
-            // UPDATE ROLES
-            // =====================================================
-
-            var currentRoles =
-                await _userManager.GetRolesAsync(user);
-
-
-            // Remove old roles
+            // Remove Old Roles
             if (currentRoles.Any())
             {
                 await _userManager.RemoveFromRolesAsync(
@@ -301,8 +275,7 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                     currentRoles);
             }
 
-
-            // Add new roles
+            // Add New Roles
             if (model.SelectedRoles != null &&
                 model.SelectedRoles.Any())
             {
@@ -317,14 +290,20 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 }
             }
 
+            // Activity Log
+            await _activityLogService.LogAsync(
+                "Admin",
+                "EditUser",
+                "ApplicationUser",
+                user.Id,
+                $"Updated user: {user.Email}"
+            );
 
             TempData["Success"] =
                 $"{user.Email} was updated successfully.";
 
-
             return RedirectToAction(nameof(Users));
         }
-
 
         // =========================================================
         // TOGGLE ADMIN
@@ -339,8 +318,7 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
             if (user is null)
                 return NotFound();
 
-
-            // Prevent changing own role
+            // Prevent Changing Own Role
             if (user.Id == _userManager.GetUserId(User))
             {
                 TempData["Error"] =
@@ -349,40 +327,63 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 return RedirectToAction(nameof(Users));
             }
 
-
-            if (await _userManager.IsInRoleAsync(
+            var isAdmin = await _userManager.IsInRoleAsync(
                 user,
-                "Admin"))
+                "Admin");
+
+            IdentityResult result;
+
+            if (isAdmin)
             {
-                await _userManager.RemoveFromRoleAsync(
+                result = await _userManager.RemoveFromRoleAsync(
                     user,
                     "Admin");
 
-                await _userManager.AddToRoleAsync(
-                    user,
-                    "Customer");
-
-                TempData["Success"] =
-                    $"{user.Email} is now a Customer.";
+                if (result.Succeeded)
+                {
+                    await _userManager.AddToRoleAsync(
+                        user,
+                        "Customer");
+                }
             }
             else
             {
-                await _userManager.RemoveFromRoleAsync(
+                result = await _userManager.RemoveFromRoleAsync(
                     user,
                     "Customer");
 
-                await _userManager.AddToRoleAsync(
-                    user,
-                    "Admin");
-
-                TempData["Success"] =
-                    $"{user.Email} is now an Admin.";
+                if (result.Succeeded)
+                {
+                    await _userManager.AddToRoleAsync(
+                        user,
+                        "Admin");
+                }
             }
 
+            if (!result.Succeeded)
+            {
+                TempData["Error"] =
+                    string.Join(", ", result.Errors.Select(e => e.Description));
+
+                return RedirectToAction(nameof(Users));
+            }
+
+            var newRole = isAdmin ? "Customer" : "Admin";
+
+            // Activity Log
+            await _activityLogService.LogAsync(
+                "Admin",
+                "ToggleAdmin",
+                "ApplicationUser",
+                user.Id,
+                $"Changed role for {user.Email} to {newRole}"
+            );
+
+            TempData["Success"] =
+                $"{user.Email} is now a {newRole}.";
 
             return RedirectToAction(nameof(Users));
         }
-
 
         // =========================================================
         // LOCK / UNLOCK
@@ -397,8 +398,7 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
             if (user is null)
                 return NotFound();
 
-
-            // Prevent locking own account
+            // Prevent Locking Own Account
             if (user.Id == _userManager.GetUserId(User))
             {
                 TempData["Error"] =
@@ -407,38 +407,51 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 return RedirectToAction(nameof(Users));
             }
 
-
             var isLocked =
                 user.LockoutEnd.HasValue &&
                 user.LockoutEnd > DateTimeOffset.UtcNow;
-
 
             await _userManager.SetLockoutEnabledAsync(
                 user,
                 true);
 
+            IdentityResult result;
 
             if (isLocked)
             {
                 // Unlock
-                await _userManager.SetLockoutEndDateAsync(
+                result = await _userManager.SetLockoutEndDateAsync(
                     user,
                     null);
-
-                TempData["Success"] =
-                    $"{user.Email} was unlocked.";
             }
             else
             {
                 // Lock
-                await _userManager.SetLockoutEndDateAsync(
+                result = await _userManager.SetLockoutEndDateAsync(
                     user,
                     DateTimeOffset.UtcNow.AddYears(100));
-
-                TempData["Success"] =
-                    $"{user.Email} was locked.";
             }
 
+            if (!result.Succeeded)
+            {
+                TempData["Error"] =
+                    string.Join(", ", result.Errors.Select(e => e.Description));
+
+                return RedirectToAction(nameof(Users));
+            }
+
+            // Activity Log
+            await _activityLogService.LogAsync(
+                "Admin",
+                isLocked ? "UnlockUser" : "LockUser",
+                "ApplicationUser",
+                user.Id,
+                $"{(isLocked ? "Unlocked" : "Locked")} user: {user.Email}"
+            );
+
+            TempData["Success"] = isLocked
+                ? $"{user.Email} was unlocked."
+                : $"{user.Email} was locked.";
 
             return RedirectToAction(nameof(Users));
         }

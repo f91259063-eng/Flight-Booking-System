@@ -5,19 +5,19 @@
     Layout = "_AdminLayout";
 }
 
-<div class="container-fluid py-4" dir="rtl">
+<div class="container-fluid py-4">
 
-    <!-- Header -->
+    <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
 
         <div>
             <h2 class="fw-bold mb-1">
-                <i class="bi bi-person-plus-fill"></i>
-                إنشاء مستخدم
+                <i class="bi bi-person-plus-fill me-2"></i>
+                Create New User
             </h2>
 
             <p class="text-muted mb-0">
-                إضافة مستخدم جديد وتحديد صلاحياته
+                Add a new user and configure their account permissions.
             </p>
         </div>
 
@@ -25,20 +25,18 @@
            asp-action="Users"
            class="btn btn-secondary">
 
-            <i class="bi bi-arrow-right"></i>
-            العودة للمستخدمين
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to User Management
 
         </a>
 
     </div>
 
-
-    <!-- Validation -->
+    <!-- Validation Summary -->
     <div asp-validation-summary="ModelOnly"
          class="alert alert-danger"
          role="alert">
     </div>
-
 
     <div class="row justify-content-center">
 
@@ -46,15 +44,15 @@
 
             <div class="card shadow-sm border-0">
 
+                <!-- Card Header -->
                 <div class="card-header bg-primary text-white">
 
                     <h5 class="mb-0">
-                        <i class="bi bi-person-fill"></i>
-                        بيانات المستخدم
+                        <i class="bi bi-person-fill me-2"></i>
+                        User Information
                     </h5>
 
                 </div>
-
 
                 <div class="card-body p-4">
 
@@ -63,7 +61,6 @@
                           method="post">
 
                         @Html.AntiForgeryToken()
-
 
                         <!-- First Name -->
                         <div class="mb-3">
@@ -74,14 +71,13 @@
 
                             <input asp-for="FirstName"
                                    class="form-control"
-                                   placeholder="أدخل الاسم الأول" />
+                                   placeholder="Enter first name" />
 
                             <span asp-validation-for="FirstName"
                                   class="text-danger">
                             </span>
 
                         </div>
-
 
                         <!-- Last Name -->
                         <div class="mb-3">
@@ -92,7 +88,7 @@
 
                             <input asp-for="LastName"
                                    class="form-control"
-                                   placeholder="أدخل اسم العائلة" />
+                                   placeholder="Enter last name" />
 
                             <span asp-validation-for="LastName"
                                   class="text-danger">
@@ -100,8 +96,7 @@
 
                         </div>
 
-
-                        <!-- Email -->
+                        <!-- Email Address -->
                         <div class="mb-3">
 
                             <label asp-for="Email"
@@ -118,8 +113,7 @@
 
                         </div>
 
-
-                        <!-- Phone -->
+                        <!-- Phone Number -->
                         <div class="mb-3">
 
                             <label asp-for="PhoneNumber"
@@ -128,14 +122,13 @@
 
                             <input asp-for="PhoneNumber"
                                    class="form-control"
-                                   placeholder="رقم الهاتف" />
+                                   placeholder="Enter phone number" />
 
                             <span asp-validation-for="PhoneNumber"
                                   class="text-danger">
                             </span>
 
                         </div>
-
 
                         <!-- Password -->
                         <div class="mb-3">
@@ -145,15 +138,15 @@
                             </label>
 
                             <input asp-for="Password"
+                                   type="password"
                                    class="form-control"
-                                   placeholder="Password" />
+                                   placeholder="Enter password" />
 
                             <span asp-validation-for="Password"
                                   class="text-danger">
                             </span>
 
                         </div>
-
 
                         <!-- Confirm Password -->
                         <div class="mb-4">
@@ -163,8 +156,9 @@
                             </label>
 
                             <input asp-for="ConfirmPassword"
+                                   type="password"
                                    class="form-control"
-                                   placeholder="Confirm Password" />
+                                   placeholder="Confirm password" />
 
                             <span asp-validation-for="ConfirmPassword"
                                   class="text-danger">
@@ -172,15 +166,13 @@
 
                         </div>
 
-
-                        <!-- Roles -->
+                        <!-- User Roles -->
                         <div class="mb-4">
 
                             <label class="form-label fw-bold">
-                                <i class="bi bi-shield-lock-fill"></i>
-                                Roles / الصلاحيات
+                                <i class="bi bi-shield-lock-fill me-1"></i>
+                                User Roles
                             </label>
-
 
                             <div class="border rounded p-3">
 
@@ -209,39 +201,35 @@
                                 else
                                 {
                                     <div class="alert alert-warning mb-0">
-
-                                        لا توجد Roles في النظام.
-
+                                        No roles are currently available.
                                     </div>
                                 }
 
                             </div>
 
                             <small class="text-muted">
-                                يمكنك اختيار أكثر من Role للمستخدم.
+                                You can assign multiple roles to a user.
                             </small>
 
                         </div>
 
-
-                        <!-- Buttons -->
+                        <!-- Form Actions -->
                         <div class="d-flex justify-content-between">
 
                             <a asp-controller="Admin"
                                asp-action="Users"
                                class="btn btn-secondary">
 
-                                <i class="bi bi-x-circle"></i>
-                                إلغاء
+                                <i class="bi bi-x-circle me-1"></i>
+                                Cancel
 
                             </a>
-
 
                             <button type="submit"
                                     class="btn btn-primary">
 
-                                <i class="bi bi-person-plus-fill"></i>
-                                إنشاء المستخدم
+                                <i class="bi bi-person-plus-fill me-1"></i>
+                                Create User
 
                             </button>
 
@@ -258,7 +246,6 @@
     </div>
 
 </div>
-
 
 @section Scripts {
 

@@ -1,28 +1,32 @@
-﻿using Flight_Booking_System.Models;
+﻿
+using System.Linq.Expressions;
+using Flight_Booking_System.Models;
+using Flight_Booking_System.ModelsServices;
 using Flight_Booking_System.Repositories;
 using Flight_Booking_System.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Linq.Expressions;
 
 namespace Flight_Booking_System.Controllers
 {
-
     [Area("Admin")]
     public class RoutesController : Controller
     {
         private readonly IRepository<Flight_Booking_System.Models.Route> _routeRepository;
         private readonly IRepository<AirPort> _airportRepository;
         private readonly DistanceCalculatorService _distanceCalculator;
+        private readonly IActivityLogService _activityLogService;
 
         public RoutesController(
             IRepository<Flight_Booking_System.Models.Route> routeRepository,
             IRepository<AirPort> airportRepository,
-            DistanceCalculatorService distanceCalculator)
+            DistanceCalculatorService distanceCalculator,
+            IActivityLogService activityLogService)
         {
             _routeRepository = routeRepository;
             _airportRepository = airportRepository;
             _distanceCalculator = distanceCalculator;
+            _activityLogService = activityLogService;
         }
 
         // GET: Routes
@@ -60,7 +64,7 @@ namespace Flight_Booking_System.Controllers
             {
                 ModelState.AddModelError(
                     string.Empty,
-                    "لا يمكن اختيار نفس المطار للمغادرة والوصول.");
+                    "Departure and destination airports cannot be the same.");
 
                 await LoadAirportsAsync(FromAirportId, ToAirportId);
                 return View();
@@ -76,7 +80,7 @@ namespace Flight_Booking_System.Controllers
             {
                 ModelState.AddModelError(
                     string.Empty,
-                    "مطار المغادرة أو الوصول غير موجود.");
+                    "Departure or destination airport was not found.");
 
                 await LoadAirportsAsync(FromAirportId, ToAirportId);
                 return View();
@@ -87,7 +91,7 @@ namespace Flight_Booking_System.Controllers
             {
                 ModelState.AddModelError(
                     string.Empty,
-                    "يجب تسجيل إحداثيات المطارين أولاً.");
+                    "Both airports must have coordinates.");
 
                 await LoadAirportsAsync(FromAirportId, ToAirportId);
                 return View();
@@ -101,7 +105,7 @@ namespace Flight_Booking_System.Controllers
             {
                 ModelState.AddModelError(
                     string.Empty,
-                    "هذا المسار مسجل بالفعل.");
+                    "This route already exists.");
 
                 await LoadAirportsAsync(FromAirportId, ToAirportId);
                 return View();
@@ -122,14 +126,24 @@ namespace Flight_Booking_System.Controllers
             {
                 ModelState.AddModelError(
                     string.Empty,
-                    "تعذر حفظ المسار في قاعدة البيانات.");
+                    "Unable to save the route.");
 
                 await LoadAirportsAsync(FromAirportId, ToAirportId);
                 return View();
             }
 
+            // Activity Log
+            await _activityLogService.LogAsync(
+                nameof(RoutesController),
+                nameof(Create),
+                nameof(Flight_Booking_System.Models.Route),
+                route.Id.ToString(),
+                $"Created route from {fromAirport.Name} to {toAirport.Name}. " +
+                $"Distance: {route.Distance:F2} km."
+            );
+
             TempData["Success"] =
-                $"تم إنشاء المسار بنجاح. المسافة: {route.Distance:F2} كم.";
+                $"Route created successfully. Distance: {route.Distance:F2} km.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -172,7 +186,7 @@ namespace Flight_Booking_System.Controllers
             {
                 ModelState.AddModelError(
                     string.Empty,
-                    "لا يمكن اختيار نفس المطار للمغادرة والوصول.");
+                    "Departure and destination airports cannot be the same.");
 
                 await LoadAirportsAsync(FromAirportId, ToAirportId);
                 return View(route);
@@ -188,7 +202,7 @@ namespace Flight_Booking_System.Controllers
             {
                 ModelState.AddModelError(
                     string.Empty,
-                    "مطار المغادرة أو الوصول غير موجود.");
+                    "Departure or destination airport was not found.");
 
                 await LoadAirportsAsync(FromAirportId, ToAirportId);
                 return View(route);
@@ -199,7 +213,7 @@ namespace Flight_Booking_System.Controllers
             {
                 ModelState.AddModelError(
                     string.Empty,
-                    "يجب تسجيل إحداثيات المطارين أولاً.");
+                    "Both airports must have coordinates.");
 
                 await LoadAirportsAsync(FromAirportId, ToAirportId);
                 return View(route);
@@ -214,7 +228,7 @@ namespace Flight_Booking_System.Controllers
             {
                 ModelState.AddModelError(
                     string.Empty,
-                    "يوجد مسار آخر بنفس مطار المغادرة والوصول.");
+                    "Another route with the same airports already exists.");
 
                 await LoadAirportsAsync(FromAirportId, ToAirportId);
                 return View(route);
@@ -228,18 +242,29 @@ namespace Flight_Booking_System.Controllers
 
             int result = await _routeRepository.CommitAsync();
 
-            if (result < 0)
+            if (result <= 0)
             {
                 ModelState.AddModelError(
                     string.Empty,
-                    "حدث خطأ أثناء تعديل المسار.");
+                    "Unable to update the route.");
 
                 await LoadAirportsAsync(FromAirportId, ToAirportId);
                 return View(route);
             }
 
+            // Activity Log
+            await _activityLogService.LogAsync(
+                nameof(RoutesController),
+                nameof(Edit),
+                nameof(Flight_Booking_System.Models.Route),
+                route.Id.ToString(),
+                $"Updated route ID {route.Id}: " +
+                $"From {fromAirport.Name} to {toAirport.Name}. " +
+                $"New distance: {route.Distance:F2} km."
+            );
+
             TempData["Success"] =
-                $"تم تعديل المسار بنجاح. المسافة الجديدة: {route.Distance:F2} كم.";
+                $"Route updated successfully. New distance: {route.Distance:F2} km.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -254,22 +279,37 @@ namespace Flight_Booking_System.Controllers
 
             if (route == null)
             {
-                TempData["Error"] = "المسار غير موجود.";
+                TempData["Error"] = "Route not found.";
                 return RedirectToAction(nameof(Index));
             }
+
+            int routeId = route.Id;
+            int fromAirportId = route.FromAirportId;
+            int toAirportId = route.ToAirportId;
 
             _routeRepository.Delete(route);
 
             int result = await _routeRepository.CommitAsync();
 
-            if (result < 0)
+            if (result <= 0)
             {
                 TempData["Error"] =
-                    "تعذر حذف المسار. قد يكون مرتبطًا برحلات مسجلة.";
+                    "Unable to delete the route. It may be associated with existing flights.";
             }
             else
             {
-                TempData["Success"] = "تم حذف المسار بنجاح.";
+                // Activity Log
+                await _activityLogService.LogAsync(
+                    nameof(RoutesController),
+                    nameof(Delete),
+                    nameof(Flight_Booking_System.Models.Route),
+                    routeId.ToString(),
+                    $"Deleted route ID {routeId}. " +
+                    $"From Airport ID: {fromAirportId}, " +
+                    $"To Airport ID: {toAirportId}."
+                );
+
+                TempData["Success"] = "Route deleted successfully.";
             }
 
             return RedirectToAction(nameof(Index));

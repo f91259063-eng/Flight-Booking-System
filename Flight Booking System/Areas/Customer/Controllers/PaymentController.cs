@@ -1,12 +1,14 @@
 ﻿
+using System.Security.Claims;
 using Flight_Booking_System.Models;
+using Flight_Booking_System.ModelsServices;
 using Flight_Booking_System.Repositories;
+using Flight_Booking_System.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Stripe;
 using Stripe.Checkout;
-using System.Security.Claims;
 
 namespace Flight_Booking_System.Areas.Customer.Controllers
 {
@@ -17,20 +19,21 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
         private readonly IRepository<Booking> _bookingRepository;
         private readonly IRepository<Payment> _paymentRepository;
         private readonly StripeSettings _stripeSettings;
+        private readonly IActivityLogService _activityLogService;
 
         public PaymentController(
             IRepository<Booking> bookingRepository,
             IRepository<Payment> paymentRepository,
-            IOptions<StripeSettings> stripeOptions)
+            IOptions<StripeSettings> stripeOptions,
+            IActivityLogService activityLogService)
         {
             _bookingRepository = bookingRepository;
             _paymentRepository = paymentRepository;
             _stripeSettings = stripeOptions.Value;
+            _activityLogService = activityLogService;
         }
 
         // GET: /Customer/Payment/Checkout?bookingId=1
-
-
         [HttpGet]
         public async Task<IActionResult> Checkout(int bookingId)
         {
@@ -112,39 +115,39 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 },
 
                 LineItems = new List<SessionLineItemOptions>
-        {
-            new SessionLineItemOptions
-            {
-                Quantity = 1,
-
-                PriceData = new SessionLineItemPriceDataOptions
                 {
-                    Currency =
-                        _stripeSettings.Currency.ToLowerInvariant(),
+                    new SessionLineItemOptions
+                    {
+                        Quantity = 1,
 
-                    UnitAmount = amountInSmallestUnit,
-
-                    ProductData =
-                        new SessionLineItemPriceDataProductDataOptions
+                        PriceData = new SessionLineItemPriceDataOptions
                         {
-                            Name =
-                                $"Flight Booking {booking.BookingReference}",
+                            Currency =
+                                _stripeSettings.Currency.ToLowerInvariant(),
 
-                            Description =
-                                $"Booking Reference: {booking.BookingReference}. " +
-                                $"Number of tickets: {ticketCount}. " +
-                                $"Total booking amount: {payment.Amount:N2} " +
-                                $"{_stripeSettings.Currency.ToUpperInvariant()}.",
+                            UnitAmount = amountInSmallestUnit,
 
-                            Metadata = new Dictionary<string, string>
-                            {
-                                ["BookingId"] = booking.Id.ToString(),
-                                ["NumberOfTickets"] = ticketCount.ToString()
-                            }
+                            ProductData =
+                                new SessionLineItemPriceDataProductDataOptions
+                                {
+                                    Name =
+                                        $"Flight Booking {booking.BookingReference}",
+
+                                    Description =
+                                        $"Booking Reference: {booking.BookingReference}. " +
+                                        $"Number of tickets: {ticketCount}. " +
+                                        $"Total booking amount: {payment.Amount:N2} " +
+                                        $"{_stripeSettings.Currency.ToUpperInvariant()}.",
+
+                                    Metadata = new Dictionary<string, string>
+                                    {
+                                        ["BookingId"] = booking.Id.ToString(),
+                                        ["NumberOfTickets"] = ticketCount.ToString()
+                                    }
+                                }
                         }
+                    }
                 }
-            }
-        }
             };
 
             var service = new SessionService();
@@ -153,6 +156,15 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             if (string.IsNullOrWhiteSpace(session.Url))
                 return StatusCode(
                     500, "Stripe Checkout URL was not returned.");
+
+            // Activity Log: Checkout Created
+            await _activityLogService.LogAsync(
+                nameof(PaymentController),
+                nameof(Checkout),
+                nameof(Payment),
+                payment.Id.ToString(),
+                $"Stripe Checkout session created for booking {booking.BookingReference}."
+            );
 
             return Redirect(session.Url);
         }
@@ -200,8 +212,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             if (payment == null)
                 return NotFound("Payment record not found.");
 
-            // Verify that this Stripe session matches our booking
-            // and expected payment amount.
+            // Verify Stripe session details.
             var expectedAmount = Convert.ToInt64(
                 Math.Round(
                     payment.Amount * 100m,
@@ -209,7 +220,8 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                     MidpointRounding.AwayFromZero));
 
             if (session.Metadata == null ||
-                !session.Metadata.TryGetValue("BookingId", out var metadataBookingId) ||
+                !session.Metadata.TryGetValue(
+                    "BookingId", out var metadataBookingId) ||
                 metadataBookingId != bookingId.ToString() ||
                 session.AmountTotal != expectedAmount ||
                 !string.Equals(
@@ -217,7 +229,8 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                     _stripeSettings.Currency,
                     StringComparison.OrdinalIgnoreCase))
             {
-                return BadRequest("Payment details do not match the booking.");
+                return BadRequest(
+                    "Payment details do not match the booking.");
             }
 
             // Make the operation safe to repeat.
@@ -233,6 +246,15 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
 
                 await _paymentRepository.CommitAsync();
                 await _bookingRepository.CommitAsync();
+
+                // Activity Log: Payment Successful
+                await _activityLogService.LogAsync(
+                    nameof(PaymentController),
+                    nameof(Success),
+                    nameof(Payment),
+                    payment.Id.ToString(),
+                    $"Payment completed successfully for booking {booking.BookingReference}. Amount: {payment.Amount:N2}."
+                );
             }
 
             return RedirectToAction(
@@ -258,7 +280,23 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             if (booking == null)
                 return NotFound();
 
+            var payment = await _paymentRepository.GetOneAsync(
+                filter: p => p.BookingId == bookingId,
+                IsTracking: false);
+
             ViewBag.BookingReference = booking.BookingReference;
+
+            // Activity Log: Payment Cancelled
+            if (payment != null && !payment.PaymentStatus)
+            {
+                await _activityLogService.LogAsync(
+                    nameof(PaymentController),
+                    nameof(Cancel),
+                    nameof(Payment),
+                    payment.Id.ToString(),
+                    $"Customer cancelled Stripe Checkout for booking {booking.BookingReference}."
+                );
+            }
 
             return View("PaymentCancelled");
         }

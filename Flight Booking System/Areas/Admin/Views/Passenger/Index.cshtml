@@ -1,5 +1,4 @@
-﻿
-@model IEnumerable<Flight_Booking_System.Models.Passenger>
+﻿@model IEnumerable<Flight_Booking_System.Models.Passenger>
 
 @{
     ViewData["Title"] = "Passenger Management";
@@ -8,7 +7,7 @@
 
 <div class="container-fluid py-4" dir="ltr">
 
-    <!-- Header -->
+    <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
         <div>
             <h2 class="fw-bold mb-1">
@@ -16,7 +15,7 @@
                 Passenger Management
             </h2>
             <p class="text-muted mb-0">
-                View and manage passenger information.
+                Manage registered passengers and their personal information.
             </p>
         </div>
 
@@ -25,56 +24,59 @@
            asp-action="Create"
            class="btn btn-primary">
             <i class="bi bi-plus-circle me-1"></i>
-            Add Passenger
+            Add New Passenger
         </a>
     </div>
 
-    <!-- Success Message -->
+    <!-- Notifications -->
     @if (TempData["Success"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="bi bi-check-circle me-1"></i>
             @TempData["Success"]
-            <button type="button"
-                    class="btn-close"
-                    data-bs-dismiss="alert"
-                    aria-label="Close"></button>
+            <button type="button" class="btn-close"
+                    data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
-    <!-- Error Message -->
     @if (TempData["Error"] != null)
     {
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="bi bi-exclamation-triangle me-1"></i>
             @TempData["Error"]
-            <button type="button"
-                    class="btn-close"
-                    data-bs-dismiss="alert"
-                    aria-label="Close"></button>
+            <button type="button" class="btn-close"
+                    data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
-    <!-- Passenger List -->
+    <!-- Registered Passengers -->
     <div class="card border-0 shadow-sm">
+
         <div class="card-header bg-white py-3">
-            <h5 class="mb-0 fw-bold">
-                <i class="bi bi-list-ul me-1"></i>
-                Passenger List
-            </h5>
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-list-ul me-1"></i>
+                    Registered Passengers
+                </h5>
+
+                <span class="badge bg-primary">
+                    @(Model?.Count() ?? 0) Passengers
+                </span>
+            </div>
         </div>
 
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
+
                     <thead style="background-color: #0b1729; color: white;">
                         <tr>
                             <th>ID</th>
-                            <th>Passenger Name</th>
-                            <th>Passport Number</th>
+                            <th>Full Name</th>
+                            <th>Passport No.</th>
                             <th>National ID</th>
-                            <th>Phone</th>
-                            <th>Email</th>
+                            <th>Phone Number</th>
+                            <th>Email Address</th>
                             <th>Date of Birth</th>
                             <th class="text-center">Actions</th>
                         </tr>
@@ -110,6 +112,7 @@
 
                                     <td>
                                         <div class="d-flex justify-content-center gap-2 flex-wrap">
+
                                             <a asp-area="Admin"
                                                asp-controller="Passenger"
                                                asp-action="Edit"
@@ -120,6 +123,15 @@
                                             </a>
 
                                             <a asp-area="Admin"
+                                               asp-controller="ActivityLog"
+                                               asp-action="Index"
+                                               asp-route-entityId="@item.Id"
+                                               class="btn btn-info btn-sm">
+                                                <i class="bi bi-clock-history me-1"></i>
+                                                Activity History
+                                            </a>
+
+                                            <a asp-area="Admin"
                                                asp-controller="Passenger"
                                                asp-action="Delete"
                                                asp-route-id="@item.Id"
@@ -127,6 +139,7 @@
                                                 <i class="bi bi-trash me-1"></i>
                                                 Delete
                                             </a>
+
                                         </div>
                                     </td>
                                 </tr>
@@ -137,17 +150,17 @@
                             <tr>
                                 <td colspan="8" class="text-center py-5 text-muted">
                                     <i class="bi bi-people display-6 d-block mb-3"></i>
-                                    <h5>No Passengers Found</h5>
+                                    <h5>No Passengers Available</h5>
                                     <p class="mb-0">
-                                        No passengers have been registered yet.
+                                        There are currently no registered passengers.
                                     </p>
                                 </td>
                             </tr>
                         }
                     </tbody>
+
                 </table>
             </div>
         </div>
     </div>
-
 </div>

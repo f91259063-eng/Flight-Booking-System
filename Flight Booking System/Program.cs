@@ -89,9 +89,16 @@ namespace Flight_Booking_System
             builder.Services.AddTransient<IAppEmailSender, SmtpEmailSender>();
 
             // Stripe
+            var stripeSecretKey = builder.Configuration["Stripe:SecretKey"];
+
+            if (string.IsNullOrWhiteSpace(stripeSecretKey))
+            {
+                throw new InvalidOperationException(
+                    "Stripe SecretKey is missing. Check User Secrets configuration.");
+            }
+
             builder.Services.Configure<StripeSettings>(
                 builder.Configuration.GetSection("Stripe"));
-
             // MVC
             builder.Services.AddControllersWithViews();
 
