@@ -4,6 +4,7 @@ using Flight_Booking_System.Models;
 using Flight_Booking_System.ModelsServices;
 using Flight_Booking_System.Repositories;
 using Flight_Booking_System.Services;
+using Flight_Booking_System.Services.Rewards;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -20,17 +21,20 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
         private readonly IRepository<Payment> _paymentRepository;
         private readonly StripeSettings _stripeSettings;
         private readonly IActivityLogService _activityLogService;
+        private readonly IRewardService _rewardService;
 
         public PaymentController(
             IRepository<Booking> bookingRepository,
             IRepository<Payment> paymentRepository,
             IOptions<StripeSettings> stripeOptions,
-            IActivityLogService activityLogService)
+            IActivityLogService activityLogService,
+            IRewardService rewardService)
         {
             _bookingRepository = bookingRepository;
             _paymentRepository = paymentRepository;
             _stripeSettings = stripeOptions.Value;
             _activityLogService = activityLogService;
+            _rewardService = rewardService;
         }
 
         // GET: /Customer/Payment/Checkout?bookingId=1
@@ -157,7 +161,6 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 return StatusCode(
                     500, "Stripe Checkout URL was not returned.");
 
-            // Activity Log: Checkout Created
             await _activityLogService.LogAsync(
                 nameof(PaymentController),
                 nameof(Checkout),
@@ -184,7 +187,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             var stripeService = new SessionService();
             var session = await stripeService.GetAsync(session_id);
 
-            // Do not trust the return URL alone.
+            // Verify Stripe payment.
             if (session.PaymentStatus != "paid" ||
                 !int.TryParse(session.ClientReferenceId, out int bookingId))
             {
@@ -233,7 +236,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                     "Payment details do not match the booking.");
             }
 
-            // Make the operation safe to repeat.
+            // Update payment and booking only once.
             if (!payment.PaymentStatus)
             {
                 payment.PaymentStatus = true;
@@ -247,7 +250,6 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 await _paymentRepository.CommitAsync();
                 await _bookingRepository.CommitAsync();
 
-                // Activity Log: Payment Successful
                 await _activityLogService.LogAsync(
                     nameof(PaymentController),
                     nameof(Success),
@@ -255,6 +257,25 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                     payment.Id.ToString(),
                     $"Payment completed successfully for booking {booking.BookingReference}. Amount: {payment.Amount:N2}."
                 );
+            }
+
+            // Confirm redeemed reward points after successful payment.
+            // This is outside the payment-status condition so it can
+            // be retried if the first confirmation attempt fails.
+            if (booking.PointsRedeemed > 0)
+            {
+                var redemptionConfirmed =
+                    await _rewardService.ConfirmRedemptionAsync(
+                        userId,
+                        booking.Id);
+
+                if (!redemptionConfirmed)
+                {
+                    return StatusCode(
+                        500,
+                        "Payment succeeded, but reward points confirmation failed. Please contact support."
+                    );
+                }
             }
 
             return RedirectToAction(
@@ -286,7 +307,8 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
 
             ViewBag.BookingReference = booking.BookingReference;
 
-            // Activity Log: Payment Cancelled
+            // Keep reserved points while the booking remains Pending.
+            // The customer may retry Stripe Checkout.
             if (payment != null && !payment.PaymentStatus)
             {
                 await _activityLogService.LogAsync(

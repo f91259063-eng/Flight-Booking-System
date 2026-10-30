@@ -6,6 +6,7 @@ using Flight_Booking_System.Models.Identity;
 using Flight_Booking_System.ModelsServices;
 using Flight_Booking_System.Repositories;
 using Flight_Booking_System.Services;
+using Flight_Booking_System.Services.Rewards;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -70,6 +71,7 @@ namespace Flight_Booking_System
             // Other services
             builder.Services.AddHttpClient<AirportCoordinateService>();
             builder.Services.AddScoped<DistanceCalculatorService>();
+            builder.Services.AddScoped<IRewardService, RewardService>();
 
             builder.Services.AddScoped<
                 Flight_Booking_System.Services.ISeatService,
