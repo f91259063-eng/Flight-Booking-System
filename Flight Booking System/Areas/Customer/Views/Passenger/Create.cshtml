@@ -4,6 +4,17 @@
 @{
     ViewData["Title"] = "Passenger Details";
     Layout = "~/Areas/Customer/Views/Shared/_CustomerLayout.cshtml";
+
+    var subtotal = Model == null
+        ? 0m
+        : Model.TicketPrice * (Model.Passengers?.Count ?? 0);
+
+    var maxRedeemablePoints = Model == null
+        ? 0
+        : Math.Min(
+            (Model.AvailablePoints / 100) * 100,
+            (int)(subtotal / 50m) * 100
+        );
 }
 
 @if (Model == null)
@@ -88,6 +99,7 @@ else
                                    class="selected-passenger-id" />
 
                             <div class="border rounded p-3 mb-4 bg-light">
+
                                 <h6 class="fw-bold mb-3">
                                     Search Existing Passenger
                                 </h6>
@@ -131,6 +143,7 @@ else
                                 </div>
 
                                 <div class="mt-3 d-flex gap-2 flex-wrap">
+
                                     <button type="button"
                                             class="btn btn-outline-secondary btn-sm clear-passenger-btn">
                                         Clear Passenger
@@ -141,6 +154,7 @@ else
                                           aria-live="polite">
                                         Enter a passport number or national ID to search.
                                     </span>
+
                                 </div>
                             </div>
 
@@ -259,26 +273,114 @@ else
                     </div>
                 }
 
+                <!-- Booking Summary -->
+
                 <div class="card shadow-sm mb-4">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
 
-                            <div>
-                                <div>
-                                    <strong>Number of Passengers:</strong>
-                                    @Model.Passengers.Count
-                                </div>
+                        <h4 class="fw-bold mb-3">
+                            Booking Summary
+                        </h4>
 
-                                <div>
-                                    <strong>Price per Ticket:</strong>
-                                    @Model.TicketPrice.ToString("N2")
-                                </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Number of Passengers</span>
+                            <strong>@Model.Passengers.Count</strong>
+                        </div>
 
-                                <div>
-                                    <strong>Total Price:</strong>
-                                    @((Model.TicketPrice * Model.Passengers.Count).ToString("N2"))
-                                </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Price per Ticket</span>
+                            <strong>@Model.TicketPrice.ToString("N2") EGP</strong>
+                        </div>
+
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal</span>
+                            <strong id="subtotal">
+                                @subtotal.ToString("N2")
+                            </strong>
+                        </div>
+
+                        <hr />
+
+                        <!-- Reward Points -->
+
+                        <div class="bg-light border rounded p-3 mb-4">
+
+                            <h5 class="fw-bold mb-3">
+                                Reward Points
+                            </h5>
+
+                            <div class="alert alert-info">
+                                Your available points:
+                                <strong id="availablePoints">
+                                    @Model.AvailablePoints
+                                </strong>
                             </div>
+
+                            <div class="row g-3 align-items-end">
+
+                                <div class="col-md-6">
+
+                                    <label asp-for="PointsToRedeem"
+                                           class="form-label fw-bold">
+                                        Points to Redeem
+                                    </label>
+
+                                    <input asp-for="PointsToRedeem"
+                                           type="number"
+                                           min="0"
+                                           max="@maxRedeemablePoints"
+                                           step="100"
+                                           value="0"
+                                           class="form-control"
+                                           id="pointsToRedeem" />
+
+                                    <small class="text-muted">
+                                        Every 100 points = 50 EGP discount.
+                                        Minimum redemption is 100 points.
+                                        Points must be redeemed in multiples of 100.
+                                    </small>
+
+                                    <span asp-validation-for="PointsToRedeem"
+                                          class="text-danger"></span>
+
+                                </div>
+
+                                <div class="col-md-6">
+
+                                    <div class="alert alert-success mb-0">
+                                        <div class="d-flex justify-content-between">
+                                            <span>Discount</span>
+
+                                            <strong>
+                                                <span id="discountAmount">0.00</span>
+                                                EGP
+                                            </strong>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <hr />
+
+                        <div class="d-flex justify-content-between align-items-center">
+
+                            <h5 class="fw-bold mb-0">
+                                Final Total
+                            </h5>
+
+                            <h4 class="fw-bold text-success mb-0">
+                                <span id="finalTotal">
+                                    @subtotal.ToString("N2")
+                                </span>
+                                EGP
+                            </h4>
+
+                        </div>
+
+                        <div class="mt-4 text-end">
 
                             <button type="submit"
                                     class="btn btn-success btn-lg">
@@ -286,6 +388,7 @@ else
                             </button>
 
                         </div>
+
                     </div>
                 </div>
             }
@@ -294,9 +397,168 @@ else
 }
 
 @section Scripts {
+
     <partial name="_ValidationScriptsPartial" />
 
     <script src="~/js/passenger-create.js"
             asp-append-version="true"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const pointsInput =
+                document.getElementById("pointsToRedeem");
+
+            const availablePointsElement =
+                document.getElementById("availablePoints");
+
+            const subtotalElement =
+                document.getElementById("subtotal");
+
+            const discountElement =
+                document.getElementById("discountAmount");
+
+            const totalElement =
+                document.getElementById("finalTotal");
+
+            const passengerForm =
+                document.getElementById("passengerForm");
+
+            // Ensure that the points element is an input.
+            // This also allows TypeScript/Visual Studio to recognize
+            // the max property correctly.
+
+            if (!(pointsInput instanceof HTMLInputElement)) {
+                return;
+            }
+
+            if (
+                !availablePointsElement ||
+                !subtotalElement ||
+                !discountElement ||
+                !totalElement ||
+                !passengerForm
+            ) {
+                return;
+            }
+
+            const availablePoints =
+                parseInt(
+                    availablePointsElement.textContent || "0",
+                    10
+                ) || 0;
+
+            const subtotalText =
+                subtotalElement.textContent || "0";
+
+            const subtotal =
+                parseFloat(
+                    subtotalText.replace(/,/g, "")
+                ) || 0;
+
+            // Maximum redeemable points:
+            // 1. Cannot exceed available points.
+            // 2. Must be multiples of 100.
+            // 3. Discount cannot exceed booking subtotal.
+
+            const maxPoints = Math.min(
+                Math.floor(availablePoints / 100) * 100,
+                Math.floor(subtotal / 50) * 100
+            );
+
+            // Set the maximum allowed value.
+            pointsInput.max = maxPoints.toString();
+
+            function calculateDiscount() {
+
+                const inputValue = pointsInput.value.trim();
+
+                // Empty input is treated as zero.
+                if (inputValue === "") {
+                    pointsInput.setCustomValidity("");
+                    discountElement.textContent = "0.00";
+                    totalElement.textContent = subtotal.toFixed(2);
+                    return;
+                }
+
+                const points = Number(inputValue);
+
+                // Invalid numeric value.
+                if (!Number.isInteger(points)) {
+                    pointsInput.setCustomValidity(
+                        "Please enter a valid whole number of points."
+                    );
+
+                    discountElement.textContent = "0.00";
+                    totalElement.textContent = subtotal.toFixed(2);
+                    return;
+                }
+
+                // Zero points means no discount.
+                if (points === 0) {
+                    pointsInput.setCustomValidity("");
+                    discountElement.textContent = "0.00";
+                    totalElement.textContent = subtotal.toFixed(2);
+                    return;
+                }
+
+                // Validate redemption rules.
+                if (
+                    points < 100 ||
+                    points % 100 !== 0 ||
+                    points > maxPoints
+                ) {
+                    pointsInput.setCustomValidity(
+                        "Enter points in multiples of 100, within your available balance and booking total."
+                    );
+
+                    discountElement.textContent = "0.00";
+                    totalElement.textContent = subtotal.toFixed(2);
+                    return;
+                }
+
+                // Valid points.
+                pointsInput.setCustomValidity("");
+
+                const discount = (points / 100) * 50;
+
+                const finalTotal = subtotal - discount;
+
+                discountElement.textContent =
+                    discount.toFixed(2);
+
+                totalElement.textContent =
+                    finalTotal.toFixed(2);
+            }
+
+            // Recalculate when the user changes the points.
+            pointsInput.addEventListener(
+                "input",
+                calculateDiscount
+            );
+
+            pointsInput.addEventListener(
+                "change",
+                calculateDiscount
+            );
+
+            // Validate points before submitting the form.
+            passengerForm.addEventListener(
+                "submit",
+                function (event) {
+
+                    calculateDiscount();
+
+                    if (!pointsInput.checkValidity()) {
+                        event.preventDefault();
+                        pointsInput.reportValidity();
+                    }
+                }
+            );
+
+            // Initial calculation.
+            calculateDiscount();
+
+        });
+    </script>
 }
-```

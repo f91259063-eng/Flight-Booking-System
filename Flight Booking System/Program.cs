@@ -6,6 +6,7 @@ using Flight_Booking_System.Models.Identity;
 using Flight_Booking_System.ModelsServices;
 using Flight_Booking_System.Repositories;
 using Flight_Booking_System.Services;
+using Flight_Booking_System.Services.Rewards;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -70,6 +71,7 @@ namespace Flight_Booking_System
             // Other services
             builder.Services.AddHttpClient<AirportCoordinateService>();
             builder.Services.AddScoped<DistanceCalculatorService>();
+            builder.Services.AddScoped<IRewardService, RewardService>();
 
             builder.Services.AddScoped<
                 Flight_Booking_System.Services.ISeatService,
@@ -89,9 +91,16 @@ namespace Flight_Booking_System
             builder.Services.AddTransient<IAppEmailSender, SmtpEmailSender>();
 
             // Stripe
+            var stripeSecretKey = builder.Configuration["Stripe:SecretKey"];
+
+            if (string.IsNullOrWhiteSpace(stripeSecretKey))
+            {
+                throw new InvalidOperationException(
+                    "Stripe SecretKey is missing. Check User Secrets configuration.");
+            }
+
             builder.Services.Configure<StripeSettings>(
                 builder.Configuration.GetSection("Stripe"));
-
             // MVC
             builder.Services.AddControllersWithViews();
 

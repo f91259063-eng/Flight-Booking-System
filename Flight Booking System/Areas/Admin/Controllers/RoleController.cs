@@ -1,4 +1,7 @@
 ﻿
+using Flight_Booking_System.Models;
+using Flight_Booking_System.Models.Identity;
+using Flight_Booking_System.ModelsServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -7,20 +10,25 @@ namespace Flight_Booking_System.Controllers
 {
     [Authorize(Roles = "Admin")]
     [Area("Admin")]
-
-
     public class RolesController : Controller
     {
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IActivityLogService _activityLogService;
 
-        public RolesController(RoleManager<IdentityRole> roleManager)
+        public RolesController(
+            RoleManager<IdentityRole> roleManager,
+            UserManager<ApplicationUser> userManager,
+            IActivityLogService activityLogService)
         {
             _roleManager = roleManager;
+            _userManager = userManager;
+            _activityLogService = activityLogService;
         }
 
-        // GET: /Roles/Index
+        // GET: /Admin/Roles/Index
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             var roles = _roleManager.Roles
                 .OrderBy(r => r.Name)
@@ -29,14 +37,14 @@ namespace Flight_Booking_System.Controllers
             return View(roles);
         }
 
-        // GET: /Roles/Create
+        // GET: /Admin/Roles/Create
         [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: /Roles/Create
+        // POST: /Admin/Roles/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(string name)
@@ -55,12 +63,22 @@ namespace Flight_Booking_System.Controllers
                 return View();
             }
 
-            var result = await _roleManager.CreateAsync(
-                new IdentityRole(name));
+            var role = new IdentityRole(name);
+
+            var result = await _roleManager.CreateAsync(role);
 
             if (result.Succeeded)
             {
+                await _activityLogService.LogAsync(
+                    nameof(RolesController),
+                    nameof(Create),
+                    nameof(IdentityRole),
+                    role.Id,
+                    $"Created role: {role.Name}."
+                );
+
                 TempData["Success"] = "Role created successfully.";
+
                 return RedirectToAction(nameof(Index));
             }
 
@@ -72,7 +90,7 @@ namespace Flight_Booking_System.Controllers
             return View();
         }
 
-        // POST: /Roles/Delete
+        // POST: /Admin/Roles/Delete
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(string id)
@@ -85,9 +103,26 @@ namespace Flight_Booking_System.Controllers
             if (role == null)
                 return NotFound();
 
-            if (role.Name == "Admin")
+            // Prevent deleting Admin role
+            if (string.Equals(
+                role.Name,
+                "Admin",
+                StringComparison.OrdinalIgnoreCase))
             {
                 TempData["Error"] = "The Admin role cannot be deleted.";
+
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Check whether the role is assigned to users
+            var usersInRole = await _userManager.GetUsersInRoleAsync(
+                role.Name!);
+
+            if (usersInRole.Any())
+            {
+                TempData["Error"] =
+                    "This role cannot be deleted because it is assigned to users.";
+
                 return RedirectToAction(nameof(Index));
             }
 
@@ -95,12 +130,21 @@ namespace Flight_Booking_System.Controllers
 
             if (result.Succeeded)
             {
+                await _activityLogService.LogAsync(
+                    nameof(RolesController),
+                    nameof(Delete),
+                    nameof(IdentityRole),
+                    role.Id,
+                    $"Deleted role: {role.Name}."
+                );
+
                 TempData["Success"] = "Role deleted successfully.";
             }
             else
             {
                 TempData["Error"] = string.Join(
-                    " ", result.Errors.Select(e => e.Description));
+                    " ",
+                    result.Errors.Select(e => e.Description));
             }
 
             return RedirectToAction(nameof(Index));

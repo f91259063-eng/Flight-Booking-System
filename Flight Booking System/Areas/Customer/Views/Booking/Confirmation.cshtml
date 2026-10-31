@@ -1,5 +1,4 @@
-﻿
-@model Flight_Booking_System.ViewModels.Customer.BookingConfirmationViewModel
+﻿@model Flight_Booking_System.ViewModels.Customer.BookingConfirmationViewModel
 
 @{
     ViewData["Title"] = "Booking Confirmation";
@@ -8,6 +7,7 @@
 
 <div class="container py-5">
 
+    <!-- Booking Confirmation -->
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body text-center py-5">
 
@@ -33,12 +33,15 @@
         </div>
     </div>
 
+    <!-- Flight Information -->
     <div class="card shadow-sm mb-4">
+
         <div class="card-header">
             <h5 class="mb-0">Flight Information</h5>
         </div>
 
         <div class="card-body">
+
             <div class="row g-4">
 
                 <div class="col-md-4">
@@ -83,15 +86,19 @@
                 </div>
 
             </div>
+
         </div>
     </div>
 
+    <!-- Passenger Tickets -->
     <div class="card shadow-sm mb-4">
+
         <div class="card-header">
             <h5 class="mb-0">Passenger Tickets</h5>
         </div>
 
         <div class="table-responsive">
+
             <table class="table table-hover align-middle mb-0">
 
                 <thead class="table-light">
@@ -104,6 +111,7 @@
                 </thead>
 
                 <tbody>
+
                     @for (int i = 0; i < Model.Tickets.Count; i++)
                     {
                         var ticket = Model.Tickets[i];
@@ -121,38 +129,87 @@
                             </td>
                         </tr>
                     }
+
                 </tbody>
 
-                <tfoot class="table-light">
-                    <tr>
-                        <th colspan="3" class="text-end">
-                            Total Price
-                        </th>
-                        <th class="text-end text-primary">
-                            @Model.TotalPrice.ToString("N2") EGP
-                        </th>
-                    </tr>
-                </tfoot>
-
             </table>
+
         </div>
     </div>
 
+    <!-- Payment Summary -->
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header">
+            <h5 class="mb-0">Payment Summary</h5>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row mb-3">
+                <div class="col-7 text-muted">
+                    Subtotal
+                </div>
+                <div class="col-5 text-end fw-bold">
+                    @Model.Subtotal.ToString("N2") EGP
+                </div>
+            </div>
+
+            @if (Model.PointsRedeemed > 0)
+            {
+                <div class="row mb-3">
+                    <div class="col-7 text-muted">
+                        Reward Points Used
+                    </div>
+                    <div class="col-5 text-end fw-bold">
+                        @Model.PointsRedeemed Points
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-7 text-muted">
+                        Discount
+                    </div>
+                    <div class="col-5 text-end fw-bold text-success">
+                        - @Model.DiscountAmount.ToString("N2") EGP
+                    </div>
+                </div>
+            }
+
+            <hr />
+
+            <div class="row mb-2">
+                <div class="col-7 fw-bold">
+                    Amount Paid
+                </div>
+                <div class="col-5 text-end fw-bold text-success fs-5">
+                    @Model.AmountPaid.ToString("N2") EGP
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Actions -->
     <div class="d-flex justify-content-between flex-wrap gap-2">
 
         <a asp-area="Customer"
            asp-controller="Flights"
            asp-action="Index"
            class="btn btn-primary">
+
             <i class="fas fa-plane me-2"></i>
             Browse Flights
+
         </a>
 
         <button type="button"
                 onclick="window.print()"
                 class="btn btn-outline-secondary">
+
             <i class="fas fa-print me-2"></i>
             Print Confirmation
+
         </button>
 
     </div>

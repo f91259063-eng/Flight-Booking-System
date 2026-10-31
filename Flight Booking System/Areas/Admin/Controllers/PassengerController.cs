@@ -2,11 +2,13 @@
 using Flight_Booking_System.Models;
 using Flight_Booking_System.ModelsServices;
 using Flight_Booking_System.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Flight_Booking_System.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "Admin")]
     public class PassengerController : Controller
     {
         private readonly IRepository<Passenger> _repositoryPassenger;
@@ -52,6 +54,7 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
             {
                 ModelState.AddModelError(
                     "",
+                    "Unable to save passenger information.");
                     "Unable to save passenger information."
                 );
 
@@ -112,10 +115,11 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
 
             var result = await _repositoryPassenger.CommitAsync();
 
-            if (result < 0)
+            if (result <= 0)
             {
                 ModelState.AddModelError(
                     "",
+                    "Unable to update passenger information.");
                     "Unable to update passenger information."
                 );
 
@@ -160,6 +164,7 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 return NotFound();
 
             var passengerId = passenger.Id.ToString();
+
             var passengerName =
                 $"{passenger.FirstName} {passenger.LastName}";
 
@@ -169,6 +174,14 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
 
             if (result <= 0)
             {
+                await _activityLogService.LogAsync(
+                    nameof(PassengerController),
+                    nameof(Delete),
+                    nameof(Passenger),
+                    passengerId,
+                    $"Failed to delete passenger: {passengerName}."
+                );
+
                 TempData["Error"] =
                     "Unable to delete the passenger. The passenger may be linked to existing records.";
 

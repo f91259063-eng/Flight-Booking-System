@@ -64,7 +64,7 @@ namespace Flight_Booking_System.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ActivityLogs");
+                    b.ToTable("ActivityLogs", (string)null);
                 });
 
             modelBuilder.Entity("Flight_Booking_System.Models.AirPort", b =>
@@ -92,7 +92,7 @@ namespace Flight_Booking_System.Migrations
 
                     b.HasIndex("cityId");
 
-                    b.ToTable("AirPorts");
+                    b.ToTable("AirPorts", (string)null);
                 });
 
             modelBuilder.Entity("Flight_Booking_System.Models.Aircraft", b =>
@@ -121,7 +121,7 @@ namespace Flight_Booking_System.Migrations
 
                     b.HasIndex("AirlineId");
 
-                    b.ToTable("Aircrafts");
+                    b.ToTable("Aircrafts", (string)null);
                 });
 
             modelBuilder.Entity("Flight_Booking_System.Models.AircraftClass", b =>
@@ -152,7 +152,7 @@ namespace Flight_Booking_System.Migrations
 
                     b.HasIndex("ClassId");
 
-                    b.ToTable("AircraftClasses");
+                    b.ToTable("AircraftClasses", (string)null);
                 });
 
             modelBuilder.Entity("Flight_Booking_System.Models.Airline", b =>
@@ -182,7 +182,7 @@ namespace Flight_Booking_System.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Airlines");
+                    b.ToTable("Airlines", (string)null);
                 });
 
             modelBuilder.Entity("Flight_Booking_System.Models.Booking", b =>
@@ -203,7 +203,13 @@ namespace Flight_Booking_System.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("DiscountAmount")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("NumberOfTickets")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PointsRedeemed")
                         .HasColumnType("int");
 
                     b.Property<string>("Status")
@@ -218,7 +224,7 @@ namespace Flight_Booking_System.Migrations
 
                     b.HasIndex("ApplicationUserId");
 
-                    b.ToTable("Bookings");
+                    b.ToTable("Bookings", (string)null);
                 });
 
             modelBuilder.Entity("Flight_Booking_System.Models.Class", b =>
@@ -238,7 +244,7 @@ namespace Flight_Booking_System.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Classes");
+                    b.ToTable("Classes", (string)null);
                 });
 
             modelBuilder.Entity("Flight_Booking_System.Models.Flight", b =>
@@ -282,7 +288,7 @@ namespace Flight_Booking_System.Migrations
 
                     b.HasIndex("RouteId");
 
-                    b.ToTable("Flights");
+                    b.ToTable("Flights", (string)null);
                 });
 
             modelBuilder.Entity("Flight_Booking_System.Models.Identity.ApplicationUser", b =>
@@ -404,7 +410,7 @@ namespace Flight_Booking_System.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Passengers");
+                    b.ToTable("Passengers", (string)null);
                 });
 
             modelBuilder.Entity("Flight_Booking_System.Models.Payment", b =>
@@ -434,7 +440,98 @@ namespace Flight_Booking_System.Migrations
 
                     b.HasIndex("BookingId");
 
-                    b.ToTable("Payments");
+                    b.ToTable("Payments", (string)null);
+                });
+
+            modelBuilder.Entity("Flight_Booking_System.Models.Rewards.RewardAccount", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AvailablePoints")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ReservedPoints")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalEarnedPoints")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalRedeemedPoints")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("RewardAccounts", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_RewardAccount_AvailablePoints", "[AvailablePoints] >= 0");
+
+                            t.HasCheckConstraint("CK_RewardAccount_TotalPoints", "[TotalEarnedPoints] >= 0 AND [TotalRedeemedPoints] >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("Flight_Booking_System.Models.Rewards.RewardTransaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("BookingId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Points")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ReferenceKey")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("TransactionType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BookingId");
+
+                    b.HasIndex("ReferenceKey")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RewardTransactions", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_RewardTransaction_Points", "[Points] > 0");
+                        });
                 });
 
             modelBuilder.Entity("Flight_Booking_System.Models.Route", b =>
@@ -460,7 +557,7 @@ namespace Flight_Booking_System.Migrations
 
                     b.HasIndex("ToAirportId");
 
-                    b.ToTable("Routes");
+                    b.ToTable("Routes", (string)null);
                 });
 
             modelBuilder.Entity("Flight_Booking_System.Models.Seat", b =>
@@ -482,7 +579,7 @@ namespace Flight_Booking_System.Migrations
 
                     b.HasIndex("AircraftClassId");
 
-                    b.ToTable("Seats");
+                    b.ToTable("Seats", (string)null);
                 });
 
             modelBuilder.Entity("Flight_Booking_System.Models.Setting", b =>
@@ -501,7 +598,7 @@ namespace Flight_Booking_System.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("settings");
+                    b.ToTable("settings", (string)null);
                 });
 
             modelBuilder.Entity("Flight_Booking_System.Models.city", b =>
@@ -518,7 +615,7 @@ namespace Flight_Booking_System.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Cities");
+                    b.ToTable("Cities", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -687,7 +784,7 @@ namespace Flight_Booking_System.Migrations
 
                     b.HasIndex("SeatId");
 
-                    b.ToTable("Tickets");
+                    b.ToTable("Tickets", (string)null);
                 });
 
             modelBuilder.Entity("Flight_Booking_System.Models.ActivityLog", b =>
@@ -789,6 +886,35 @@ namespace Flight_Booking_System.Migrations
                         .IsRequired();
 
                     b.Navigation("Booking");
+                });
+
+            modelBuilder.Entity("Flight_Booking_System.Models.Rewards.RewardAccount", b =>
+                {
+                    b.HasOne("Flight_Booking_System.Models.Identity.ApplicationUser", "User")
+                        .WithOne()
+                        .HasForeignKey("Flight_Booking_System.Models.Rewards.RewardAccount", "UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Flight_Booking_System.Models.Rewards.RewardTransaction", b =>
+                {
+                    b.HasOne("Flight_Booking_System.Models.Booking", "Booking")
+                        .WithMany()
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Flight_Booking_System.Models.Identity.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Booking");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Flight_Booking_System.Models.Route", b =>

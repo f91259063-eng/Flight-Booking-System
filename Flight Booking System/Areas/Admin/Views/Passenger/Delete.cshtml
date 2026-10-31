@@ -39,6 +39,11 @@
                         This action cannot be undone.
                     </div>
 
+                    <!-- Passenger Information -->
+                    <h6 class="fw-bold text-primary mb-3">
+                        Passenger Information
+                    </h6>
+
                     <dl class="row">
 
                         <dt class="col-sm-4">Full Name</dt>
@@ -75,6 +80,7 @@
 
                     <hr />
 
+                    <!-- Actions -->
                     <form asp-area="Admin"
                           asp-controller="Passenger"
                           asp-action="Delete"
@@ -94,6 +100,9 @@
                                asp-controller="Passenger"
                                asp-action="Index"
                                class="btn btn-light border">
+
+                                <i class="bi bi-arrow-left me-1"></i>
+                                Back to Passenger List
                                 <i class="bi bi-arrow-left me-1"></i>
                                 Cancel
                             </a>
@@ -109,4 +118,3 @@
     </div>
 
 </div>
-```

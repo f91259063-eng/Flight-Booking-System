@@ -1,98 +1,176 @@
 ﻿@model Flight_Booking_System.Models.Flight
+@using Flight_Booking_System.Models.ENUM
 
 @{
-    ViewData["Title"] = "تعديل رحلة";
+    ViewData["Title"] = "Edit Flight";
     Layout = "_AdminLayout";
-
 }
 
-<div class="container-fluid py-4" dir="rtl">
+<div class="container-fluid py-4">
     <div class="card shadow-sm">
+
         <div class="card-header">
-            <h4 class="mb-0">تعديل بيانات الرحلة</h4>
+            <h4 class="mb-0">Edit Flight Details</h4>
         </div>
 
         <div class="card-body">
-            <form asp-area="Admin" asp-controller="Flight"
-                  asp-action="Edit" asp-route-id="@Model.Id" method="post">
+
+            <form asp-area="Admin"
+                  asp-controller="Flight"
+                  asp-action="Edit"
+                  asp-route-id="@Model.Id"
+                  method="post">
 
                 <input asp-for="Id" type="hidden" />
 
-                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                <div asp-validation-summary="ModelOnly"
+                     class="alert alert-danger"></div>
 
                 <div class="row g-3">
+
                     <div class="col-md-6">
-                        <label asp-for="FlightNumber" class="form-label">رقم الرحلة</label>
-                        <input asp-for="FlightNumber" class="form-control" />
-                        <span asp-validation-for="FlightNumber" class="text-danger"></span>
+                        <label asp-for="FlightNumber" class="form-label">
+                            Flight Number
+                        </label>
+
+                        <input asp-for="FlightNumber"
+                               class="form-control" />
+
+                        <span asp-validation-for="FlightNumber"
+                              class="text-danger"></span>
                     </div>
 
                     <div class="col-md-6">
-                        <label asp-for="AircraftId" class="form-label">الطائرة</label>
+                        <label asp-for="AircraftId" class="form-label">
+                            Aircraft
+                        </label>
+
                         <select asp-for="AircraftId"
                                 asp-items="ViewBag.Aircrafts"
                                 class="form-select">
-                            <option value="">-- اختر الطائرة --</option>
+                            <option value="">-- Select Aircraft --</option>
                         </select>
-                        <span asp-validation-for="AircraftId" class="text-danger"></span>
+
+                        <span asp-validation-for="AircraftId"
+                              class="text-danger"></span>
                     </div>
 
                     <div class="col-md-6">
-                        <label asp-for="AirlineId" class="form-label">شركة الطيران</label>
-                        <select asp-for="AirlineId" asp-items="ViewBag.Airlines"
+                        <label asp-for="AirlineId" class="form-label">
+                            Airline
+                        </label>
+
+                        <select asp-for="AirlineId"
+                                asp-items="ViewBag.Airlines"
                                 class="form-select">
-                            <option value="">اختر شركة الطيران</option>
+                            <option value="">-- Select Airline --</option>
                         </select>
+
+                        <span asp-validation-for="AirlineId"
+                              class="text-danger"></span>
                     </div>
 
                     <div class="col-md-6">
-                        <label asp-for="RouteId" class="form-label">مسار الرحلة</label>
+                        <label asp-for="RouteId" class="form-label">
+                            Flight Route
+                        </label>
+
                         <select asp-for="RouteId"
                                 asp-items="ViewBag.Routes"
                                 class="form-select">
-                            <option value="">-- اختر مسار الرحلة --</option>
+                            <option value="">-- Select Route --</option>
                         </select>
-                        <span asp-validation-for="RouteId" class="text-danger"></span>
+
+                        <span asp-validation-for="RouteId"
+                              class="text-danger"></span>
                     </div>
 
                     <div class="col-md-6">
-                        <label asp-for="DepartureDateTime" class="form-label">تاريخ ووقت المغادرة</label>
-                        <input asp-for="DepartureDateTime" type="datetime-local"
+                        <label asp-for="DepartureDateTime" class="form-label">
+                            Departure Date & Time
+                        </label>
+
+                        <input asp-for="DepartureDateTime"
+                               type="datetime-local"
                                class="form-control" />
+
+                        <span asp-validation-for="DepartureDateTime"
+                              class="text-danger"></span>
                     </div>
 
                     <div class="col-md-6">
-                        <label asp-for="ArrivalDateTime" class="form-label">تاريخ ووقت الوصول</label>
-                        <input asp-for="ArrivalDateTime" type="datetime-local"
+                        <label asp-for="ArrivalDateTime" class="form-label">
+                            Arrival Date & Time
+                        </label>
+
+                        <input asp-for="ArrivalDateTime"
+                               type="datetime-local"
                                class="form-control" />
+
+                        <span asp-validation-for="ArrivalDateTime"
+                              class="text-danger"></span>
                     </div>
 
                     <div class="col-md-6">
-                        <label asp-for="DayOfWeek" class="form-label">يوم الرحلة</label>
+                        <label asp-for="DayOfWeek" class="form-label">
+                            Day of Week
+                        </label>
+
                         <select asp-for="DayOfWeek"
                                 asp-items="Html.GetEnumSelectList<DayOfWeek>()"
                                 class="form-select">
                         </select>
+
+                        <span asp-validation-for="DayOfWeek"
+                              class="text-danger"></span>
                     </div>
 
                     <div class="col-md-6">
-                        <label asp-for="FlightStatus" class="form-label">حالة الرحلة</label>
+                        <label asp-for="FlightStatus" class="form-label">
+                            Flight Status
+                        </label>
+
                         <select asp-for="FlightStatus" class="form-select">
-                            <option value="true">نشطة</option>
-                            <option value="false">غير نشطة</option>
+
+                            <option value="@((int)FlightStatus.Scheduled)">
+                                Scheduled
+                            </option>
+
+                            <option value="@((int)FlightStatus.InProgress)">
+                                In Progress
+                            </option>
+
+                            <option value="@((int)FlightStatus.Completed)">
+                                Completed
+                            </option>
+
+                            <option value="@((int)FlightStatus.Cancelled)">
+                                Cancelled
+                            </option>
+
                         </select>
+
+                        <span asp-validation-for="FlightStatus"
+                              class="text-danger"></span>
                     </div>
+
                 </div>
 
                 <hr class="my-4" />
 
-                <button type="submit" class="btn btn-warning">حفظ التعديلات</button>
+                <button type="submit" class="btn btn-warning">
+                    Save Changes
+                </button>
 
-                <a asp-area="Admin" asp-controller="Flight"
-                   asp-action="Index" class="btn btn-secondary">
-                    إلغاء
+                <a asp-area="Admin"
+                   asp-controller="Flight"
+                   asp-action="Index"
+                   class="btn btn-secondary">
+                    Cancel
                 </a>
+
             </form>
+
         </div>
     </div>
 </div>

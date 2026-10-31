@@ -1,5 +1,6 @@
 ﻿using Flight_Booking_System.Models;
 using Flight_Booking_System.Models.Identity;
+using Flight_Booking_System.Models.Rewards;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,17 +11,20 @@ namespace Flight_Booking_System.Data
         public ApplicationDbContext(
             DbContextOptions<ApplicationDbContext> options)
             : base(options)
-        { 
+        {
         }
         public DbSet<ActivityLog> ActivityLogs { get; set; }
         public DbSet<Setting> settings { get; set; }
-        public DbSet<city> Cities { get; set;  }
+        public DbSet<city> Cities { get; set; }
         public DbSet<Airline> Airlines { get; set; }
         public DbSet<Aircraft> Aircrafts { get; set; }
         public DbSet<AircraftClass> AircraftClasses { get; set; }
         public DbSet<Class> Classes { get; set; }
         public DbSet<Seat> Seats { get; set; }
         public DbSet<AirPort> AirPorts { get; set; }
+        public DbSet<RewardAccount> RewardAccounts { get; set; }
+
+        public DbSet<RewardTransaction> RewardTransactions { get; set; }
         public DbSet<Flight_Booking_System.Models.Route> Routes { get; set; }
         public DbSet<Flight> Flights { get; set; }
         public DbSet<Passenger> Passengers { get; set; }
@@ -46,7 +50,7 @@ namespace Flight_Booking_System.Data
             // Route → To Airport
             // =========================
 
-            modelBuilder.Entity<Flight_Booking_System.Models. Route>()
+            modelBuilder.Entity<Flight_Booking_System.Models.Route>()
                 .HasOne(r => r.ToAirport)
                 .WithMany(a => a.ToRoutes)
                 .HasForeignKey(r => r.ToAirportId)
@@ -95,6 +99,72 @@ namespace Flight_Booking_System.Data
                 .WithMany()
                 .HasForeignKey(f => f.RouteId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // =========================
+            // Reward Account → User
+            // =========================
+
+            modelBuilder.Entity<RewardAccount>()
+        .HasIndex(x => x.UserId)
+        .IsUnique();
+
+            modelBuilder.Entity<RewardAccount>()
+        .HasOne(x => x.User)
+        .WithOne()
+        .HasForeignKey<RewardAccount>(x => x.UserId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+
+            // =========================
+            // Reward Transaction → User
+            // =========================
+
+            modelBuilder.Entity<RewardTransaction>()
+        .HasOne(x => x.User)
+        .WithMany()
+        .HasForeignKey(x => x.UserId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+
+            // =========================
+            // Reward Transaction → Booking
+            // =========================
+
+            modelBuilder.Entity<RewardTransaction>()
+        .HasOne(x => x.Booking)
+        .WithMany()
+        .HasForeignKey(x => x.BookingId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+
+            // =========================
+            // Reward Transaction → Reference Key
+            // =========================
+
+            modelBuilder.Entity<RewardTransaction>()
+        .HasIndex(x => x.ReferenceKey)
+        .IsUnique();
+
+
+            // =========================
+            // Reward Account → Points
+            // =========================
+
+            modelBuilder.Entity<RewardAccount>()
+        .ToTable(t => t.HasCheckConstraint(
+            "CK_RewardAccount_AvailablePoints",
+            "[AvailablePoints] >= 0"));
+
+            modelBuilder.Entity<RewardAccount>()
+                .ToTable(t => t.HasCheckConstraint(
+                    "CK_RewardAccount_TotalPoints",
+                    "[TotalEarnedPoints] >= 0 AND [TotalRedeemedPoints] >= 0"));
+
+            modelBuilder.Entity<RewardTransaction>()
+                .ToTable(t => t.HasCheckConstraint(
+                    "CK_RewardTransaction_Points",
+                    "[Points] > 0"));
+
         }
     }
 }

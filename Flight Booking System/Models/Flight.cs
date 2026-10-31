@@ -1,4 +1,7 @@
-﻿namespace Flight_Booking_System.Models
+﻿
+using Flight_Booking_System.Models.ENUM;
+
+namespace Flight_Booking_System.Models
 {
     public class Flight
     {
@@ -7,9 +10,8 @@
         public int AircraftId { get; set; }
         public Aircraft? Aircraft { get; set; } = null!;
 
-
-        public  bool FlightStatus { get; set; }
-
+        public FlightStatus FlightStatus { get; set; }
+            = FlightStatus.Scheduled;
 
         public int AirlineId { get; set; }
         public Airline? Airline { get; set; } = null!;

@@ -21,10 +21,25 @@ namespace Flight_Booking_System.ViewModels.Customer
 
         public DateTime ArrivalDateTime { get; set; }
 
+        // Reward Points
+        public int PointsRedeemed { get; set; }
+
+        public decimal DiscountAmount { get; set; }
+
+        // Ticket Information
         public List<BookingTicketViewModel> Tickets { get; set; }
             = new List<BookingTicketViewModel>();
 
-        public decimal TotalPrice => Tickets.Sum(t => t.TicketPrice);
+        // Total before discount
+        public decimal Subtotal =>
+            Tickets.Sum(t => t.TicketPrice);
+
+        // Final amount after discount
+        public decimal TotalPrice =>
+            Math.Max(0, Subtotal - DiscountAmount);
+
+        // Actual amount stored in Payment
+        public decimal AmountPaid { get; set; }
     }
 
     public class BookingTicketViewModel
