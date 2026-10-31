@@ -1,6 +1,8 @@
 ﻿
 using System.Linq.Expressions;
 using System.Security.Claims;
+
+using Flight_Booking_System.Data;
 using Flight_Booking_System.Models;
 using Flight_Booking_System.Models.ENUM;
 using Flight_Booking_System.ModelsServices;
@@ -8,7 +10,9 @@ using Flight_Booking_System.Repositories;
 using Flight_Booking_System.Services;
 using Flight_Booking_System.Services.Rewards;
 using Flight_Booking_System.ViewModels.Customer;
+
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Flight_Booking_System.Areas.Customer.Controllers
 {
@@ -24,8 +28,11 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
         private readonly IRepository<Setting> _settingRepository;
         private readonly IRepository<AircraftClass> _aircraftClassRepository;
         private readonly IRepository<Payment> _paymentRepository;
+
         private readonly IActivityLogService _activityLogService;
         private readonly IRewardService _rewardService;
+
+        private readonly ApplicationDbContext _context;
 
         public PassengerController(
             IRepository<Passenger> passengerRepository,
@@ -38,7 +45,8 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             IRepository<AircraftClass> aircraftClassRepository,
             IRepository<Payment> paymentRepository,
             IActivityLogService activityLogService,
-            IRewardService rewardService)
+            IRewardService rewardService,
+            ApplicationDbContext context)
         {
             _passengerRepository = passengerRepository;
             _seatRepository = seatRepository;
@@ -49,8 +57,11 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             _settingRepository = settingRepository;
             _aircraftClassRepository = aircraftClassRepository;
             _paymentRepository = paymentRepository;
+
             _activityLogService = activityLogService;
             _rewardService = rewardService;
+
+            _context = context;
         }
 
         // =========================================================
@@ -85,21 +96,15 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             if (!selectedSeatIds.Any())
                 return BadRequest("No valid seats selected.");
 
-            // =====================================================
-            // Get Available Reward Points
-            // =====================================================
-
             int availablePoints =
                 await _rewardService.GetAvailablePointsAsync(userId);
 
-            // =====================================================
             // Get Flight
-            // =====================================================
 
             var flight = await _flightRepository.GetOneAsync(
                 filter: f =>
                     f.Id == flightId &&
-                    f.FlightStatus &&
+                    f.FlightStatus == FlightStatus.Scheduled &&
                     f.DepartureDateTime >= DateTime.Now,
 
                 includes:
@@ -118,9 +123,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             if (flight.Route == null)
                 return BadRequest("Flight route is not available.");
 
-            // =====================================================
             // Get Class
-            // =====================================================
 
             var classInfo = await _classRepository.GetOneAsync(
                 filter: c => c.Id == classId,
@@ -130,9 +133,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             if (classInfo == null)
                 return NotFound("Class not found.");
 
-            // =====================================================
             // Check Class belongs to Aircraft
-            // =====================================================
 
             var aircraftClass = await GetAircraftClass(
                 flight.AircraftId,
@@ -146,18 +147,14 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 );
             }
 
-            // =====================================================
             // Get Latest Setting
-            // =====================================================
 
             var setting = await GetLatestSetting();
 
             if (setting == null)
                 return BadRequest("Ticket price setting was not found.");
 
-            // =====================================================
             // Calculate Ticket Price
-            // =====================================================
 
             decimal distance = Convert.ToDecimal(flight.Route.Distance);
 
@@ -166,9 +163,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 setting.PricePerKm *
                 classInfo.DistancePercentage;
 
-            // =====================================================
             // Create ViewModel
-            // =====================================================
 
             var model = new PassengerBookingViewModel
             {
@@ -182,9 +177,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 TotalPrice = 0m
             };
 
-            // =====================================================
-            // Validate selected seats
-            // =====================================================
+            // Validate Selected Seats
 
             foreach (var seatId in selectedSeatIds)
             {
@@ -239,9 +232,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             model.TotalPrice =
                 model.TicketPrice * model.Passengers.Count;
 
-            // =====================================================
             // Activity Log
-            // =====================================================
 
             await _activityLogService.LogAsync(
                 nameof(PassengerController),
@@ -355,10 +346,6 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
         public async Task<IActionResult> Create(
             PassengerBookingViewModel model)
         {
-            // =====================================================
-            // Check Login
-            // =====================================================
-
             if (User.Identity?.IsAuthenticated != true)
                 return Challenge();
 
@@ -368,9 +355,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             if (string.IsNullOrWhiteSpace(userId))
                 return Unauthorized();
 
-            // =====================================================
             // Validate Passengers
-            // =====================================================
 
             if (model.Passengers == null ||
                 !model.Passengers.Any())
@@ -391,14 +376,12 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 return View(model);
             }
 
-            // =====================================================
             // Get Flight
-            // =====================================================
 
             var flight = await _flightRepository.GetOneAsync(
                 filter: f =>
                     f.Id == model.FlightId &&
-                    f.FlightStatus &&
+                    f.FlightStatus == FlightStatus.Scheduled &&
                     f.DepartureDateTime >= DateTime.Now,
 
                 includes:
@@ -417,9 +400,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             if (flight.Route == null)
                 return BadRequest("Flight route is not available.");
 
-            // =====================================================
             // Get Class
-            // =====================================================
 
             var classInfo = await _classRepository.GetOneAsync(
                 filter: c => c.Id == model.ClassId,
@@ -429,9 +410,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             if (classInfo == null)
                 return NotFound("Class not found.");
 
-            // =====================================================
             // Verify Aircraft Class
-            // =====================================================
 
             var aircraftClass = await GetAircraftClass(
                 flight.AircraftId,
@@ -445,18 +424,14 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 );
             }
 
-            // =====================================================
             // Get Latest Setting
-            // =====================================================
 
             var setting = await GetLatestSetting();
 
             if (setting == null)
                 return BadRequest("Ticket price setting was not found.");
 
-            // =====================================================
             // Calculate Ticket Price on Server
-            // =====================================================
 
             decimal distance = Convert.ToDecimal(flight.Route.Distance);
 
@@ -468,9 +443,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             decimal subtotal =
                 ticketPrice * model.Passengers.Count;
 
-            // =====================================================
             // Validate Reward Points on Server
-            // =====================================================
 
             int availablePoints =
                 await _rewardService.GetAvailablePointsAsync(userId);
@@ -530,9 +503,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
 
             decimal finalTotal = subtotal - discountAmount;
 
-            // =====================================================
             // Validate Seat IDs
-            // =====================================================
 
             var seatIds = model.Passengers
                 .Select(p => p.SeatId)
@@ -548,13 +519,12 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
 
                 model.AvailablePoints = availablePoints;
                 model.TicketPrice = ticketPrice;
+                model.TotalPrice = subtotal;
 
                 return View(model);
             }
 
-            // =====================================================
             // Check Seat Availability
-            // =====================================================
 
             foreach (var passengerModel in model.Passengers)
             {
@@ -575,6 +545,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
 
                     model.AvailablePoints = availablePoints;
                     model.TicketPrice = ticketPrice;
+                    model.TotalPrice = subtotal;
 
                     return View(model);
                 }
@@ -597,14 +568,13 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
 
                     model.AvailablePoints = availablePoints;
                     model.TicketPrice = ticketPrice;
+                    model.TotalPrice = subtotal;
 
                     return View(model);
                 }
             }
 
-            // =====================================================
             // Find Existing Passengers
-            // =====================================================
 
             var matchedPassengers = new List<Passenger?>();
 
@@ -627,8 +597,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                         await _passengerRepository.GetOneAsync(
                             filter: p =>
                                 p.Id == passengerModel.SelectedPassengerId.Value,
-
-                            IsTracking: true
+                            IsTracking: false
                         );
 
                     if (matchedPassenger == null)
@@ -640,6 +609,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
 
                         model.AvailablePoints = availablePoints;
                         model.TicketPrice = ticketPrice;
+                        model.TotalPrice = subtotal;
 
                         return View(model);
                     }
@@ -677,6 +647,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
 
                         model.AvailablePoints = availablePoints;
                         model.TicketPrice = ticketPrice;
+                        model.TotalPrice = subtotal;
 
                         return View(model);
                     }
@@ -715,6 +686,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
 
                         model.AvailablePoints = availablePoints;
                         model.TicketPrice = ticketPrice;
+                        model.TotalPrice = subtotal;
 
                         return View(model);
                     }
@@ -731,6 +703,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
 
                         model.AvailablePoints = availablePoints;
                         model.TicketPrice = ticketPrice;
+                        model.TotalPrice = subtotal;
 
                         return View(model);
                     }
@@ -739,9 +712,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 matchedPassengers.Add(matchedPassenger);
             }
 
-            // =====================================================
             // Prevent Duplicate Passenger in Same Booking
-            // =====================================================
 
             for (int i = 0; i < model.Passengers.Count; i++)
             {
@@ -761,6 +732,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
 
                         model.AvailablePoints = availablePoints;
                         model.TicketPrice = ticketPrice;
+                        model.TotalPrice = subtotal;
 
                         return View(model);
                     }
@@ -796,15 +768,14 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
 
                         model.AvailablePoints = availablePoints;
                         model.TicketPrice = ticketPrice;
+                        model.TotalPrice = subtotal;
 
                         return View(model);
                     }
                 }
             }
 
-            // =====================================================
             // Create Booking
-            // =====================================================
 
             var booking = new Booking
             {
@@ -831,13 +802,12 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
 
                 model.AvailablePoints = availablePoints;
                 model.TicketPrice = ticketPrice;
+                model.TotalPrice = subtotal;
 
                 return View(model);
             }
 
-            // =====================================================
             // Reserve Reward Points
-            // =====================================================
 
             if (pointsToRedeem > 0)
             {
@@ -863,6 +833,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                         await _rewardService.GetAvailablePointsAsync(userId);
 
                     model.TicketPrice = ticketPrice;
+                    model.PointsToRedeem = 0;
                     model.DiscountAmount = 0m;
                     model.TotalPrice = subtotal;
 
@@ -880,207 +851,222 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 $"Customer created booking {booking.BookingReference} with {booking.NumberOfTickets} tickets. Status: Pending. Points reserved: {pointsToRedeem}. Discount: {discountAmount:N2}."
             );
 
-            // =====================================================
-            // Save Passengers + Tickets
-            // =====================================================
+            await using var dbTransaction =
+                await _context.Database.BeginTransactionAsync();
 
-            for (int i = 0; i < model.Passengers.Count; i++)
+            try
             {
-                var passengerModel = model.Passengers[i];
+                // Save Passengers and Tickets
 
-                string passport =
-                    passengerModel.PassportNumber?.Trim()
-                    ?? string.Empty;
-
-                string nationalId =
-                    passengerModel.NationalID?.Trim()
-                    ?? string.Empty;
-
-                Passenger passenger;
-
-                // =================================================
-                // Existing Passenger
-                // =================================================
-
-                if (matchedPassengers[i] != null)
+                for (int i = 0; i < model.Passengers.Count; i++)
                 {
-                    passenger = await _passengerRepository.GetOneAsync(
-                        filter: p =>
-                            p.Id == matchedPassengers[i]!.Id,
+                    var passengerModel = model.Passengers[i];
 
-                        IsTracking: true
-                    );
+                    string passport =
+                        passengerModel.PassportNumber?.Trim()
+                        ?? string.Empty;
 
-                    if (passenger == null)
+                    string nationalId =
+                        passengerModel.NationalID?.Trim()
+                        ?? string.Empty;
+
+                    Passenger passenger;
+
+                    if (matchedPassengers[i] != null)
                     {
-                        ModelState.AddModelError(
-                            "",
-                            "A selected passenger could not be loaded."
+                        passenger = await _passengerRepository.GetOneAsync(
+                            filter: p =>
+                                p.Id == matchedPassengers[i]!.Id,
+                            IsTracking: true
                         );
 
-                        return View(model);
-                    }
+                        if (passenger == null)
+                        {
+                            throw new InvalidOperationException(
+                                "A selected passenger could not be loaded."
+                            );
+                        }
 
-                    passenger.FirstName =
-                        passengerModel.FirstName.Trim();
+                        passenger.FirstName =
+                            passengerModel.FirstName.Trim();
 
-                    passenger.MiddleName =
-                        passengerModel.MiddleName?.Trim()
-                        ?? string.Empty;
-
-                    passenger.LastName =
-                        passengerModel.LastName.Trim();
-
-                    passenger.PassportNumber = passport;
-                    passenger.NationalID = nationalId;
-
-                    passenger.Phone =
-                        passengerModel.Phone?.Trim()
-                        ?? string.Empty;
-
-                    passenger.Email =
-                        passengerModel.Email?.Trim()
-                        ?? string.Empty;
-
-                    passenger.DateOfBirth =
-                        passengerModel.DateOfBirth;
-
-                    _passengerRepository.Update(passenger);
-
-                    var updateResult =
-                        await _passengerRepository.CommitAsync();
-
-                    if (updateResult <= 0)
-                    {
-                        ModelState.AddModelError(
-                            "",
-                            "Unable to update passenger information."
-                        );
-
-                        return View(model);
-                    }
-
-                    await _activityLogService.LogAsync(
-                        nameof(PassengerController),
-                        nameof(Create),
-                        nameof(Passenger),
-                        passenger.Id.ToString(),
-                        $"Existing passenger {passenger.Id} information was updated during booking {booking.BookingReference}."
-                    );
-                }
-                else
-                {
-                    // =================================================
-                    // New Passenger
-                    // =================================================
-
-                    passenger = new Passenger
-                    {
-                        FirstName = passengerModel.FirstName.Trim(),
-
-                        MiddleName =
+                        passenger.MiddleName =
                             passengerModel.MiddleName?.Trim()
-                            ?? string.Empty,
+                            ?? string.Empty;
 
-                        LastName = passengerModel.LastName.Trim(),
-                        PassportNumber = passport,
-                        NationalID = nationalId,
+                        passenger.LastName =
+                            passengerModel.LastName.Trim();
 
-                        Phone =
+                        passenger.PassportNumber = passport;
+                        passenger.NationalID = nationalId;
+
+                        passenger.Phone =
                             passengerModel.Phone?.Trim()
-                            ?? string.Empty,
+                            ?? string.Empty;
 
-                        Email =
+                        passenger.Email =
                             passengerModel.Email?.Trim()
-                            ?? string.Empty,
+                            ?? string.Empty;
 
-                        DateOfBirth = passengerModel.DateOfBirth
+                        passenger.DateOfBirth =
+                            passengerModel.DateOfBirth;
+
+                        _passengerRepository.Update(passenger);
+
+                        var updateResult =
+                            await _passengerRepository.CommitAsync();
+
+                        if (updateResult < 0)
+                        {
+                            throw new InvalidOperationException(
+                                "Unable to update passenger information."
+                            );
+                        }
+
+                        await _activityLogService.LogAsync(
+                            nameof(PassengerController),
+                            nameof(Create),
+                            nameof(Passenger),
+                            passenger.Id.ToString(),
+                            $"Existing passenger {passenger.Id} information was updated during booking {booking.BookingReference}."
+                        );
+                    }
+                    else
+                    {
+                        passenger = new Passenger
+                        {
+                            FirstName = passengerModel.FirstName.Trim(),
+
+                            MiddleName =
+                                passengerModel.MiddleName?.Trim()
+                                ?? string.Empty,
+
+                            LastName = passengerModel.LastName.Trim(),
+
+                            PassportNumber = passport,
+                            NationalID = nationalId,
+
+                            Phone =
+                                passengerModel.Phone?.Trim()
+                                ?? string.Empty,
+
+                            Email =
+                                passengerModel.Email?.Trim()
+                                ?? string.Empty,
+
+                            DateOfBirth = passengerModel.DateOfBirth
+                        };
+
+                        await _passengerRepository.InsertAsync(passenger);
+
+                        var passengerResult =
+                            await _passengerRepository.CommitAsync();
+
+                        if (passengerResult <= 0 || passenger.Id <= 0)
+                        {
+                            throw new InvalidOperationException(
+                                "Unable to save passenger information."
+                            );
+                        }
+
+                        await _activityLogService.LogAsync(
+                            nameof(PassengerController),
+                            nameof(Create),
+                            nameof(Passenger),
+                            passenger.Id.ToString(),
+                            $"New passenger {passenger.Id} was created during booking {booking.BookingReference}."
+                        );
+                    }
+
+                    // Create Ticket
+
+                    var ticket = new Ticket
+                    {
+                        BookingId = booking.Id,
+                        PassengerId = passenger.Id,
+                        FlightId = flight.Id,
+                        SeatId = passengerModel.SeatId,
+                        TicketPrice = ticketPrice
                     };
 
-                    await _passengerRepository.InsertAsync(passenger);
+                    await _ticketRepository.InsertAsync(ticket);
 
-                    var passengerResult =
-                        await _passengerRepository.CommitAsync();
+                    var ticketResult =
+                        await _ticketRepository.CommitAsync();
 
-                    if (passengerResult <= 0 || passenger.Id <= 0)
+                    if (ticketResult <= 0 || ticket.Id <= 0)
                     {
-                        ModelState.AddModelError(
-                            "",
-                            "Unable to save passenger information."
+                        throw new InvalidOperationException(
+                            "Unable to create ticket."
                         );
-
-                        return View(model);
                     }
 
                     await _activityLogService.LogAsync(
                         nameof(PassengerController),
                         nameof(Create),
-                        nameof(Passenger),
-                        passenger.Id.ToString(),
-                        $"New passenger {passenger.Id} was created during booking {booking.BookingReference}."
+                        nameof(Ticket),
+                        ticket.Id.ToString(),
+                        $"Ticket created for booking {booking.BookingReference}. Flight: {flight.Id}, Seat: {passengerModel.SeatId}, Passenger: {passenger.Id}."
                     );
                 }
 
-                // =================================================
-                // Create Ticket
-                // =================================================
+                // Create Payment Record
 
-                var ticket = new Ticket
+                var payment = new Payment
                 {
                     BookingId = booking.Id,
-                    PassengerId = passenger.Id,
-                    FlightId = flight.Id,
-                    SeatId = passengerModel.SeatId,
-                    TicketPrice = ticketPrice
+                    PaymentDate = DateTime.Now,
+                    PaymentMethod = PaymentMethod.CreditCard,
+                    Amount = finalTotal,
+                    PaymentStatus = false
                 };
 
-                await _ticketRepository.InsertAsync(ticket);
+                await _paymentRepository.InsertAsync(payment);
 
-                var ticketResult =
-                    await _ticketRepository.CommitAsync();
+                var paymentResult =
+                    await _paymentRepository.CommitAsync();
 
-                if (ticketResult <= 0)
+                if (paymentResult <= 0 || payment.Id <= 0)
                 {
-                    ModelState.AddModelError(
-                        "",
-                        "Unable to create ticket."
+                    throw new InvalidOperationException(
+                        "Unable to create payment record."
                     );
-
-                    return View(model);
                 }
 
                 await _activityLogService.LogAsync(
                     nameof(PassengerController),
                     nameof(Create),
-                    nameof(Ticket),
-                    ticket.Id.ToString(),
-                    $"Ticket created for booking {booking.BookingReference}. Flight: {flight.Id}, Seat: {passengerModel.SeatId}, Passenger: {passenger.Id}."
+                    nameof(Payment),
+                    payment.Id.ToString(),
+                    $"Payment record created for booking {booking.BookingReference}. Original subtotal: {subtotal:N2}. Discount: {discountAmount:N2}. Amount: {payment.Amount:N2}. Method: {payment.PaymentMethod}. Status: Pending."
                 );
+
+                await dbTransaction.CommitAsync();
             }
-
-            // =====================================================
-            // Create Payment Record
-            // =====================================================
-
-            decimal totalAmount = finalTotal;
-
-            var payment = new Payment
+            catch (Exception ex)
             {
-                BookingId = booking.Id,
-                PaymentDate = DateTime.Now,
-                PaymentMethod = PaymentMethod.CreditCard,
-                Amount = totalAmount,
-                PaymentStatus = false
-            };
+                await dbTransaction.RollbackAsync();
+                await dbTransaction.DisposeAsync();
 
-            await _paymentRepository.InsertAsync(payment);
+                _context.ChangeTracker.Clear();
 
-            var paymentResult =
-                await _paymentRepository.CommitAsync();
+                var failedBooking =
+                    await _bookingRepository.GetOneAsync(
+                        filter: b =>
+                            b.Id == booking.Id &&
+                            b.UserId == userId,
+                        IsTracking: true
+                    );
 
-            if (paymentResult <= 0 || payment.Id <= 0)
-            {
-                // Return reserved points if payment record could not be saved.
+                if (failedBooking != null)
+                {
+                    failedBooking.Status = "Cancelled";
+
+                    _bookingRepository.Update(failedBooking);
+
+                    await _bookingRepository.CommitAsync();
+                }
+
                 if (pointsToRedeem > 0)
                 {
                     await _rewardService.ReleaseReservedPointsAsync(
@@ -1089,37 +1075,31 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                     );
                 }
 
-                booking.Status = "Cancelled";
-
-                _bookingRepository.Update(booking);
-                await _bookingRepository.CommitAsync();
+                await _activityLogService.LogAsync(
+                    nameof(PassengerController),
+                    nameof(Create),
+                    nameof(Booking),
+                    booking.Id.ToString(),
+                    $"Booking {booking.BookingReference} was cancelled because saving booking details failed. Error: {ex.Message}"
+                );
 
                 ModelState.AddModelError(
                     "",
-                    "Unable to create payment record. The booking was cancelled."
+                    "Unable to complete your booking. Your booking was cancelled and reserved points were returned. Please try again."
                 );
 
                 model.AvailablePoints =
                     await _rewardService.GetAvailablePointsAsync(userId);
 
+                model.TicketPrice = ticketPrice;
+                model.PointsToRedeem = 0;
+                model.DiscountAmount = 0m;
+                model.TotalPrice = subtotal;
+
                 return View(model);
             }
 
-            // =====================================================
-            // Activity Log: Payment Record Created
-            // =====================================================
-
-            await _activityLogService.LogAsync(
-                nameof(PassengerController),
-                nameof(Create),
-                nameof(Payment),
-                payment.Id.ToString(),
-                $"Payment record created for booking {booking.BookingReference}. Original subtotal: {subtotal:N2}. Discount: {discountAmount:N2}. Amount: {payment.Amount:N2}. Method: {payment.PaymentMethod}. Status: Pending."
-            );
-
-            // =====================================================
             // Redirect To Stripe Checkout
-            // =====================================================
 
             return RedirectToAction(
                 "Checkout",

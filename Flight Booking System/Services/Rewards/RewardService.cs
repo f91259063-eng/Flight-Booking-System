@@ -20,6 +20,57 @@ namespace Flight_Booking_System.Services.Rewards
         private const decimal DiscountPerPoints = 50m;
 
         // =====================================
+        // Ensure Reward Account
+        // =====================================
+
+        public async Task EnsureAccountAsync(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                throw new ArgumentException(
+                    "User ID is required.", nameof(userId));
+
+            bool accountExists = await _context.RewardAccounts
+                .AnyAsync(x => x.UserId == userId);
+
+            if (accountExists)
+                return;
+
+            bool userExists = await _context.Users
+                .AnyAsync(x => x.Id == userId);
+
+            if (!userExists)
+                throw new InvalidOperationException(
+                    "User does not exist.");
+
+            var account = new RewardAccount
+            {
+                UserId = userId,
+                AvailablePoints = 0,
+                ReservedPoints = 0,
+                TotalEarnedPoints = 0,
+                TotalRedeemedPoints = 0
+            };
+
+            _context.RewardAccounts.Add(account);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                _context.Entry(account).State = EntityState.Detached;
+
+                bool createdByAnotherRequest =
+                    await _context.RewardAccounts
+                        .AnyAsync(x => x.UserId == userId);
+
+                if (!createdByAnotherRequest)
+                    throw;
+            }
+        }
+
+        // =====================================
         // Get Available Points
         // =====================================
 
@@ -81,7 +132,6 @@ namespace Flight_Booking_System.Services.Rewards
                 string redeemKey = $"BOOKING-{bookingId}-REDEEM";
                 string releaseKey = $"BOOKING-{bookingId}-RELEASE";
 
-                // Verify booking ownership.
                 var booking = await _context.Bookings
                     .FirstOrDefaultAsync(x =>
                         x.Id == bookingId &&
@@ -91,18 +141,6 @@ namespace Flight_Booking_System.Services.Rewards
                     booking.PointsRedeemed != points)
                 {
                     return false;
-                }
-
-                // Prevent duplicate reservation.
-                var existingReserve =
-                    await _context.RewardTransactions
-                        .FirstOrDefaultAsync(x =>
-                            x.ReferenceKey == reserveKey);
-
-                if (existingReserve != null)
-                {
-                    return existingReserve.UserId == userId &&
-                           existingReserve.Points == points;
                 }
 
                 bool alreadyRedeemed =
@@ -116,6 +154,17 @@ namespace Flight_Booking_System.Services.Rewards
                 if (alreadyRedeemed || alreadyReleased)
                     return false;
 
+                var existingReserve =
+                    await _context.RewardTransactions
+                        .FirstOrDefaultAsync(x =>
+                            x.ReferenceKey == reserveKey);
+
+                if (existingReserve != null)
+                {
+                    return existingReserve.UserId == userId &&
+                           existingReserve.Points == points;
+                }
+
                 var account = await _context.RewardAccounts
                     .FirstOrDefaultAsync(x => x.UserId == userId);
 
@@ -125,7 +174,6 @@ namespace Flight_Booking_System.Services.Rewards
                     return false;
                 }
 
-                // Move points from available to reserved.
                 account.AvailablePoints -= points;
                 account.ReservedPoints += points;
 
@@ -171,19 +219,18 @@ namespace Flight_Booking_System.Services.Rewards
                 string redeemKey = $"BOOKING-{bookingId}-REDEEM";
                 string releaseKey = $"BOOKING-{bookingId}-RELEASE";
 
-                // Verify booking ownership and confirmation.
                 var booking = await _context.Bookings
                     .FirstOrDefaultAsync(x =>
                         x.Id == bookingId &&
                         x.UserId == userId);
 
                 if (booking == null ||
-                    booking.Status != "Confirmed")
+                    booking.Status != "Confirmed" ||
+                    booking.PointsRedeemed <= 0)
                 {
                     return false;
                 }
 
-                // Verify successful payment.
                 bool paymentSucceeded =
                     await _context.Payments.AnyAsync(x =>
                         x.BookingId == bookingId &&
@@ -192,7 +239,6 @@ namespace Flight_Booking_System.Services.Rewards
                 if (!paymentSucceeded)
                     return false;
 
-                // Check whether redemption was already confirmed.
                 var existingRedeem =
                     await _context.RewardTransactions
                         .FirstOrDefaultAsync(x =>
@@ -204,7 +250,6 @@ namespace Flight_Booking_System.Services.Rewards
                            existingRedeem.Points == booking.PointsRedeemed;
                 }
 
-                // A released reservation cannot be redeemed.
                 bool alreadyReleased =
                     await _context.RewardTransactions.AnyAsync(
                         x => x.ReferenceKey == releaseKey);
@@ -212,7 +257,6 @@ namespace Flight_Booking_System.Services.Rewards
                 if (alreadyReleased)
                     return false;
 
-                // Get original reservation.
                 var reserve =
                     await _context.RewardTransactions
                         .FirstOrDefaultAsync(x =>
@@ -235,7 +279,6 @@ namespace Flight_Booking_System.Services.Rewards
                     return false;
                 }
 
-                // Confirm redemption.
                 account.ReservedPoints -= reserve.Points;
                 account.TotalRedeemedPoints += reserve.Points;
 
@@ -294,9 +337,7 @@ namespace Flight_Booking_System.Services.Rewards
                             x.ReferenceKey == releaseKey);
 
                 if (existingRelease != null)
-                {
                     return existingRelease.UserId == userId;
-                }
 
                 var reserve =
                     await _context.RewardTransactions
@@ -304,7 +345,7 @@ namespace Flight_Booking_System.Services.Rewards
                             x.ReferenceKey == reserveKey &&
                             x.UserId == userId);
 
-                if (reserve == null)
+                if (reserve == null || reserve.Points <= 0)
                     return false;
 
                 var account = await _context.RewardAccounts
@@ -316,7 +357,6 @@ namespace Flight_Booking_System.Services.Rewards
                     return false;
                 }
 
-                // Return reserved points to available balance.
                 account.ReservedPoints -= reserve.Points;
                 account.AvailablePoints += reserve.Points;
 
@@ -329,6 +369,132 @@ namespace Flight_Booking_System.Services.Rewards
                         Points = reserve.Points,
                         Description = "Reserved points returned",
                         ReferenceKey = releaseKey,
+                        CreatedAt = DateTime.UtcNow
+                    });
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return true;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        // =====================================
+        // Earn Points After Completed Flight
+        // =====================================
+
+        public async Task<bool> EarnPointsAsync(
+            string userId,
+            int bookingId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                return false;
+
+            await using var transaction =
+                await _context.Database.BeginTransactionAsync(
+                    IsolationLevel.Serializable);
+
+            try
+            {
+                string earnKey = $"BOOKING-{bookingId}-EARN";
+
+                // Get confirmed booking
+                var booking = await _context.Bookings
+                    .FirstOrDefaultAsync(x =>
+                        x.Id == bookingId &&
+                        x.UserId == userId &&
+                        x.Status == "Confirmed");
+
+                if (booking == null)
+                    return false;
+
+                // Get successful payment
+                var payment = await _context.Payments
+                    .FirstOrDefaultAsync(x =>
+                        x.BookingId == bookingId &&
+                        x.PaymentStatus);
+
+                if (payment == null || payment.Amount <= 0)
+                    return false;
+
+                // Get ticket
+                var ticket = await _context.Tickets
+                    .FirstOrDefaultAsync(x =>
+                        x.BookingId == bookingId);
+
+                if (ticket == null)
+                    return false;
+
+                // Check flight status
+                var flight = await _context.Flights
+                    .FirstOrDefaultAsync(x =>
+                        x.Id == ticket.FlightId);
+
+                if (flight == null ||
+                    flight.FlightStatus !=
+                    Flight_Booking_System.Models.ENUM.FlightStatus.Completed)
+                {
+                    return false;
+                }
+
+                // Prevent duplicate earning
+                var existingEarn =
+                    await _context.RewardTransactions
+                        .FirstOrDefaultAsync(x =>
+                            x.ReferenceKey == earnKey);
+
+                if (existingEarn != null)
+                {
+                    return existingEarn.UserId == userId &&
+                           existingEarn.BookingId == bookingId;
+                }
+
+                // 1 point for every 100 EGP paid
+                int earnedPoints =
+                    (int)Math.Floor(payment.Amount / 100m);
+
+                if (earnedPoints <= 0)
+                    return false;
+
+                // Get or create Reward Account
+                var account = await _context.RewardAccounts
+                    .FirstOrDefaultAsync(x =>
+                        x.UserId == userId);
+
+                if (account == null)
+                {
+                    account = new RewardAccount
+                    {
+                        UserId = userId,
+                        AvailablePoints = 0,
+                        ReservedPoints = 0,
+                        TotalEarnedPoints = 0,
+                        TotalRedeemedPoints = 0
+                    };
+
+                    _context.RewardAccounts.Add(account);
+                }
+
+                // Add points
+                account.AvailablePoints += earnedPoints;
+                account.TotalEarnedPoints += earnedPoints;
+
+                // Record transaction
+                _context.RewardTransactions.Add(
+                    new RewardTransaction
+                    {
+                        UserId = userId,
+                        BookingId = bookingId,
+                        TransactionType = "Earn",
+                        Points = earnedPoints,
+                        Description =
+                            $"Earned {earnedPoints} points after completed flight",
+                        ReferenceKey = earnKey,
                         CreatedAt = DateTime.UtcNow
                     });
 

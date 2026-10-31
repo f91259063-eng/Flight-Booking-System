@@ -1,4 +1,5 @@
-﻿
+﻿using Flight_Booking_System.Models.ENUM;
+
 namespace Flight_Booking_System.ViewModels.Customer
 {
     public class AvailableFlightViewModel
@@ -21,6 +22,6 @@ namespace Flight_Booking_System.ViewModels.Customer
 
         public DateTime ArrivalDateTime { get; set; }
 
-        public bool FlightStatus { get; set; }
+        public FlightStatus FlightStatus { get; set; }
     }
 }

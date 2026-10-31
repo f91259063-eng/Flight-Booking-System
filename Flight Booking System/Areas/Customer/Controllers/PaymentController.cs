@@ -1,5 +1,6 @@
 ﻿
 using System.Security.Claims;
+using Flight_Booking_System.Data;
 using Flight_Booking_System.Models;
 using Flight_Booking_System.ModelsServices;
 using Flight_Booking_System.Repositories;
@@ -7,6 +8,7 @@ using Flight_Booking_System.Services;
 using Flight_Booking_System.Services.Rewards;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Stripe;
 using Stripe.Checkout;
@@ -22,19 +24,22 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
         private readonly StripeSettings _stripeSettings;
         private readonly IActivityLogService _activityLogService;
         private readonly IRewardService _rewardService;
+        private readonly ApplicationDbContext _context;
 
         public PaymentController(
             IRepository<Booking> bookingRepository,
             IRepository<Payment> paymentRepository,
             IOptions<StripeSettings> stripeOptions,
             IActivityLogService activityLogService,
-            IRewardService rewardService)
+            IRewardService rewardService,
+            ApplicationDbContext context)
         {
             _bookingRepository = bookingRepository;
             _paymentRepository = paymentRepository;
             _stripeSettings = stripeOptions.Value;
             _activityLogService = activityLogService;
             _rewardService = rewardService;
+            _context = context;
         }
 
         // GET: /Customer/Payment/Checkout?bookingId=1
@@ -66,8 +71,13 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 booking.Status == "Confirmed")
             {
                 return RedirectToAction(
-                    "Confirmation", "Booking",
-                    new { area = "Customer", id = booking.Id });
+                    "Confirmation",
+                    "Booking",
+                    new
+                    {
+                        area = "Customer",
+                        id = booking.Id
+                    });
             }
 
             if (booking.Status != "Pending")
@@ -77,10 +87,14 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 return BadRequest("Invalid payment amount.");
 
             if (string.IsNullOrWhiteSpace(_stripeSettings.SecretKey))
-                return StatusCode(500, "Stripe SecretKey is missing.");
+                return StatusCode(
+                    500,
+                    "Stripe SecretKey is missing.");
 
             if (string.IsNullOrWhiteSpace(_stripeSettings.Currency))
-                return StatusCode(500, "Stripe Currency is missing.");
+                return StatusCode(
+                    500,
+                    "Stripe Currency is missing.");
 
             StripeConfiguration.ApiKey = _stripeSettings.SecretKey;
 
@@ -124,32 +138,38 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                     {
                         Quantity = 1,
 
-                        PriceData = new SessionLineItemPriceDataOptions
-                        {
-                            Currency =
-                                _stripeSettings.Currency.ToLowerInvariant(),
+                        PriceData =
+                            new SessionLineItemPriceDataOptions
+                            {
+                                Currency =
+                                    _stripeSettings.Currency
+                                        .ToLowerInvariant(),
 
-                            UnitAmount = amountInSmallestUnit,
+                                UnitAmount = amountInSmallestUnit,
 
-                            ProductData =
-                                new SessionLineItemPriceDataProductDataOptions
-                                {
-                                    Name =
-                                        $"Flight Booking {booking.BookingReference}",
-
-                                    Description =
-                                        $"Booking Reference: {booking.BookingReference}. " +
-                                        $"Number of tickets: {ticketCount}. " +
-                                        $"Total booking amount: {payment.Amount:N2} " +
-                                        $"{_stripeSettings.Currency.ToUpperInvariant()}.",
-
-                                    Metadata = new Dictionary<string, string>
+                                ProductData =
+                                    new SessionLineItemPriceDataProductDataOptions
                                     {
-                                        ["BookingId"] = booking.Id.ToString(),
-                                        ["NumberOfTickets"] = ticketCount.ToString()
+                                        Name =
+                                            $"Flight Booking {booking.BookingReference}",
+
+                                        Description =
+                                            $"Booking Reference: {booking.BookingReference}. " +
+                                            $"Number of tickets: {ticketCount}. " +
+                                            $"Total booking amount: {payment.Amount:N2} " +
+                                            $"{_stripeSettings.Currency.ToUpperInvariant()}.",
+
+                                        Metadata =
+                                            new Dictionary<string, string>
+                                            {
+                                                ["BookingId"] =
+                                                    booking.Id.ToString(),
+
+                                                ["NumberOfTickets"] =
+                                                    ticketCount.ToString()
+                                            }
                                     }
-                                }
-                        }
+                            }
                     }
                 }
             };
@@ -158,8 +178,11 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             var session = await service.CreateAsync(options);
 
             if (string.IsNullOrWhiteSpace(session.Url))
+            {
                 return StatusCode(
-                    500, "Stripe Checkout URL was not returned.");
+                    500,
+                    "Stripe Checkout URL was not returned.");
+            }
 
             await _activityLogService.LogAsync(
                 nameof(PaymentController),
@@ -180,16 +203,24 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 return BadRequest("Missing Stripe session ID.");
 
             if (string.IsNullOrWhiteSpace(_stripeSettings.SecretKey))
-                return StatusCode(500, "Stripe SecretKey is missing.");
+            {
+                return StatusCode(
+                    500,
+                    "Stripe SecretKey is missing.");
+            }
 
             StripeConfiguration.ApiKey = _stripeSettings.SecretKey;
 
             var stripeService = new SessionService();
+
             var session = await stripeService.GetAsync(session_id);
 
             // Verify Stripe payment.
             if (session.PaymentStatus != "paid" ||
-                !int.TryParse(session.ClientReferenceId, out int bookingId))
+                session.Status != "complete" ||
+                !int.TryParse(
+                    session.ClientReferenceId,
+                    out int bookingId))
             {
                 return View("PaymentFailed");
             }
@@ -200,6 +231,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             if (string.IsNullOrEmpty(userId))
                 return Challenge();
 
+            // Load booking belonging to current user.
             var booking = await _bookingRepository.GetOneAsync(
                 filter: b => b.Id == bookingId &&
                              b.UserId == userId,
@@ -224,7 +256,8 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
 
             if (session.Metadata == null ||
                 !session.Metadata.TryGetValue(
-                    "BookingId", out var metadataBookingId) ||
+                    "BookingId",
+                    out var metadataBookingId) ||
                 metadataBookingId != bookingId.ToString() ||
                 session.AmountTotal != expectedAmount ||
                 !string.Equals(
@@ -236,19 +269,34 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                     "Payment details do not match the booking.");
             }
 
-            // Update payment and booking only once.
+            // Update payment and booking in one transaction.
             if (!payment.PaymentStatus)
             {
-                payment.PaymentStatus = true;
-                payment.PaymentDate = DateTime.Now;
+                if (booking.Status != "Pending")
+                {
+                    return BadRequest(
+                        "Booking is not in a pending state.");
+                }
 
-                booking.Status = "Confirmed";
+                await using var transaction =
+                    await _context.Database.BeginTransactionAsync();
 
-                _paymentRepository.Update(payment);
-                _bookingRepository.Update(booking);
+                try
+                {
+                    payment.PaymentStatus = true;
+                    payment.PaymentDate = DateTime.Now;
 
-                await _paymentRepository.CommitAsync();
-                await _bookingRepository.CommitAsync();
+                    booking.Status = "Confirmed";
+
+                    await _context.SaveChangesAsync();
+
+                    await transaction.CommitAsync();
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
 
                 await _activityLogService.LogAsync(
                     nameof(PaymentController),
@@ -260,8 +308,8 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             }
 
             // Confirm redeemed reward points after successful payment.
-            // This is outside the payment-status condition so it can
-            // be retried if the first confirmation attempt fails.
+            // This remains outside the payment-status condition
+            // so a failed confirmation can be retried.
             if (booking.PointsRedeemed > 0)
             {
                 var redemptionConfirmed =
@@ -273,14 +321,18 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 {
                     return StatusCode(
                         500,
-                        "Payment succeeded, but reward points confirmation failed. Please contact support."
-                    );
+                        "Payment succeeded, but reward points confirmation failed. Please contact support.");
                 }
             }
 
             return RedirectToAction(
-                "Confirmation", "Booking",
-                new { area = "Customer", id = booking.Id });
+                "Confirmation",
+                "Booking",
+                new
+                {
+                    area = "Customer",
+                    id = booking.Id
+                });
         }
 
         // GET: /Customer/Payment/Cancel?bookingId=1
@@ -307,8 +359,8 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
 
             ViewBag.BookingReference = booking.BookingReference;
 
-            // Keep reserved points while the booking remains Pending.
-            // The customer may retry Stripe Checkout.
+            // Keep reserved points while booking remains Pending.
+            // Customer can retry Stripe Checkout.
             if (payment != null && !payment.PaymentStatus)
             {
                 await _activityLogService.LogAsync(

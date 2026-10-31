@@ -1,8 +1,10 @@
+
 using System.Text;
 using System.Text.Encodings.Web;
 using Flight_Booking_System.Areas.Identity.ViewModels;
 using Flight_Booking_System.Models.Identity;
 using Flight_Booking_System.Services;
+using Flight_Booking_System.Services.Rewards;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
@@ -16,17 +18,20 @@ namespace Flight_Booking_System.Areas.Identity.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IAppEmailSender _emailSender;
         private readonly IWebHostEnvironment _env;
+        private readonly IRewardService _rewardService;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IAppEmailSender emailSender,
-            IWebHostEnvironment env)
+            IWebHostEnvironment env,
+            IRewardService rewardService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _env = env;
+            _rewardService = rewardService;
         }
 
         // =====================================================
@@ -56,7 +61,11 @@ namespace Flight_Booking_System.Areas.Identity.Controllers
 
             if (result.Succeeded)
             {
+                // Create Customer role assignment
                 await _userManager.AddToRoleAsync(user, "Customer");
+
+                // Create Reward Account automatically with zero points
+                await _rewardService.EnsureAccountAsync(user.Id);
 
                 var link = await SendConfirmationEmailAsync(user);
                 TempData["DevLink"] = _env.IsDevelopment() ? link : null;
@@ -90,6 +99,7 @@ namespace Flight_Booking_System.Areas.Identity.Controllers
                 return View("Message", Error("Invalid link", "This confirmation link is invalid or incomplete."));
 
             var user = await _userManager.FindByIdAsync(userId);
+
             if (user is null)
                 return View("Message", Error("Invalid link", "We couldn't find an account for this link."));
 
@@ -121,10 +131,11 @@ namespace Flight_Booking_System.Areas.Identity.Controllers
             if (user is not null && !await _userManager.IsEmailConfirmedAsync(user))
             {
                 var link = await SendConfirmationEmailAsync(user);
-                if (_env.IsDevelopment()) devLink = link;
+
+                if (_env.IsDevelopment())
+                    devLink = link;
             }
 
-            // Same answer whether or not the email exists (don't leak which emails are registered)
             return View("Message", new MessageViewModel
             {
                 Title = "Check your email",
@@ -139,8 +150,8 @@ namespace Flight_Booking_System.Areas.Identity.Controllers
         // Login / 2FA / Logout
         // =====================================================
 
-[HttpGet]
-public IActionResult Login(string? returnUrl = null)
+        [HttpGet]
+        public IActionResult Login(string? returnUrl = null)
         {
             return View(new LoginViewModel
             {
@@ -153,54 +164,35 @@ public IActionResult Login(string? returnUrl = null)
         public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
-            {
                 return View(model);
-            }
 
-            // Find user by email
             var user = await _userManager.FindByEmailAsync(model.Email);
 
             if (user == null)
             {
                 ModelState.AddModelError(
                     string.Empty,
-                    "Invalid email or password."
-                );
+                    "Invalid email or password.");
 
                 return View(model);
             }
 
-            // Sign in
             var result = await _signInManager.PasswordSignInAsync(
                 user,
                 model.Password,
                 model.RememberMe,
-                lockoutOnFailure: true
-            );
+                lockoutOnFailure: true);
 
-            // Login successful
             if (result.Succeeded)
             {
-                // Admin user
                 if (await _userManager.IsInRoleAsync(user, "Admin"))
                 {
                     return Redirect("/Admin/Home/Index");
-
-                    //return RedirectToAction(
-                    //    "Index",
-                    //    "Home",
-                    //    new { area = "Admin" }
-                    //);
                 }
 
                 return Redirect("/Customer/Flights/Index");
-
-
-                // Normal user
-                return RedirectToLocal(model.ReturnUrl);
             }
 
-            // Two-factor authentication
             if (result.RequiresTwoFactor)
             {
                 return RedirectToAction(
@@ -209,50 +201,49 @@ public IActionResult Login(string? returnUrl = null)
                     {
                         rememberMe = model.RememberMe,
                         returnUrl = model.ReturnUrl
-                    }
-                );
+                    });
             }
 
-            // Account locked
             if (result.IsLockedOut)
             {
                 ModelState.AddModelError(
                     string.Empty,
-                    "Account locked after too many failed attempts. Try again in a few minutes."
-                );
+                    "Account locked after too many failed attempts. Try again in a few minutes.");
 
                 return View(model);
             }
 
-            // Email confirmation required
             if (result.IsNotAllowed)
             {
                 ModelState.AddModelError(
                     string.Empty,
-                    "You need to confirm your email before logging in."
-                );
+                    "You need to confirm your email before logging in.");
 
                 ViewData["ShowResend"] = true;
 
                 return View(model);
             }
 
-            // Invalid password
             ModelState.AddModelError(
                 string.Empty,
-                "Invalid email or password."
-            );
+                "Invalid email or password.");
 
             return View(model);
         }
 
         [HttpGet]
-        public async Task<IActionResult> LoginWith2fa(bool rememberMe, string? returnUrl = null)
+        public async Task<IActionResult> LoginWith2fa(
+            bool rememberMe,
+            string? returnUrl = null)
         {
             if (await _signInManager.GetTwoFactorAuthenticationUserAsync() is null)
                 return RedirectToAction(nameof(Login));
 
-            return View(new TwoFactorLoginViewModel { RememberMe = rememberMe, ReturnUrl = returnUrl });
+            return View(new TwoFactorLoginViewModel
+            {
+                RememberMe = rememberMe,
+                ReturnUrl = returnUrl
+            });
         }
 
         [HttpPost, ValidateAntiForgeryToken]
@@ -264,16 +255,24 @@ public IActionResult Login(string? returnUrl = null)
             if (await _signInManager.GetTwoFactorAuthenticationUserAsync() is null)
                 return RedirectToAction(nameof(Login));
 
-            var code = model.TwoFactorCode.Replace(" ", string.Empty).Replace("-", string.Empty);
+            var code = model.TwoFactorCode
+                .Replace(" ", string.Empty)
+                .Replace("-", string.Empty);
 
             var result = await _signInManager.TwoFactorAuthenticatorSignInAsync(
-                code, model.RememberMe, model.RememberMachine);
+                code,
+                model.RememberMe,
+                model.RememberMachine);
 
             if (result.Succeeded)
                 return RedirectToLocal(model.ReturnUrl);
 
-            ModelState.AddModelError(string.Empty,
-                result.IsLockedOut ? "Account locked. Try again in a few minutes." : "Invalid authenticator code.");
+            ModelState.AddModelError(
+                string.Empty,
+                result.IsLockedOut
+                    ? "Account locked. Try again in a few minutes."
+                    : "Invalid authenticator code.");
+
             return View(model);
         }
 
@@ -283,20 +282,29 @@ public IActionResult Login(string? returnUrl = null)
             if (await _signInManager.GetTwoFactorAuthenticationUserAsync() is null)
                 return RedirectToAction(nameof(Login));
 
-            return View(new RecoveryCodeLoginViewModel { ReturnUrl = returnUrl });
+            return View(new RecoveryCodeLoginViewModel
+            {
+                ReturnUrl = returnUrl
+            });
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> LoginWithRecoveryCode(RecoveryCodeLoginViewModel model)
+        public async Task<IActionResult> LoginWithRecoveryCode(
+            RecoveryCodeLoginViewModel model)
         {
             var code = model.RecoveryCode.Replace(" ", string.Empty);
+
             var result = await _signInManager.TwoFactorRecoveryCodeSignInAsync(code);
 
             if (result.Succeeded)
                 return RedirectToLocal(model.ReturnUrl);
 
-            ModelState.AddModelError(string.Empty,
-                result.IsLockedOut ? "Account locked. Try again in a few minutes." : "Invalid recovery code.");
+            ModelState.AddModelError(
+                string.Empty,
+                result.IsLockedOut
+                    ? "Account locked. Try again in a few minutes."
+                    : "Invalid recovery code.");
+
             return View(model);
         }
 
@@ -304,6 +312,7 @@ public IActionResult Login(string? returnUrl = null)
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
+
             return RedirectToAction("Index", "Home", new { area = "" });
         }
 
@@ -315,7 +324,8 @@ public IActionResult Login(string? returnUrl = null)
         // =====================================================
 
         [HttpGet]
-        public IActionResult ForgotPassword() => View(new ForgotPasswordViewModel());
+        public IActionResult ForgotPassword()
+            => View(new ForgotPasswordViewModel());
 
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
@@ -324,25 +334,33 @@ public IActionResult Login(string? returnUrl = null)
                 return View(model);
 
             string? devLink = null;
+
             var user = await _userManager.FindByEmailAsync(model.Email);
 
             if (user is not null && await _userManager.IsEmailConfirmedAsync(user))
             {
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
-                var link = Url.Action(nameof(ResetPassword), "Account",
-                    new { area = "Identity", code, email = model.Email }, Request.Scheme)!;
+                var code = WebEncoders.Base64UrlEncode(
+                    Encoding.UTF8.GetBytes(token));
 
-                await _emailSender.SendAsync(user.Email!, "Reset your password",
+                var link = Url.Action(
+                    nameof(ResetPassword),
+                    "Account",
+                    new { area = "Identity", code, email = model.Email },
+                    Request.Scheme)!;
+
+                await _emailSender.SendAsync(
+                    user.Email!,
+                    "Reset your password",
                     $"<p>Hi {HtmlEncoder.Default.Encode(user.FirstName)},</p>" +
                     $"<p>You can reset your password by <a href=\"{HtmlEncoder.Default.Encode(link)}\">clicking here</a>.</p>" +
                     "<p>If you didn't ask for this, you can ignore this email.</p>");
 
-                if (_env.IsDevelopment()) devLink = link;
+                if (_env.IsDevelopment())
+                    devLink = link;
             }
 
-            // Same answer whether or not the email exists
             return View("Message", new MessageViewModel
             {
                 Title = "Check your email",
@@ -354,12 +372,22 @@ public IActionResult Login(string? returnUrl = null)
         }
 
         [HttpGet]
-        public IActionResult ResetPassword(string? code = null, string? email = null)
+        public IActionResult ResetPassword(
+            string? code = null,
+            string? email = null)
         {
             if (!TryDecode(code, out _))
-                return View("Message", Error("Invalid link", "This password reset link is invalid or incomplete."));
+            {
+                return View("Message", Error(
+                    "Invalid link",
+                    "This password reset link is invalid or incomplete."));
+            }
 
-            return View(new ResetPasswordViewModel { Code = code!, Email = email ?? string.Empty });
+            return View(new ResetPasswordViewModel
+            {
+                Code = code!,
+                Email = email ?? string.Empty
+            });
         }
 
         [HttpPost, ValidateAntiForgeryToken]
@@ -369,7 +397,11 @@ public IActionResult Login(string? returnUrl = null)
                 return View(model);
 
             if (!TryDecode(model.Code, out var token))
-                return View("Message", Error("Invalid link", "This password reset link is invalid or incomplete."));
+            {
+                return View("Message", Error(
+                    "Invalid link",
+                    "This password reset link is invalid or incomplete."));
+            }
 
             var done = new MessageViewModel
             {
@@ -380,15 +412,50 @@ public IActionResult Login(string? returnUrl = null)
             };
 
             var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user is null)
-                return View("Message", done);   // don't reveal that the email doesn't exist
 
-            var result = await _userManager.ResetPasswordAsync(user, token, model.Password);
+            if (user is null)
+                return View("Message", done);
+
+            var result = await _userManager.ResetPasswordAsync(
+                user,
+                token,
+                model.Password);
+
             if (result.Succeeded)
                 return View("Message", done);
 
             foreach (var error in result.Errors)
                 ModelState.AddModelError(string.Empty, error.Description);
+
+            return View(model);
+        }
+
+        // =====================================================
+        // My Account
+        // =====================================================
+
+        
+        [HttpGet]
+        public async Task<IActionResult> MyAccount()
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+                return Challenge();
+
+            var availablePoints =
+                await _rewardService.GetAvailablePointsAsync(user.Id);
+
+            var model = new MyAccountViewModel
+            {
+                FirstName = user.FirstName,
+                MiddleName = user.MiddelName,
+                LastName = user.LastName,
+                Email = user.Email ?? string.Empty,
+                PhoneNumber = user.PhoneNumber ?? string.Empty,
+
+                AvailablePoints = availablePoints
+            };
 
             return View(model);
         }
@@ -400,12 +467,24 @@ public IActionResult Login(string? returnUrl = null)
         private async Task<string> SendConfirmationEmailAsync(ApplicationUser user)
         {
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
-            var link = Url.Action(nameof(ConfirmEmail), "Account",
-                new { area = "Identity", userId = user.Id, code }, Request.Scheme)!;
+            var code = WebEncoders.Base64UrlEncode(
+                Encoding.UTF8.GetBytes(token));
 
-            await _emailSender.SendAsync(user.Email!, "Confirm your email",
+            var link = Url.Action(
+                nameof(ConfirmEmail),
+                "Account",
+                new
+                {
+                    area = "Identity",
+                    userId = user.Id,
+                    code
+                },
+                Request.Scheme)!;
+
+            await _emailSender.SendAsync(
+                user.Email!,
+                "Confirm your email",
                 $"<p>Hi {HtmlEncoder.Default.Encode(user.FirstName)},</p>" +
                 $"<p>Please confirm your account by <a href=\"{HtmlEncoder.Default.Encode(link)}\">clicking here</a>.</p>");
 
@@ -415,11 +494,15 @@ public IActionResult Login(string? returnUrl = null)
         private static bool TryDecode(string? code, out string decoded)
         {
             decoded = string.Empty;
-            if (string.IsNullOrEmpty(code)) return false;
+
+            if (string.IsNullOrEmpty(code))
+                return false;
 
             try
             {
-                decoded = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
+                decoded = Encoding.UTF8.GetString(
+                    WebEncoders.Base64UrlDecode(code));
+
                 return true;
             }
             catch (FormatException)
@@ -428,10 +511,23 @@ public IActionResult Login(string? returnUrl = null)
             }
         }
 
-        private string LoginUrl() => Url.Action(nameof(Login), "Account", new { area = "Identity" })!;
+        private string LoginUrl()
+        {
+            return Url.Action(
+                nameof(Login),
+                "Account",
+                new { area = "Identity" })!;
+        }
 
         private static MessageViewModel Error(string title, string message)
-            => new() { Title = title, Message = message, IsSuccess = false };
+        {
+            return new MessageViewModel
+            {
+                Title = title,
+                Message = message,
+                IsSuccess = false
+            };
+        }
 
         private IActionResult RedirectToLocal(string? returnUrl)
         {
@@ -440,28 +536,5 @@ public IActionResult Login(string? returnUrl = null)
 
             return RedirectToAction("Index", "Home", new { area = "" });
         }
-
-
-
-        [HttpGet]
-        public async Task<IActionResult> MyAccount()
-        {
-            var user = await _userManager.GetUserAsync(User);
-
-            if (user == null)
-                return Challenge();
-
-            var model = new MyAccountViewModel
-            {
-                FirstName = user.FirstName,
-                MiddleName = user.MiddelName,
-                LastName = user.LastName,
-                Email = user.Email ?? string.Empty,
-                PhoneNumber = user.PhoneNumber ?? string.Empty
-            };
-
-            return View(model);
-        }
-
     }
 }
