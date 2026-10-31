@@ -9,11 +9,20 @@ namespace Flight_Booking_System.ViewModels.Customer
 
         public decimal TicketPrice { get; set; }
 
-        // قائمة المسافرين المسجلين مسبقًا
+        // Reward Points
+        public int AvailablePoints { get; set; }
+
+        public int PointsToRedeem { get; set; }
+
+        public decimal DiscountAmount { get; set; }
+
+        public decimal TotalPrice { get; set; }
+
+        // Existing passengers
         public List<PassengerOptionViewModel> ExistingPassengers { get; set; }
             = new List<PassengerOptionViewModel>();
 
-        // بيانات المسافرين المختارين للمقاعد
+        // Selected passengers and seats
         public List<PassengerSeatViewModel> Passengers { get; set; }
             = new List<PassengerSeatViewModel>();
     }
@@ -24,8 +33,6 @@ namespace Flight_Booking_System.ViewModels.Customer
 
         public string SeatNumber { get; set; } = string.Empty;
 
-        // صفر أو null: إضافة مسافر جديد
-        // قيمة أكبر من صفر: اختيار مسافر مسجل
         public int? SelectedPassengerId { get; set; }
 
         public string FirstName { get; set; } = string.Empty;

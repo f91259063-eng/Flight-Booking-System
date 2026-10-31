@@ -1,24 +1,39 @@
+﻿```cshtml
 @model Flight_Booking_System.Models.Passenger
 
 @{
-    ViewData["Title"] = "تعديل بيانات راكب";
+    ViewData["Title"] = "Edit Passenger";
     Layout = "_AdminLayout";
 }
 
-<div class="container-fluid py-4" dir="rtl">
+<div class="container-fluid py-4" dir="ltr">
+
+    <!-- Header -->
     <div class="mb-4">
-        <h2 class="fw-bold">تعديل بيانات الراكب</h2>
-        <p class="text-muted">قم بتعديل البيانات المطلوبة ثم احفظ التغييرات.</p>
+        <h2 class="fw-bold">
+            <i class="bi bi-person-gear me-1"></i>
+            Edit Passenger
+        </h2>
+        <p class="text-muted">
+            Update the passenger's personal and contact information.
+            Edit Passenger Information
+        </h2>
+        <p class="text-muted">
+            Update the required passenger information and save your changes.
+        </p>
     </div>
 
     <div class="row justify-content-center">
         <div class="col-lg-9">
+
             <div class="card border-0 shadow-sm">
+
                 <div class="card-header bg-white py-3">
-                    <h5 class="mb-0">بيانات الراكب</h5>
+                    <h5 class="mb-0">Passenger Information</h5>
                 </div>
 
                 <div class="card-body p-4">
+
                     <form asp-area="Admin"
                           asp-controller="Passenger"
                           asp-action="Edit"
@@ -30,120 +45,184 @@
                         <input type="hidden" asp-for="Id" />
 
                         <div asp-validation-summary="ModelOnly"
-                             class="text-danger mb-3"></div>
+                             class="text-danger mb-3">
+                        </div>
 
+                        <!-- Personal Information -->
+                        <h6 class="fw-bold text-primary mb-3">
+                            Personal Information
+                        </h6>
+
+                        <!-- Passenger Name -->
                         <div class="row">
+
                             <div class="col-md-4 mb-3">
                                 <label asp-for="FirstName" class="form-label">
-                                    الاسم الأول
+                                    First Name
                                 </label>
+
                                 <input asp-for="FirstName" class="form-control" />
+                                <input asp-for="FirstName"
+                                       class="form-control" />
+
                                 <span asp-validation-for="FirstName"
                                       class="text-danger"></span>
                             </div>
 
                             <div class="col-md-4 mb-3">
                                 <label asp-for="MiddleName" class="form-label">
-                                    الاسم الأوسط
+                                    Middle Name
                                 </label>
+
                                 <input asp-for="MiddleName" class="form-control" />
+                                <input asp-for="MiddleName"
+                                       class="form-control" />
+
                                 <span asp-validation-for="MiddleName"
                                       class="text-danger"></span>
                             </div>
 
                             <div class="col-md-4 mb-3">
                                 <label asp-for="LastName" class="form-label">
-                                    اسم العائلة
+                                    Last Name
                                 </label>
+
                                 <input asp-for="LastName" class="form-control" />
+                                <input asp-for="LastName"
+                                       class="form-control" />
+
                                 <span asp-validation-for="LastName"
                                       class="text-danger"></span>
                             </div>
+
                         </div>
 
+                        <hr class="my-3" />
+
+                        <!-- Identification Details -->
+                        <h6 class="fw-bold text-primary mb-3">
+                            Identification Details
+                        </h6>
+
+                        <!-- Identification -->
                         <div class="row">
+
                             <div class="col-md-6 mb-3">
                                 <label asp-for="PassportNumber" class="form-label">
-                                    رقم جواز السفر
+                                    Passport Number
                                 </label>
+
                                 <input asp-for="PassportNumber"
                                        class="form-control"
                                        dir="ltr" />
+
                                 <span asp-validation-for="PassportNumber"
                                       class="text-danger"></span>
                             </div>
 
                             <div class="col-md-6 mb-3">
                                 <label asp-for="NationalID" class="form-label">
-                                    الرقم القومي
+                                    National ID
                                 </label>
+
                                 <input asp-for="NationalID"
                                        class="form-control"
                                        dir="ltr"
                                        maxlength="14"
                                        inputmode="numeric" />
+
                                 <span asp-validation-for="NationalID"
                                       class="text-danger"></span>
                             </div>
+
                         </div>
 
+                        <hr class="my-3" />
+
+                        <!-- Contact Information -->
+                        <h6 class="fw-bold text-primary mb-3">
+                            Contact Information
+                        </h6>
+
+                        <!-- Contact Information -->
                         <div class="row">
+
                             <div class="col-md-6 mb-3">
                                 <label asp-for="Phone" class="form-label">
-                                    رقم الهاتف
+                                    Phone Number
                                 </label>
+
                                 <input asp-for="Phone"
                                        class="form-control"
                                        dir="ltr"
                                        maxlength="11"
                                        inputmode="numeric"
                                        oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11)" />
+
                                 <span asp-validation-for="Phone"
                                       class="text-danger"></span>
                             </div>
 
                             <div class="col-md-6 mb-3">
                                 <label asp-for="Email" class="form-label">
-                                    البريد الإلكتروني
+                                    Email Address
                                 </label>
+
                                 <input asp-for="Email"
                                        type="email"
                                        class="form-control"
                                        dir="ltr" />
+
                                 <span asp-validation-for="Email"
                                       class="text-danger"></span>
                             </div>
+
                         </div>
 
+                        <!-- Date of Birth -->
                         <div class="mb-4">
                             <label asp-for="DateOfBirth" class="form-label">
-                                تاريخ الميلاد
+                                Date of Birth
                             </label>
+
                             <input asp-for="DateOfBirth"
                                    type="date"
                                    class="form-control"
                                    max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+
                             <span asp-validation-for="DateOfBirth"
                                   class="text-danger"></span>
                         </div>
 
-                        <div class="d-flex gap-2">
+                        <!-- Actions -->
+                        <div class="d-flex gap-2 flex-wrap">
+
                             <button type="submit" class="btn btn-primary">
-                                حفظ التعديلات
+                                <i class="bi bi-check-circle me-1"></i>
+                                Save Changes
                             </button>
 
                             <a asp-area="Admin"
                                asp-controller="Passenger"
                                asp-action="Index"
                                class="btn btn-light border">
-                                إلغاء
+
+                                <i class="bi bi-arrow-left me-1"></i>
+                                Back to Passenger List
+                                <i class="bi bi-x-circle me-1"></i>
+                                Cancel
                             </a>
+
                         </div>
+
                     </form>
+
                 </div>
             </div>
+
         </div>
     </div>
+
 </div>
 
 @section Scripts {

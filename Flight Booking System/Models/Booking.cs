@@ -1,4 +1,5 @@
-﻿using Flight_Booking_System.Models.Identity;
+﻿
+using Flight_Booking_System.Models.Identity;
 
 namespace Flight_Booking_System.Models
 {
@@ -6,8 +7,9 @@ namespace Flight_Booking_System.Models
     {
         public int Id { get; set; }
 
-       public String UserId { get; set; }
-       public ApplicationUser ApplicationUser { get; set; } = null!;
+        public string UserId { get; set; } = string.Empty;
+
+        public ApplicationUser ApplicationUser { get; set; } = null!;
 
         public DateTime BookingDate { get; set; }
 
@@ -19,5 +21,10 @@ namespace Flight_Booking_System.Models
 
         public ICollection<Ticket> Tickets { get; set; }
             = new List<Ticket>();
+
+        // Reward Points
+        public int PointsRedeemed { get; set; } = 0;
+
+        public decimal DiscountAmount { get; set; } = 0m;
     }
 }

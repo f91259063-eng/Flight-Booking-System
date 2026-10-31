@@ -1,17 +1,17 @@
 ﻿@model Flight_Booking_System.Models.Airline
 
 @{
-    ViewData["Title"] = "تعديل شركة الطيران";
+    ViewData["Title"] = "Edit Airline";
     Layout = "_AdminLayout";
 }
 
-<div class="container-fluid py-4" dir="rtl">
+<div class="container-fluid py-4" dir="ltr">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold mb-1">تعديل شركة الطيران</h2>
+            <h2 class="fw-bold mb-1">Edit Airline</h2>
             <p class="text-muted mb-0">
-                يمكنك تحديث بيانات شركة الطيران
+                Update the airline information.
             </p>
         </div>
 
@@ -19,8 +19,8 @@
            asp-controller="Airline"
            asp-action="Index"
            class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-right me-1"></i>
-            العودة إلى شركات الطيران
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Airlines
         </a>
     </div>
 
@@ -28,8 +28,9 @@
         <div class="col-md-8 col-lg-6">
 
             <div class="card border-0 shadow-sm">
+
                 <div class="card-header bg-white py-3">
-                    <h5 class="mb-0">بيانات شركة الطيران</h5>
+                    <h5 class="mb-0">Airline Information</h5>
                 </div>
 
                 <div class="card-body p-4">
@@ -50,48 +51,51 @@
 
                         <div class="mb-3">
                             <label asp-for="Name" class="form-label fw-semibold">
-                                اسم شركة الطيران
+                                Airline Name
                             </label>
 
                             <input asp-for="Name"
                                    class="form-control"
-                                   placeholder="أدخل اسم شركة الطيران" />
+                                   placeholder="Enter airline name" />
 
                             <span asp-validation-for="Name"
-                                  class="text-danger"></span>
+                                  class="text-danger">
+                            </span>
                         </div>
 
                         <div class="mb-3">
                             <label asp-for="AirlineCode" class="form-label fw-semibold">
-                                كود شركة الطيران
+                                Airline Code
                             </label>
 
                             <input asp-for="AirlineCode"
                                    class="form-control"
-                                   placeholder="أدخل كود شركة الطيران" />
+                                   placeholder="Enter airline code" />
 
                             <span asp-validation-for="AirlineCode"
-                                  class="text-danger"></span>
+                                  class="text-danger">
+                            </span>
                         </div>
 
                         <div class="mb-3">
                             <label asp-for="Email" class="form-label fw-semibold">
-                                البريد الإلكتروني
+                                Email Address
                             </label>
 
                             <input asp-for="Email"
                                    type="email"
                                    dir="ltr"
-                                   class="form-control text-end"
+                                   class="form-control"
                                    placeholder="example@email.com" />
 
                             <span asp-validation-for="Email"
-                                  class="text-danger"></span>
+                                  class="text-danger">
+                            </span>
                         </div>
 
                         <div class="mb-4">
                             <label asp-for="Phone" class="form-label fw-semibold">
-                                رقم الهاتف
+                                Phone Number
                             </label>
 
                             <input asp-for="Phone"
@@ -99,27 +103,30 @@
                                    dir="ltr"
                                    maxlength="11"
                                    minlength="11"
-                                   class="form-control text-end"
-                                   placeholder="أدخل رقم الهاتف" />
+                                   class="form-control"
+                                   placeholder="Enter phone number" />
 
                             <span asp-validation-for="Phone"
-                                  class="text-danger"></span>
+                                  class="text-danger">
+                            </span>
                         </div>
 
                         <hr />
 
                         <div class="d-flex justify-content-start gap-2">
+
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-save me-1"></i>
-                                حفظ التعديلات
+                                Save Changes
                             </button>
 
                             <a asp-area="Admin"
                                asp-controller="Airline"
                                asp-action="Index"
                                class="btn btn-light border">
-                                إلغاء
+                                Cancel
                             </a>
+
                         </div>
 
                     </form>
@@ -129,6 +136,7 @@
 
         </div>
     </div>
+
 </div>
 
 @section Scripts {

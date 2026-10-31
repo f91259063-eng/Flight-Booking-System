@@ -1,52 +1,86 @@
+﻿```cshtml
 @model Flight_Booking_System.Models.Passenger
 
 @{
-    ViewData["Title"] = "حذف راكب";
+    ViewData["Title"] = "Delete Passenger";
     Layout = "_AdminLayout";
 }
 
-<div class="container-fluid py-4" dir="rtl">
+<div class="container-fluid py-4" dir="ltr">
+
+    <!-- Header -->
     <div class="mb-4">
-        <h2 class="fw-bold">حذف راكب</h2>
-        <p class="text-muted">راجع بيانات الراكب قبل تأكيد الحذف.</p>
+        <h2 class="fw-bold">
+            <i class="bi bi-person-x me-1"></i>
+            Delete Passenger
+        </h2>
+        <p class="text-muted">
+            Review the passenger information before confirming deletion.
+        </p>
     </div>
 
     <div class="row justify-content-center">
         <div class="col-lg-7">
+
             <div class="card border-0 shadow-sm">
+
                 <div class="card-header bg-white py-3">
-                    <h5 class="mb-0 text-danger">تأكيد حذف الراكب</h5>
+                    <h5 class="mb-0 text-danger">
+                        <i class="bi bi-exclamation-triangle me-1"></i>
+                        Confirm Passenger Deletion
+                    </h5>
                 </div>
 
                 <div class="card-body p-4">
+
                     <div class="alert alert-warning">
-                        هل أنت متأكد أنك تريد حذف هذا الراكب؟
+                        <i class="bi bi-exclamation-circle me-1"></i>
+                        Are you sure you want to delete this passenger?
+                        This action cannot be undone.
                     </div>
 
+                    <!-- Passenger Information -->
+                    <h6 class="fw-bold text-primary mb-3">
+                        Passenger Information
+                    </h6>
+
                     <dl class="row">
-                        <dt class="col-sm-4">الاسم الكامل</dt>
+
+                        <dt class="col-sm-4">Full Name</dt>
                         <dd class="col-sm-8">
                             @Model.FirstName @Model.MiddleName @Model.LastName
                         </dd>
 
-                        <dt class="col-sm-4">رقم جواز السفر</dt>
-                        <dd class="col-sm-8">@Model.PassportNumber</dd>
+                        <dt class="col-sm-4">Passport Number</dt>
+                        <dd class="col-sm-8">
+                            @Model.PassportNumber
+                        </dd>
 
-                        <dt class="col-sm-4">الرقم القومي</dt>
-                        <dd class="col-sm-8">@Model.NationalID</dd>
+                        <dt class="col-sm-4">National ID</dt>
+                        <dd class="col-sm-8">
+                            @Model.NationalID
+                        </dd>
 
-                        <dt class="col-sm-4">رقم الهاتف</dt>
-                        <dd class="col-sm-8" dir="ltr">@Model.Phone</dd>
+                        <dt class="col-sm-4">Phone Number</dt>
+                        <dd class="col-sm-8" dir="ltr">
+                            @Model.Phone
+                        </dd>
 
-                        <dt class="col-sm-4">البريد الإلكتروني</dt>
-                        <dd class="col-sm-8">@Model.Email</dd>
+                        <dt class="col-sm-4">Email Address</dt>
+                        <dd class="col-sm-8">
+                            @Model.Email
+                        </dd>
 
-                        <dt class="col-sm-4">تاريخ الميلاد</dt>
+                        <dt class="col-sm-4">Date of Birth</dt>
                         <dd class="col-sm-8">
                             @Model.DateOfBirth.ToString("yyyy/MM/dd")
                         </dd>
+
                     </dl>
 
+                    <hr />
+
+                    <!-- Actions -->
                     <form asp-area="Admin"
                           asp-controller="Passenger"
                           asp-action="Delete"
@@ -55,21 +89,32 @@
 
                         @Html.AntiForgeryToken()
 
-                        <div class="d-flex gap-2 mt-4">
+                        <div class="d-flex gap-2 flex-wrap">
+
                             <button type="submit" class="btn btn-danger">
-                                تأكيد الحذف
+                                <i class="bi bi-trash me-1"></i>
+                                Confirm Delete
                             </button>
 
                             <a asp-area="Admin"
                                asp-controller="Passenger"
                                asp-action="Index"
                                class="btn btn-light border">
-                                إلغاء
+
+                                <i class="bi bi-arrow-left me-1"></i>
+                                Back to Passenger List
+                                <i class="bi bi-arrow-left me-1"></i>
+                                Cancel
                             </a>
+
                         </div>
+
                     </form>
+
                 </div>
             </div>
+
         </div>
     </div>
+
 </div>

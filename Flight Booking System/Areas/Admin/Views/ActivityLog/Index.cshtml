@@ -1,0 +1,293 @@
+﻿@model Flight_Booking_System.ViewModels.ActivityLogIndexViewModel
+
+@{
+    ViewData["Title"] = "Activity Logs";
+}
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3>
+                <i class="fas fa-history"></i>
+                Activity Logs
+            </h3>
+            <p class="text-muted">
+                Monitor all system activities.
+            </p>
+        </div>
+
+        <span class="badge bg-primary fs-6">
+            Total: @Model.TotalRecords
+        </span>
+    </div>
+
+    <!-- Search Filters -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-filter"></i>
+                Search Filters
+            </h5>
+        </div>
+
+        <div class="card-body">
+
+            <form method="get" asp-area="Admin"
+                  asp-controller="ActivityLog"
+                  asp-action="Index">
+
+                <div class="row g-3">
+
+                    <!-- User -->
+
+                    <div class="col-md-4">
+                        <label class="form-label">User</label>
+
+                        <select name="userId" class="form-select">
+                            <option value="">All Users</option>
+
+                            @foreach (var user in Model.Users)
+                            {
+                                <option value="@user.Value"
+                                        selected="@(user.Value == Model.UserId)">
+                                    @user.Text
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Controller -->
+
+                    <div class="col-md-4">
+                        <label class="form-label">Controller / Module</label>
+
+                        <select name="control" class="form-select">
+                            <option value="">All Modules</option>
+
+                            @foreach (var item in Model.Controls)
+                            {
+                                <option value="@item.Value"
+                                        selected="@(item.Value == Model.Control)">
+                                    @item.Text
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Action -->
+
+                    <div class="col-md-4">
+                        <label class="form-label">Action Type</label>
+
+                        <select name="actionType" class="form-select">
+                            <option value="">All Actions</option>
+
+                            @foreach (var item in Model.Actions)
+                            {
+                                <option value="@item.Value"
+                                        selected="@(item.Value == Model.ActionType)">
+                                    @item.Text
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Date From -->
+
+                    <div class="col-md-4">
+                        <label class="form-label">Date From</label>
+
+                        <input type="date"
+                               name="dateFrom"
+                               value="@Model.DateFrom?.ToString("yyyy-MM-dd")"
+                               class="form-control" />
+                    </div>
+
+                    <!-- Date To -->
+
+                    <div class="col-md-4">
+                        <label class="form-label">Date To</label>
+
+                        <input type="date"
+                               name="dateTo"
+                               value="@Model.DateTo?.ToString("yyyy-MM-dd")"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-4 d-flex align-items-end gap-2">
+
+                        <button type="submit"
+                                class="btn btn-primary flex-fill">
+                            <i class="fas fa-search"></i>
+                            Search
+                        </button>
+
+                        <a asp-area="Admin"
+                           asp-controller="ActivityLog"
+                           asp-action="Index"
+                           class="btn btn-secondary">
+                            Reset
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+    <!-- Activity Logs Table -->
+
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+            <h5 class="mb-0">Activity History</h5>
+        </div>
+
+        <div class="card-body table-responsive">
+
+            <table class="table table-hover table-striped align-middle">
+
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Date</th>
+                        <th>User</th>
+                        <th>Controller</th>
+                        <th>Action</th>
+                        <th>Entity</th>
+                        <th>Entity ID</th>
+                        <th>Description</th>
+                        <th>IP Address</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @if (Model.Logs.Any())
+                    {
+                        @foreach (var log in Model.Logs)
+                        {
+                            <tr>
+                                <td>@log.Id</td>
+
+                                <td>
+                                    @log.CreatedAt.ToString("yyyy-MM-dd HH:mm")
+                                </td>
+
+                                <td>
+                                    @(log.User?.UserName ?? log.User?.Email ?? "Unknown")
+                                </td>
+
+                                <td>@log.Control</td>
+
+                                <td>
+                                    @{
+                                        string badgeClass = "bg-info";
+
+                                        if (log.Action?.ToLower() == "create")
+                                        {
+                                            badgeClass = "bg-success";
+                                        }
+                                        else if (log.Action?.ToLower() == "update")
+                                        {
+                                            badgeClass = "bg-warning text-dark";
+                                        }
+                                        else if (log.Action?.ToLower() == "delete")
+                                        {
+                                            badgeClass = "bg-danger";
+                                        }
+                                    }
+
+                                    <span class="badge @badgeClass">
+                                        @log.Action
+                                    </span>
+                                </td>
+
+                                <td>@log.EntityName</td>
+                                <td>@log.EntityId</td>
+                                <td>@log.Description</td>
+                                <td>@log.IpAddress</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="9" class="text-center text-muted p-4">
+                                No activity logs found.
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+            <!-- Pagination -->
+            @if (Model.TotalPages > 1)
+            {
+                <nav>
+                    <ul class="pagination justify-content-center">
+
+                        <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+
+                            <a class="page-link"
+                               asp-action="Index"
+                               asp-route-page="@(Model.CurrentPage - 1)"
+                               asp-route-userId="@Model.UserId"
+                               asp-route-dateFrom="@Model.DateFrom?.ToString("yyyy-MM-dd")"
+                               asp-route-dateTo="@Model.DateTo?.ToString("yyyy-MM-dd")"
+                               asp-route-control="@Model.Control"
+                               asp-route-actionType="@Model.ActionType">
+                                Previous
+                            </a>
+
+                        </li>
+
+                        @for (int i = 1; i <= Model.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+
+                                <a class="page-link"
+                                   asp-action="Index"
+                                   asp-route-page="@i"
+                                   asp-route-userId="@Model.UserId"
+                                   asp-route-dateFrom="@Model.DateFrom?.ToString("yyyy-MM-dd")"
+                                   asp-route-dateTo="@Model.DateTo?.ToString("yyyy-MM-dd")"
+                                   asp-route-control="@Model.Control"
+                                   asp-route-actionType="@Model.ActionType">
+                                    @i
+                                </a>
+
+                            </li>
+                        }
+
+                        <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+
+                            <a class="page-link"
+                               asp-action="Index"
+                               asp-route-page="@(Model.CurrentPage + 1)"
+                               asp-route-userId="@Model.UserId"
+                               asp-route-dateFrom="@Model.DateFrom?.ToString("yyyy-MM-dd")"
+                               asp-route-dateTo="@Model.DateTo?.ToString("yyyy-MM-dd")"
+                               asp-route-control="@Model.Control"
+                               asp-route-actionType="@Model.ActionType">
+                                Next
+                            </a>
+
+                        </li>
+
+                    </ul>
+                </nav>
+            }
+
+        </div>
+    </div>
+
+</div>

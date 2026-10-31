@@ -1,6 +1,9 @@
+
 using System.Text.RegularExpressions;
 using Flight_Booking_System.Data;
 using Flight_Booking_System.Models.Identity;
+using Flight_Booking_System.ModelsServices;
+using Flight_Booking_System.Services;
 using Flight_Booking_System.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -13,68 +16,90 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
     [Area("Admin")]
     public class AdminController : Controller
     {
-        private static readonly Regex UserNameRegex = new(@"^[A-Za-z0-9._-]{3,20}$");
+        private static readonly Regex UserNameRegex =
+            new(@"^[A-Za-z0-9._-]{3,20}$");
 
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ApplicationDbContext _db;
+        private readonly IActivityLogService _activityLogService;
 
         public AdminController(
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
-            ApplicationDbContext db)
+            ApplicationDbContext db,
+            IActivityLogService activityLogService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _db = db;
+            _activityLogService = activityLogService;
         }
 
         // =========================================================
-        // USERS LIST (with search and filters)
+        // USERS LIST
         // =========================================================
 
         [HttpGet]
-        public async Task<IActionResult> Users(string? search, string? role, string? status)
+        public async Task<IActionResult> Users(
+            string? search,
+            string? role,
+            string? status)
         {
             var query = _userManager.Users.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
                 search = search.Trim();
+
                 query = query.Where(u =>
-                    u.UserName!.Contains(search) ||
-                    u.Email!.Contains(search) ||
+                    (u.UserName != null && u.UserName.Contains(search)) ||
+                    (u.Email != null && u.Email.Contains(search)) ||
                     u.FirstName.Contains(search) ||
                     u.LastName.Contains(search) ||
-                    u.PhoneNumber!.Contains(search));
+                    (u.PhoneNumber != null && u.PhoneNumber.Contains(search)));
             }
 
-            var users = await query.OrderBy(u => u.UserName).ToListAsync();
+            var users = await query
+                .OrderBy(u => u.UserName)
+                .ToListAsync();
+
             var rows = new List<UserRowViewModel>();
 
-            foreach (var u in users)
+            foreach (var user in users)
             {
-                var roles = await _userManager.GetRolesAsync(u);
-                var locked = u.LockoutEnd.HasValue && u.LockoutEnd > DateTimeOffset.UtcNow;
+                var roles = await _userManager.GetRolesAsync(user);
 
-                if (!string.IsNullOrEmpty(role) && !roles.Contains(role))
+                var locked = user.LockoutEnd.HasValue &&
+                             user.LockoutEnd > DateTimeOffset.UtcNow;
+
+                if (!string.IsNullOrEmpty(role) &&
+                    !roles.Contains(role))
+                {
+                    continue;
+                }
+
+                if (status == "locked" && !locked)
                     continue;
 
-                if (status == "locked" && !locked) continue;
-                if (status == "active" && locked) continue;
-                if (status == "unconfirmed" && u.EmailConfirmed) continue;
+                if (status == "active" && locked)
+                    continue;
+
+                if (status == "unconfirmed" && user.EmailConfirmed)
+                    continue;
 
                 rows.Add(new UserRowViewModel
                 {
-                    Id = u.Id,
-                    UserName = u.UserName ?? string.Empty,
-                    FullName = $"{u.FirstName} {u.LastName}".Trim(),
-                    Email = u.Email ?? string.Empty,
-                    PhoneNumber = u.PhoneNumber,
-                    EmailConfirmed = u.EmailConfirmed,
-                    TwoFactorEnabled = u.TwoFactorEnabled,
+                    Id = user.Id,
+                    UserName = user.UserName ?? string.Empty,
+                    FullName = $"{user.FirstName} {user.LastName}".Trim(),
+                    Email = user.Email ?? string.Empty,
+                    PhoneNumber = user.PhoneNumber,
+                    EmailConfirmed = user.EmailConfirmed,
+                    TwoFactorEnabled = user.TwoFactorEnabled,
+                    IsAdmin = roles.Contains("Admin"),
                     IsLocked = locked,
-                    LockoutEnd = u.LockoutEnd,
+                    LockoutEnd = user.LockoutEnd,
                     Roles = roles.ToList()
                 });
             }
@@ -87,14 +112,15 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 Role = role,
                 Status = status,
                 CurrentUserId = _userManager.GetUserId(User) ?? string.Empty,
-                PendingCount = await _userManager.Users.CountAsync(u => !u.EmailConfirmed)
+                PendingCount = await _userManager.Users
+                    .CountAsync(u => !u.EmailConfirmed)
             };
 
             return View(model);
         }
 
         // =========================================================
-        // CREATE USER
+        // CREATE USER - GET
         // =========================================================
 
         [HttpGet]
@@ -106,18 +132,59 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
             });
         }
 
+        // =========================================================
+        // CREATE USER - POST
+        // =========================================================
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateUser(UserCreateViewModel model)
+        public async Task<IActionResult> CreateUser(
+            UserCreateViewModel model)
         {
-            if (model.SelectedRoles.Count == 0)
-                ModelState.AddModelError(string.Empty, "Choose at least one role.");
+            if (model.SelectedRoles == null ||
+                model.SelectedRoles.Count == 0)
+            {
+                ModelState.AddModelError(
+                    nameof(model.SelectedRoles),
+                    "Choose at least one role.");
+            }
 
-            if (await _userManager.FindByNameAsync(model.UserName) is not null)
-                ModelState.AddModelError(nameof(model.UserName), "This username is already taken.");
+            if (!string.IsNullOrWhiteSpace(model.UserName))
+            {
+                if (!UserNameRegex.IsMatch(model.UserName))
+                {
+                    ModelState.AddModelError(
+                        nameof(model.UserName),
+                        "Use 3 to 20 letters, numbers, dot, dash or underscore.");
+                }
+                else if (await _userManager.FindByNameAsync(model.UserName) != null)
+                {
+                    ModelState.AddModelError(
+                        nameof(model.UserName),
+                        "This username is already taken.");
+                }
+            }
 
-            if (await _userManager.FindByEmailAsync(model.Email) is not null)
-                ModelState.AddModelError(nameof(model.Email), "This email is already registered.");
+            if (!string.IsNullOrWhiteSpace(model.Email) &&
+                await _userManager.FindByEmailAsync(model.Email) != null)
+            {
+                ModelState.AddModelError(
+                    nameof(model.Email),
+                    "This email is already registered.");
+            }
+
+            if (model.SelectedRoles != null)
+            {
+                foreach (var role in model.SelectedRoles)
+                {
+                    if (!await _roleManager.RoleExistsAsync(role))
+                    {
+                        ModelState.AddModelError(
+                            nameof(model.SelectedRoles),
+                            $"Role '{role}' does not exist.");
+                    }
+                }
+            }
 
             if (!ModelState.IsValid)
             {
@@ -133,29 +200,62 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 FirstName = model.FirstName,
                 MiddelName = string.Empty,
                 LastName = model.LastName,
-                EmailConfirmed = true,      // the admin vouches for this account
+                EmailConfirmed = true,
                 LockoutEnabled = true
             };
 
-            var result = await _userManager.CreateAsync(user, model.Password);
+            var result = await _userManager.CreateAsync(
+                user,
+                model.Password);
 
             if (!result.Succeeded)
             {
                 foreach (var error in result.Errors)
-                    ModelState.AddModelError(string.Empty, error.Description);
+                {
+                    ModelState.AddModelError(
+                        string.Empty,
+                        error.Description);
+                }
 
                 model.AllRoles = await GetAllRoleNamesAsync();
                 return View(model);
             }
 
-            await AddRolesAsync(user, model.SelectedRoles);
+            var roleResult = await _userManager.AddToRolesAsync(
+                user,
+                model.SelectedRoles!);
 
-            TempData["Success"] = $"User '{user.UserName}' was created successfully.";
+            if (!roleResult.Succeeded)
+            {
+                foreach (var error in roleResult.Errors)
+                {
+                    ModelState.AddModelError(
+                        string.Empty,
+                        error.Description);
+                }
+
+                // Remove the newly created user if role assignment fails.
+                await _userManager.DeleteAsync(user);
+
+                model.AllRoles = await GetAllRoleNamesAsync();
+                return View(model);
+            }
+
+            await _activityLogService.LogAsync(
+                "Admin",
+                "CreateUser",
+                "ApplicationUser",
+                user.Id,
+                $"Created user: {user.Email}");
+
+            TempData["Success"] =
+                $"User '{user.UserName}' was created successfully.";
+
             return RedirectToAction(nameof(Users));
         }
 
         // =========================================================
-        // EDIT USER
+        // EDIT USER - GET
         // =========================================================
 
         [HttpGet]
@@ -165,6 +265,7 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 return NotFound();
 
             var user = await _userManager.FindByIdAsync(id);
+
             if (user == null)
                 return NotFound();
 
@@ -177,49 +278,98 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 Email = user.Email ?? string.Empty,
                 PhoneNumber = user.PhoneNumber ?? string.Empty,
                 EmailConfirmed = user.EmailConfirmed,
-                SelectedRoles = (await _userManager.GetRolesAsync(user)).ToList()
+                SelectedRoles = (await _userManager.GetRolesAsync(user))
+                    .ToList()
             };
 
             await FillEditInfoAsync(model, user);
+
             return View(model);
         }
 
+        // =========================================================
+        // EDIT USER - POST
+        // =========================================================
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditUser(UserEditViewModel model)
+        public async Task<IActionResult> EditUser(
+            UserEditViewModel model)
         {
             var user = await _userManager.FindByIdAsync(model.Id);
+
             if (user == null)
                 return NotFound();
 
             var currentRoles = await _userManager.GetRolesAsync(user);
             var isMe = user.Id == _userManager.GetUserId(User);
 
-            if (model.SelectedRoles.Count == 0)
-                ModelState.AddModelError(string.Empty, "Choose at least one role.");
+            if (model.SelectedRoles == null ||
+                model.SelectedRoles.Count == 0)
+            {
+                ModelState.AddModelError(
+                    nameof(model.SelectedRoles),
+                    "Choose at least one role.");
+            }
 
-            // the format is checked only when the username is changed
-            if (model.UserName != user.UserName && !UserNameRegex.IsMatch(model.UserName))
-                ModelState.AddModelError(nameof(model.UserName), "Use 3 to 20 letters, numbers, dot, dash or underscore.");
+            // Validate username format only when it changes.
+            if (model.UserName != user.UserName &&
+                !UserNameRegex.IsMatch(model.UserName ?? string.Empty))
+            {
+                ModelState.AddModelError(
+                    nameof(model.UserName),
+                    "Use 3 to 20 letters, numbers, dot, dash or underscore.");
+            }
 
-            var sameName = await _userManager.FindByNameAsync(model.UserName);
-            if (sameName is not null && sameName.Id != user.Id)
-                ModelState.AddModelError(nameof(model.UserName), "This username is already taken.");
+            var sameName = await _userManager.FindByNameAsync(
+                model.UserName);
 
-            var sameEmail = await _userManager.FindByEmailAsync(model.Email);
-            if (sameEmail is not null && sameEmail.Id != user.Id)
-                ModelState.AddModelError(nameof(model.Email), "This email is already registered.");
+            if (sameName != null && sameName.Id != user.Id)
+            {
+                ModelState.AddModelError(
+                    nameof(model.UserName),
+                    "This username is already taken.");
+            }
 
-            // never leave the system without an admin
-            if (currentRoles.Contains("Admin") && !model.SelectedRoles.Contains("Admin"))
+            var sameEmail = await _userManager.FindByEmailAsync(
+                model.Email);
+
+            if (sameEmail != null && sameEmail.Id != user.Id)
+            {
+                ModelState.AddModelError(
+                    nameof(model.Email),
+                    "This email is already registered.");
+            }
+
+            if (model.SelectedRoles != null)
+            {
+                foreach (var role in model.SelectedRoles)
+                {
+                    if (!await _roleManager.RoleExistsAsync(role))
+                    {
+                        ModelState.AddModelError(
+                            nameof(model.SelectedRoles),
+                            $"Role '{role}' does not exist.");
+                    }
+                }
+            }
+
+            // Never leave the system without an admin.
+            if (currentRoles.Contains("Admin") &&
+                model.SelectedRoles != null &&
+                !model.SelectedRoles.Contains("Admin"))
             {
                 if (isMe)
                 {
-                    ModelState.AddModelError(string.Empty, "You can't remove the Admin role from your own account.");
+                    ModelState.AddModelError(
+                        string.Empty,
+                        "You can't remove the Admin role from your own account.");
                 }
                 else if (await IsLastAdminAsync(user))
                 {
-                    ModelState.AddModelError(string.Empty, "This is the last admin. The system needs at least one.");
+                    ModelState.AddModelError(
+                        string.Empty,
+                        "This is the last admin. The system needs at least one.");
                 }
             }
 
@@ -229,6 +379,7 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 return View(model);
             }
 
+            // Update basic information.
             user.FirstName = model.FirstName;
             user.LastName = model.LastName;
             user.UserName = model.UserName;
@@ -237,51 +388,115 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
             user.EmailConfirmed = model.EmailConfirmed;
 
             var updateResult = await _userManager.UpdateAsync(user);
+
             if (!updateResult.Succeeded)
             {
                 foreach (var error in updateResult.Errors)
-                    ModelState.AddModelError(string.Empty, error.Description);
+                {
+                    ModelState.AddModelError(
+                        string.Empty,
+                        error.Description);
+                }
 
                 await FillEditInfoAsync(model, user);
                 return View(model);
             }
 
-            // roles: remove the unticked ones, add the new ones
-            var toRemove = currentRoles.Except(model.SelectedRoles).ToList();
-            var toAdd = model.SelectedRoles.Except(currentRoles).ToList();
+            // Update roles.
+            var toRemove = currentRoles
+                .Except(model.SelectedRoles!)
+                .ToList();
+
+            var toAdd = model.SelectedRoles!
+                .Except(currentRoles)
+                .ToList();
 
             if (toRemove.Count > 0)
-                await _userManager.RemoveFromRolesAsync(user, toRemove);
-
-            await AddRolesAsync(user, toAdd);
-
-            // optional new password
-            if (!string.IsNullOrWhiteSpace(model.NewPassword))
             {
-                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var passwordResult = await _userManager.ResetPasswordAsync(user, token, model.NewPassword);
+                var removeResult = await _userManager.RemoveFromRolesAsync(
+                    user,
+                    toRemove);
 
-                if (!passwordResult.Succeeded)
+                if (!removeResult.Succeeded)
                 {
-                    foreach (var error in passwordResult.Errors)
-                        ModelState.AddModelError(nameof(model.NewPassword), error.Description);
+                    foreach (var error in removeResult.Errors)
+                    {
+                        ModelState.AddModelError(
+                            string.Empty,
+                            error.Description);
+                    }
 
                     await FillEditInfoAsync(model, user);
                     return View(model);
                 }
             }
 
-            // makes the user's open sessions check his new roles
-            // (not for yourself, or you would be logged out)
-            if (!isMe)
-                await _userManager.UpdateSecurityStampAsync(user);
+            if (toAdd.Count > 0)
+            {
+                var addResult = await _userManager.AddToRolesAsync(
+                    user,
+                    toAdd);
 
-            TempData["Success"] = $"User '{user.UserName}' was updated successfully.";
+                if (!addResult.Succeeded)
+                {
+                    foreach (var error in addResult.Errors)
+                    {
+                        ModelState.AddModelError(
+                            string.Empty,
+                            error.Description);
+                    }
+
+                    await FillEditInfoAsync(model, user);
+                    return View(model);
+                }
+            }
+
+            // Optional new password.
+            if (!string.IsNullOrWhiteSpace(model.NewPassword))
+            {
+                var token = await _userManager
+                    .GeneratePasswordResetTokenAsync(user);
+
+                var passwordResult = await _userManager.ResetPasswordAsync(
+                    user,
+                    token,
+                    model.NewPassword);
+
+                if (!passwordResult.Succeeded)
+                {
+                    foreach (var error in passwordResult.Errors)
+                    {
+                        ModelState.AddModelError(
+                            nameof(model.NewPassword),
+                            error.Description);
+                    }
+
+                    await FillEditInfoAsync(model, user);
+                    return View(model);
+                }
+            }
+
+            // Refresh the user's security stamp when editing another user.
+            if (!isMe)
+            {
+                await _userManager.UpdateSecurityStampAsync(user);
+            }
+
+            await _activityLogService.LogAsync(
+                "Admin",
+                "EditUser",
+                "ApplicationUser",
+                user.Id,
+                $"Updated user: {user.Email}");
+
+            TempData["Success"] =
+                $"User '{user.UserName}' was updated successfully.";
+
             return RedirectToAction(nameof(Users));
         }
 
         // =========================================================
-        // DELETE USER (button on the edit page)
+        // DELETE USER
         // =========================================================
 
         [HttpPost]
@@ -289,25 +504,33 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
         public async Task<IActionResult> DeleteUser(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
+
             if (user == null)
                 return NotFound();
 
             if (user.Id == _userManager.GetUserId(User))
             {
-                TempData["Error"] = "You can't delete your own account.";
+                TempData["Error"] =
+                    "You can't delete your own account.";
+
                 return RedirectToAction(nameof(EditUser), new { id });
             }
 
-            if (await _userManager.IsInRoleAsync(user, "Admin") && await IsLastAdminAsync(user))
+            if (await _userManager.IsInRoleAsync(user, "Admin") &&
+                await IsLastAdminAsync(user))
             {
-                TempData["Error"] = "This is the last admin. The system needs at least one.";
+                TempData["Error"] =
+                    "This is the last admin. The system needs at least one.";
+
                 return RedirectToAction(nameof(EditUser), new { id });
             }
 
-            // the bookings belong to the user, so we keep the user and lock him instead
+            // Keep users who have bookings.
             if (await CountBookingsAsync(user.Id) > 0)
             {
-                TempData["Error"] = "This user has bookings, so he can't be deleted. Lock the account instead.";
+                TempData["Error"] =
+                    "This user has bookings, so he can't be deleted. Lock the account instead.";
+
                 return RedirectToAction(nameof(EditUser), new { id });
             }
 
@@ -315,16 +538,28 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
 
             if (!result.Succeeded)
             {
-                TempData["Error"] = string.Join(" ", result.Errors.Select(e => e.Description));
+                TempData["Error"] = string.Join(
+                    " ",
+                    result.Errors.Select(e => e.Description));
+
                 return RedirectToAction(nameof(EditUser), new { id });
             }
 
-            TempData["Success"] = $"User '{user.UserName}' was deleted.";
+            await _activityLogService.LogAsync(
+                "Admin",
+                "DeleteUser",
+                "ApplicationUser",
+                user.Id,
+                $"Deleted user: {user.Email}");
+
+            TempData["Success"] =
+                $"User '{user.UserName}' was deleted.";
+
             return RedirectToAction(nameof(Users));
         }
 
         // =========================================================
-        // CONFIRM ACCOUNT (the admin confirms a new account so the user can log in)
+        // CONFIRM ACCOUNT
         // =========================================================
 
         [HttpPost]
@@ -332,35 +567,137 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
         public async Task<IActionResult> ConfirmAccount(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
+
             if (user == null)
                 return NotFound();
 
             user.EmailConfirmed = true;
+
             var result = await _userManager.UpdateAsync(user);
 
             if (result.Succeeded)
-                TempData["Success"] = $"Account '{user.UserName}' was confirmed. The user can log in now.";
+            {
+                await _activityLogService.LogAsync(
+                    "Admin",
+                    "ConfirmAccount",
+                    "ApplicationUser",
+                    user.Id,
+                    $"Confirmed account: {user.Email}");
+
+                TempData["Success"] =
+                    $"Account '{user.UserName}' was confirmed. The user can log in now.";
+            }
             else
-                TempData["Error"] = string.Join(" ", result.Errors.Select(e => e.Description));
+            {
+                TempData["Error"] = string.Join(
+                    " ",
+                    result.Errors.Select(e => e.Description));
+            }
 
             return RedirectToAction(nameof(Users));
         }
 
         // =========================================================
-        // LOCK / UNLOCK
+        // TOGGLE ADMIN ROLE
         // =========================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Lock(string id, string duration)
+        public async Task<IActionResult> ToggleAdmin(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+                return NotFound();
+
+            var isMe = user.Id == _userManager.GetUserId(User);
+            var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+
+            if (isMe && isAdmin)
+            {
+                TempData["Error"] =
+                    "You can't remove the Admin role from your own account.";
+
+                return RedirectToAction(nameof(Users));
+            }
+
+            if (isAdmin && await IsLastAdminAsync(user))
+            {
+                TempData["Error"] =
+                    "This is the last admin. The system needs at least one.";
+
+                return RedirectToAction(nameof(Users));
+            }
+
+            IdentityResult result;
+
+            if (isAdmin)
+            {
+                result = await _userManager.RemoveFromRoleAsync(
+                    user,
+                    "Admin");
+
+                if (result.Succeeded &&
+                    !await _userManager.IsInRoleAsync(user, "Customer"))
+                {
+                    result = await _userManager.AddToRoleAsync(
+                        user,
+                        "Customer");
+                }
+            }
+            else
+            {
+                result = await _userManager.AddToRoleAsync(
+                    user,
+                    "Admin");
+            }
+
+            if (!result.Succeeded)
+            {
+                TempData["Error"] = string.Join(
+                    ", ",
+                    result.Errors.Select(e => e.Description));
+
+                return RedirectToAction(nameof(Users));
+            }
+
+            await _userManager.UpdateSecurityStampAsync(user);
+
+            var newRole = isAdmin ? "Customer" : "Admin";
+
+            await _activityLogService.LogAsync(
+                "Admin",
+                "ToggleAdmin",
+                "ApplicationUser",
+                user.Id,
+                $"Changed role for {user.Email} to {newRole}");
+
+            TempData["Success"] =
+                $"{user.Email} is now a {newRole}.";
+
+            return RedirectToAction(nameof(Users));
+        }
+
+        // =========================================================
+        // LOCK USER
+        // =========================================================
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Lock(
+            string id,
+            string? duration)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+
             if (user == null)
                 return NotFound();
 
             if (user.Id == _userManager.GetUserId(User))
             {
-                TempData["Error"] = "You can't lock your own account.";
+                TempData["Error"] =
+                    "You can't lock your own account.";
+
                 return RedirectToAction(nameof(Users));
             }
 
@@ -373,30 +710,67 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
             };
 
             await _userManager.SetLockoutEnabledAsync(user, true);
-            await _userManager.SetLockoutEndDateAsync(user, until);
+
+            var result = await _userManager.SetLockoutEndDateAsync(
+                user,
+                until);
+
+            if (!result.Succeeded)
+            {
+                TempData["Error"] = string.Join(
+                    ", ",
+                    result.Errors.Select(e => e.Description));
+
+                return RedirectToAction(nameof(Users));
+            }
+
             await _userManager.UpdateSecurityStampAsync(user);
 
-            TempData["Success"] = $"User '{user.UserName}' was locked.";
+            await _activityLogService.LogAsync(
+                "Admin",
+                "LockUser",
+                "ApplicationUser",
+                user.Id,
+                $"Locked user: {user.Email}");
+
+            TempData["Success"] =
+                $"User '{user.UserName}' was locked.";
+
             return RedirectToAction(nameof(Users));
         }
+
+        // =========================================================
+        // UNLOCK USER
+        // =========================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Unlock(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
+
             if (user == null)
                 return NotFound();
 
             await _userManager.SetLockoutEndDateAsync(user, null);
             await _userManager.ResetAccessFailedCountAsync(user);
+            await _userManager.UpdateSecurityStampAsync(user);
 
-            TempData["Success"] = $"User '{user.UserName}' was unlocked.";
+            await _activityLogService.LogAsync(
+                "Admin",
+                "UnlockUser",
+                "ApplicationUser",
+                user.Id,
+                $"Unlocked user: {user.Email}");
+
+            TempData["Success"] =
+                $"User '{user.UserName}' was unlocked.";
+
             return RedirectToAction(nameof(Users));
         }
 
         // =========================================================
-        // Helpers
+        // HELPERS
         // =========================================================
 
         private async Task<List<string>> GetAllRoleNamesAsync()
@@ -407,33 +781,35 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 .ToListAsync();
         }
 
-        // adds only roles that really exist
-        private async Task AddRolesAsync(ApplicationUser user, IEnumerable<string> roles)
-        {
-            foreach (var role in roles)
-            {
-                if (await _roleManager.RoleExistsAsync(role))
-                    await _userManager.AddToRoleAsync(user, role);
-            }
-        }
-
-        private async Task<bool> IsLastAdminAsync(ApplicationUser user)
+        private async Task<bool> IsLastAdminAsync(
+            ApplicationUser user)
         {
             var admins = await _userManager.GetUsersInRoleAsync("Admin");
-            return admins.Count <= 1 && admins.Any(a => a.Id == user.Id);
+
+            return admins.Count <= 1 &&
+                   admins.Any(a => a.Id == user.Id);
         }
 
         private Task<int> CountBookingsAsync(string userId)
         {
-            return _db.Bookings.CountAsync(b => b.UserId == userId || b.ApplicationUser.Id == userId);
+            return _db.Bookings.CountAsync(
+                booking => booking.UserId == userId);
         }
 
-        private async Task FillEditInfoAsync(UserEditViewModel model, ApplicationUser user)
+        private async Task FillEditInfoAsync(
+            UserEditViewModel model,
+            ApplicationUser user)
         {
             model.AllRoles = await GetAllRoleNamesAsync();
-            model.IsLocked = user.LockoutEnd.HasValue && user.LockoutEnd > DateTimeOffset.UtcNow;
+
+            model.IsLocked = user.LockoutEnd.HasValue &&
+                             user.LockoutEnd > DateTimeOffset.UtcNow;
+
             model.TwoFactorEnabled = user.TwoFactorEnabled;
-            model.IsCurrentUser = user.Id == _userManager.GetUserId(User);
+
+            model.IsCurrentUser =
+                user.Id == _userManager.GetUserId(User);
+
             model.BookingsCount = await CountBookingsAsync(user.Id);
         }
     }

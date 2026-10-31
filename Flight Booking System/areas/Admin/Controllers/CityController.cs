@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
+﻿
 
 using Flight_Booking_System.Models;
+using Flight_Booking_System.ModelsServices;
 using Flight_Booking_System.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,14 +13,17 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
     public class CityController : Controller
     {
         private readonly IRepository<city> _repositorycity;
+        private readonly IActivityLogService _activityLogService;
 
-
-        public CityController(IRepository<city> repository)
+        public CityController(
+            IRepository<city> repositorycity,
+            IActivityLogService activityLogService)
         {
-            _repositorycity = repository;
+            _repositorycity = repositorycity;
+            _activityLogService = activityLogService;
         }
 
-      
+        // GET: Admin/City
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -27,27 +32,48 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
             return View(cities);
         }
 
+        // GET: Admin/City/Create
         [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
 
-        
+        // POST: Admin/City/Create
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(city city)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                await _repositorycity.InsertAsync(city);
-                await _repositorycity.CommitAsync();
+                return View(city);
+            }
+
+            await _repositorycity.InsertAsync(city);
+            var result = await _repositorycity.CommitAsync();
+
+            if (result > 0)
+            {
+                await _activityLogService.LogAsync(
+                    "City",
+                    "Create",
+                    "City",
+                    city.Id.ToString(),
+                    $"Created city: {city.Name}"
+                );
 
                 return RedirectToAction(nameof(Index));
             }
 
+            ModelState.AddModelError(
+                "",
+                "Unable to save the city."
+            );
+
             return View(city);
         }
 
+        // GET: Admin/City/Edit/5
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -62,9 +88,9 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
             return View(city);
         }
 
-    
+        // POST: Admin/City/Edit/5
         [HttpPost]
-       
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, city city)
         {
             if (id != city.Id)
@@ -72,27 +98,45 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var existingCity = await _repositorycity
-                    .GetOneAsync(x => x.Id == id);
+                return View(city);
+            }
 
-                if (existingCity == null)
-                {
-                    return NotFound();
-                }
+            var existingCity = await _repositorycity
+                .GetOneAsync(x => x.Id == id);
 
-             
-                existingCity.Name = city.Name;
+            if (existingCity == null)
+            {
+                return NotFound();
+            }
 
-                await _repositorycity.CommitAsync();
+            existingCity.Name = city.Name;
+
+            var result = await _repositorycity.CommitAsync();
+
+            if (result > 0)
+            {
+                await _activityLogService.LogAsync(
+                    "City",
+                    "Edit",
+                    "City",
+                    existingCity.Id.ToString(),
+                    $"Updated city: {existingCity.Name}"
+                );
 
                 return RedirectToAction(nameof(Index));
             }
 
+            ModelState.AddModelError(
+                "",
+                "Unable to update the city."
+            );
+
             return View(city);
         }
 
+        // GET: Admin/City/Delete/5
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
@@ -120,10 +164,30 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 return NotFound();
             }
 
-             _repositorycity.Delete(city);
-            await _repositorycity.CommitAsync();
+            // Keep the details before deleting the entity.
+            var cityId = city.Id.ToString();
+            var cityName = city.Name;
 
-            return RedirectToAction(nameof(Index));
+            _repositorycity.Delete(city);
+
+            var result = await _repositorycity.CommitAsync();
+
+            if (result > 0)
+            {
+                await _activityLogService.LogAsync(
+                    "City",
+                    "Delete",
+                    "City",
+                    cityId,
+                    $"Deleted city: {cityName}"
+                );
+
+                return RedirectToAction(nameof(Index));
+            }
+
+            return BadRequest(
+                "Unable to delete the city. It may be referenced by another record."
+            );
         }
     }
 }

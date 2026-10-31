@@ -8,6 +8,31 @@
     <div class="alert alert-success alert-dismissible fade show" role="alert">
         @okMessage
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+@model IEnumerable<Flight_Booking_System.ViewModels.UserRowViewModel>
+
+@{
+    ViewData["Title"] = "User Management";
+    Layout = "_AdminLayout";
+}
+
+<div class="card">
+
+    <div class="card-header bg-light d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+        <h5 class="mb-0">
+            <i class="fas fa-users me-2"></i>
+            User Management (@Model.Count())
+        </h5>
+
+        <a asp-controller="Admin"
+           asp-action="CreateUser"
+           class="btn btn-falcon-primary btn-sm">
+
+            <i class="fas fa-user-plus me-1"></i>
+            Add New User
+
+        </a>
+
     </div>
 }
 @if (TempData["Error"] is string errorMessage)
@@ -79,6 +104,10 @@
                         <th>Email / phone</th>
                         <th>Roles</th>
                         <th>Status</th>
+                        <th>Full Name</th>
+                        <th>Email Address</th>
+                        <th>User Role</th>
+                        <th>Account Status</th>
                         <th class="text-end">Actions</th>
                     </tr>
                 </thead>
@@ -143,6 +172,9 @@
                                         <form asp-area="Admin" asp-controller="Admin" asp-action="Unlock" asp-route-id="@u.Id" method="post" class="d-inline">
                                             <button type="submit" class="btn btn-falcon-success btn-sm"><span class="fas fa-unlock me-1"></span>Unlock</button>
                                         </form>
+                                        <span class="badge rounded-pill badge-soft-warning ms-1">
+                                            Unverified
+                                        </span>
                                     }
                                     else
                                     {
@@ -159,16 +191,120 @@
                                 }
                             </td>
                         </tr>
+                                        <span class="badge rounded-pill badge-soft-success ms-1">
+                                            2FA Enabled
+                                        </span>
+                                    }
+                                </td>
+
+                                <td>
+                                    <span class="badge rounded-pill @(u.IsAdmin ? "badge-soft-danger" : "badge-soft-primary")">
+                                        @(u.IsAdmin ? "Administrator" : "Customer")
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="badge rounded-pill @(u.IsLocked ? "badge-soft-danger" : "badge-soft-success")">
+                                        @(u.IsLocked ? "Suspended" : "Active")
+                                    </span>
+                                </td>
+
+                                <td class="text-end text-nowrap">
+
+                                    <!-- Edit User -->
+
+                                    <a asp-controller="Admin"
+                                       asp-action="EditUser"
+                                       asp-route-id="@u.Id"
+                                       class="btn btn-falcon-default btn-sm"
+                                       title="Edit User">
+
+                                        <i class="fas fa-edit me-1"></i>
+                                        Edit
+
+                                    </a>
+
+                                    <!-- Audit History -->
+
+                                    <a asp-area="Admin"
+                                       asp-controller="ActivityLog"
+                                       asp-action="Index"
+                                       asp-route-userId="@u.Id"
+                                       class="btn btn-falcon-default btn-sm"
+                                       title="View Audit History">
+
+                                        <i class="fas fa-history me-1"></i>
+                                        History
+
+                                    </a>
+
+                                    <!-- Change User Role -->
+
+                                    <form asp-controller="Admin"
+                                          asp-action="ToggleAdmin"
+                                          asp-route-id="@u.Id"
+                                          method="post"
+                                          class="d-inline"
+                                          onsubmit="return confirm('Are you sure you want to change this user role?');">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit"
+                                                class="btn btn-falcon-default btn-sm">
+
+                                            @(u.IsAdmin ? "Demote to Customer" : "Promote to Admin")
+
+                                        </button>
+
+                                    </form>
+
+                                    <!-- Lock / Unlock Account -->
+
+                                    <form asp-controller="Admin"
+                                          asp-action="ToggleLock"
+                                          asp-route-id="@u.Id"
+                                          method="post"
+                                          class="d-inline"
+                                          onsubmit="return confirm('Are you sure you want to change this account status?');">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit"
+                                                class="btn btn-falcon-@(u.IsLocked ? "success" : "danger") btn-sm">
+
+                                            <i class="fas @(u.IsLocked ? "fa-unlock" : "fa-lock") me-1"></i>
+
+                                            @(u.IsLocked ? "Activate" : "Suspend")
+
+                                        </button>
+
+                                    </form>
+
+                                </td>
+
+                            </tr>
+                        }
                     }
 
                     @if (!Model.Users.Any())
                     {
                         <tr>
                             <td colspan="5" class="text-center text-600 p-4">No users found.</td>
+                            <td colspan="5" class="text-center py-4 text-muted">
+
+                                <i class="fas fa-users fa-2x mb-2"></i>
+
+                                <p class="mb-0">
+                                    No user records found.
+                                </p>
+
+                            </td>
                         </tr>
                     }
                 </tbody>
             </table>
         </div>
+
     </div>
+
 </div>

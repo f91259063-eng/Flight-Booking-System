@@ -1,16 +1,25 @@
+﻿
 @model IEnumerable<Flight_Booking_System.Models.Passenger>
 
 @{
-    ViewData["Title"] = "إدارة الركاب";
+    ViewData["Title"] = "Passenger Management";
     Layout = "_AdminLayout";
 }
 
-<div class="container-fluid py-4" dir="rtl">
+<div class="container-fluid py-4" dir="ltr">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- Page Header -->
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
         <div>
-            <h2 class="fw-bold mb-1">إدارة الركاب</h2>
-            <p class="text-muted mb-0">عرض وإدارة بيانات المسافرين</p>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-people me-1"></i>
+                Passenger Management
+            </h2>
+            <p class="text-muted mb-0">
+                Manage registered passengers and their personal information.
+                View and manage passenger information.
+            </p>
         </div>
 
         <a asp-area="Admin"
@@ -18,28 +27,91 @@
            asp-action="Create"
            class="btn btn-primary">
             <i class="bi bi-plus-circle me-1"></i>
-            إضافة راكب
+            Add New Passenger
         </a>
     </div>
 
+    <!-- Notifications -->
+            Add Passenger
+        </a>
+    </div>
+
+    <!-- Success Message -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-1"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close"
+                    data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Error Message -->
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-1"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close"
+                    data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Registered Passengers -->
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Passenger List -->
     <div class="card border-0 shadow-sm">
+
         <div class="card-header bg-white py-3">
-            <h5 class="mb-0">قائمة الركاب</h5>
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-list-ul me-1"></i>
+                    Registered Passengers
+                </h5>
+
+                <span class="badge bg-primary">
+                    @(Model?.Count() ?? 0) Passengers
+                </span>
+            </div>
+            <h5 class="mb-0 fw-bold">
+                <i class="bi bi-list-ul me-1"></i>
+                Passenger List
+            </h5>
         </div>
 
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
+
                     <thead style="background-color: #0b1729; color: white;">
                         <tr>
-                            <th>الرقم</th>
-                            <th>اسم الراكب</th>
-                            <th>رقم جواز السفر</th>
-                            <th>الرقم القومي</th>
-                            <th>الهاتف</th>
-                            <th>البريد الإلكتروني</th>
-                            <th>تاريخ الميلاد</th>
-                            <th class="text-center">الإجراءات</th>
+                            <th>ID</th>
+                            <th>Full Name</th>
+                            <th>Passport No.</th>
+                            <th>National ID</th>
+                            <th>Phone Number</th>
+                            <th>Email Address</th>
+                            <th>Passenger Name</th>
+                            <th>Passport Number</th>
+                            <th>National ID</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Date of Birth</th>
+                            <th class="text-center">Actions</th>
                         </tr>
                     </thead>
 
@@ -52,23 +124,44 @@
                                     <td>@item.Id</td>
 
                                     <td class="fw-semibold">
-                                        @item.FirstName @item.MiddleName @item.LastName
+                                        @item.FirstName
+                                        @item.MiddleName
+                                        @item.LastName
                                     </td>
 
                                     <td>@item.PassportNumber</td>
+
                                     <td>@item.NationalID</td>
-                                    <td dir="ltr" class="text-end">@item.Phone</td>
+
+                                    <td dir="ltr" class="text-start">
+                                        @item.Phone
+                                    </td>
+
                                     <td>@item.Email</td>
-                                    <td>@item.DateOfBirth.ToString("yyyy/MM/dd")</td>
 
                                     <td>
-                                        <div class="d-flex justify-content-center gap-2">
+                                        @item.DateOfBirth.ToString("yyyy/MM/dd")
+                                    </td>
+
+                                    <td>
+                                        <div class="d-flex justify-content-center gap-2 flex-wrap">
+
                                             <a asp-area="Admin"
                                                asp-controller="Passenger"
                                                asp-action="Edit"
                                                asp-route-id="@item.Id"
                                                class="btn btn-warning btn-sm">
-                                                تعديل
+                                                <i class="bi bi-pencil-square me-1"></i>
+                                                Edit
+                                            </a>
+
+                                            <a asp-area="Admin"
+                                               asp-controller="ActivityLog"
+                                               asp-action="Index"
+                                               asp-route-entityId="@item.Id"
+                                               class="btn btn-info btn-sm">
+                                                <i class="bi bi-clock-history me-1"></i>
+                                                Activity History
                                             </a>
 
                                             <a asp-area="Admin"
@@ -76,8 +169,10 @@
                                                asp-action="Delete"
                                                asp-route-id="@item.Id"
                                                class="btn btn-danger btn-sm">
-                                                حذف
+                                                <i class="bi bi-trash me-1"></i>
+                                                Delete
                                             </a>
+
                                         </div>
                                     </td>
                                 </tr>
@@ -86,14 +181,23 @@
                         else
                         {
                             <tr>
-                                <td colspan="8" class="text-center py-4 text-muted">
-                                    لا يوجد ركاب مسجلون حتى الآن.
+                                <td colspan="8" class="text-center py-5 text-muted">
+                                    <i class="bi bi-people display-6 d-block mb-3"></i>
+                                    <h5>No Passengers Available</h5>
+                                    <p class="mb-0">
+                                        There are currently no registered passengers.
+                                    <h5>No Passengers Found</h5>
+                                    <p class="mb-0">
+                                        No passengers have been registered yet.
+                                    </p>
                                 </td>
                             </tr>
                         }
                     </tbody>
+
                 </table>
             </div>
         </div>
     </div>
+
 </div>

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 
 using Flight_Booking_System.Models;
+using Flight_Booking_System.Models.ENUM;
 using Flight_Booking_System.Repositories;
 using Flight_Booking_System.ViewModels.Customer;
 using Microsoft.AspNetCore.Mvc;
@@ -39,17 +40,15 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
         }
 
         // GET: /Customer/Flights
-        // GET: /Customer/Flights?departureAirport=Cairo&arrivalAirport=Alexandria&departureDate=2026-11-01
         [HttpGet]
         public async Task<IActionResult> Index(
             string? departureAirport,
             string? arrivalAirport,
             DateTime? departureDate)
         {
-            // 1. Get active upcoming flights
             var flights = await _flightRepository.GetAllAsync(
                 filter: f =>
-                    f.FlightStatus &&
+                    f.FlightStatus == FlightStatus.Scheduled &&
                     f.DepartureDateTime >= DateTime.Now,
                 includes: new Expression<Func<Flight, object>>[]
                 {
@@ -60,7 +59,6 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 IsTracking: false
             );
 
-            // 2. Build the ViewModel
             var model = new List<AvailableFlightViewModel>();
 
             foreach (var flight in flights.OrderBy(f => f.DepartureDateTime))
@@ -106,7 +104,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 });
             }
 
-            // 3. Search by departure airport
+            // Search by departure airport
             if (!string.IsNullOrWhiteSpace(departureAirport))
             {
                 string searchDeparture = departureAirport.Trim();
@@ -119,7 +117,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                     .ToList();
             }
 
-            // 4. Search by arrival airport
+            // Search by arrival airport
             if (!string.IsNullOrWhiteSpace(arrivalAirport))
             {
                 string searchArrival = arrivalAirport.Trim();
@@ -132,7 +130,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                     .ToList();
             }
 
-            // 5. Search by departure date
+            // Search by departure date
             if (departureDate.HasValue)
             {
                 DateTime selectedDate = departureDate.Value.Date;
@@ -143,7 +141,6 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                     .ToList();
             }
 
-            // 6. Sort by departure date and time
             model = model
                 .OrderBy(f => f.DepartureDateTime)
                 .ToList();
@@ -158,7 +155,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             var flight = await _flightRepository.GetOneAsync(
                 filter: f =>
                     f.Id == id &&
-                    f.FlightStatus &&
+                    f.FlightStatus == FlightStatus.Scheduled &&
                     f.DepartureDateTime >= DateTime.Now,
                 includes: new Expression<Func<Flight, object>>[]
                 {
@@ -224,7 +221,6 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 ArrivalDateTime = flight.ArrivalDateTime
             };
 
-            // Get available classes and calculate ticket prices
             foreach (var aircraftClass in aircraftClasses)
             {
                 var classInfo = await _classRepository.GetOneAsync(
@@ -247,7 +243,6 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                     * setting.PricePerKm
                     * multiplier;
 
-                // Tickets already booked for this flight
                 var bookedTickets = await _ticketRepository.GetAllAsync(
                     filter: t => t.FlightId == flight.Id,
                     IsTracking: false
@@ -274,15 +269,16 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             return View(model);
         }
 
-        // GET: /Customer/Flights/ChooseSeat?flightId=1&classId=1
+        // GET: /Customer/Flights/ChooseSeat
         [HttpGet]
-        public async Task<IActionResult> ChooseSeat(int flightId, int classId)
+        public async Task<IActionResult> ChooseSeat(
+            int flightId,
+            int classId)
         {
-            // 1. Get active upcoming flight
             var flight = await _flightRepository.GetOneAsync(
                 filter: f =>
                     f.Id == flightId &&
-                    f.FlightStatus &&
+                    f.FlightStatus == FlightStatus.Scheduled &&
                     f.DepartureDateTime >= DateTime.Now,
                 includes: new Expression<Func<Flight, object>>[]
                 {
@@ -298,7 +294,6 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             if (flight.Route == null)
                 return NotFound("Flight route not found.");
 
-            // 2. Get selected class on this aircraft
             var aircraftClass = await _aircraftClassRepository.GetOneAsync(
                 filter: ac =>
                     ac.AircraftId == flight.AircraftId &&
@@ -313,7 +308,6 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 );
             }
 
-            // 3. Get class details
             var classInfo = await _classRepository.GetOneAsync(
                 filter: c => c.Id == classId,
                 IsTracking: false
@@ -322,7 +316,6 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             if (classInfo == null)
                 return NotFound("Class not found.");
 
-            // 4. Get pricing settings
             var setting = await _settingRepository.GetOneAsync(
                 IsTracking: false
             );
@@ -334,20 +327,17 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 );
             }
 
-            // 5. Calculate ticket price
             decimal ticketPrice =
                 Convert.ToDecimal(flight.Route.Distance)
                 * setting.PricePerKm
                 * classInfo.DistancePercentage;
 
-            // 6. Get seats belonging to this aircraft class
             var seats = await _seatRepository.GetAllAsync(
                 filter: s =>
                     s.AircraftClassId == aircraftClass.ID,
                 IsTracking: false
             );
 
-            // 7. Get tickets already booked for this flight
             var bookedTickets = await _ticketRepository.GetAllAsync(
                 filter: t => t.FlightId == flight.Id,
                 IsTracking: false
@@ -357,7 +347,6 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 .Select(t => t.SeatId)
                 .ToHashSet();
 
-            // 8. Prepare ViewModel
             var model = new ChooseSeatViewModel
             {
                 FlightId = flight.Id,
