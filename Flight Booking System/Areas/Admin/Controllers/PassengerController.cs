@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
-using Flight_Booking_System.Models;
 ﻿
 using Flight_Booking_System.Models;
 using Flight_Booking_System.ModelsServices;

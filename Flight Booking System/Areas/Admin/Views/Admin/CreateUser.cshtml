@@ -1,21 +1,10 @@
-@model UserCreateViewModel
+﻿@model Flight_Booking_System.ViewModels.UserCreateViewModel
+
 @{
-    ViewData["Title"] = "Create user";
+    ViewData["Title"] = "Create User";
+    Layout = "_AdminLayout";
 }
 
-<div class="card">
-    <div class="card-header">
-        <h5 class="mb-0"><span class="fas fa-user-plus me-2"></span>Create user</h5>
-    </div>
-    <div class="card-body">
-        <form asp-area="Admin" asp-controller="Admin" asp-action="CreateUser" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-            <div class="row gx-2">
-                <div class="mb-3 col-md-6">
-                    <label asp-for="FirstName" class="form-label"></label>
-                    <input asp-for="FirstName" class="form-control" />
-                    <span asp-validation-for="FirstName" class="text-danger fs--1"></span>
 <div class="container-fluid py-4">
 
     <!-- Page Header -->
@@ -64,28 +53,7 @@
                     </h5>
 
                 </div>
-                <div class="mb-3 col-md-6">
-                    <label asp-for="LastName" class="form-label"></label>
-                    <input asp-for="LastName" class="form-control" />
-                    <span asp-validation-for="LastName" class="text-danger fs--1"></span>
-                </div>
-            </div>
 
-            <div class="row gx-2">
-                <div class="mb-3 col-md-4">
-                    <label asp-for="UserName" class="form-label"></label>
-                    <input asp-for="UserName" class="form-control" autocomplete="off" />
-                    <span asp-validation-for="UserName" class="text-danger fs--1"></span>
-                </div>
-                <div class="mb-3 col-md-4">
-                    <label asp-for="Email" class="form-label"></label>
-                    <input asp-for="Email" class="form-control" />
-                    <span asp-validation-for="Email" class="text-danger fs--1"></span>
-                </div>
-                <div class="mb-3 col-md-4">
-                    <label asp-for="PhoneNumber" class="form-label"></label>
-                    <input asp-for="PhoneNumber" class="form-control" />
-                    <span asp-validation-for="PhoneNumber" class="text-danger fs--1"></span>
                 <div class="card-body p-4">
 
                     <form asp-controller="Admin"
@@ -270,41 +238,17 @@
                     </form>
 
                 </div>
+
             </div>
 
-            <div class="row gx-2">
-                <div class="mb-3 col-md-6">
-                    <label asp-for="Password" class="form-label"></label>
-                    <input asp-for="Password" class="form-control" autocomplete="new-password" />
-                    <span asp-validation-for="Password" class="text-danger fs--1"></span>
-                </div>
-                <div class="mb-3 col-md-6">
-                    <label asp-for="ConfirmPassword" class="form-label"></label>
-                    <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" />
-                    <span asp-validation-for="ConfirmPassword" class="text-danger fs--1"></span>
-                </div>
-            </div>
+        </div>
 
-            <div class="mb-3">
-                <label class="form-label d-block">Roles</label>
-                @foreach (var role in Model.AllRoles)
-                {
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" name="SelectedRoles" value="@role"
-                               id="role_@role" checked="@Model.SelectedRoles.Contains(role)" />
-                        <label class="form-check-label" for="role_@role">@role</label>
-                    </div>
-                }
-                <div class="form-text fs--1">Choose one role or more. The account is created with a confirmed email.</div>
-            </div>
-
-            <button type="submit" class="btn btn-primary">Create user</button>
-            <a asp-area="Admin" asp-controller="Admin" asp-action="Users" class="btn btn-secondary">Cancel</a>
-        </form>
     </div>
+
 </div>
 
 @section Scripts {
+
     <partial name="_ValidationScriptsPartial" />
 
 }

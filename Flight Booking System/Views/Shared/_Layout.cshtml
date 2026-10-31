@@ -37,29 +37,14 @@
                             </li>
                             @if (User.Identity?.IsAuthenticated == true)
                             {
-                                @if (User.IsInRole("Customer") || User.IsInRole("BookingAgent") || User.IsInRole("Admin"))
-                                {
-                                    <li class="nav-item">
-                                        <a class="nav-link" asp-area="Customer" asp-controller="Flights" asp-action="Index">Flights</a>
-                                    </li>
-                                }
-                                @if (User.IsInRole("Customer") || User.IsInRole("BookingAgent") || User.IsInRole("Admin"))
-                                {
-                                    <li class="nav-item">
-                                        <a class="nav-link" asp-area="Customer" asp-controller="Booking" asp-action="Index">My bookings</a>
-                                    </li>
-                                }
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="MyBookings" asp-action="Index">My bookings</a>
+                                </li>
                             }
                             @if (User.IsInRole("Admin"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link" asp-area="Admin" asp-controller="Home" asp-action="Index">Admin panel</a>
-                                </li>
-                            }
-                            @if (User.IsInRole("Receptionist") || User.IsInRole("BookingAgent") || User.IsInRole("Admin"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-area="Staff" asp-controller="Home" asp-action="Index">Staff desk</a>
+                                    <a class="nav-link" asp-area="" asp-controller="Admin" asp-action="Users">Users</a>
                                 </li>
                             }
                         </ul>

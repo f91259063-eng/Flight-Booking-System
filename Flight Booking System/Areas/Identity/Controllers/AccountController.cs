@@ -1,6 +1,6 @@
 
 using System.Text;
-using System.Text.RegularExpressions;
+using System.Text.Encodings.Web;
 using Flight_Booking_System.Areas.Identity.ViewModels;
 using Flight_Booking_System.Models.Identity;
 using Flight_Booking_System.Services;
@@ -8,20 +8,15 @@ using Flight_Booking_System.Services.Rewards;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Options;
 
 namespace Flight_Booking_System.Areas.Identity.Controllers
 {
     [Area("Identity")]
     public class AccountController : Controller
     {
-        private static readonly Regex UserNameRegex = new(@"^[A-Za-z0-9._-]{3,20}$");
-
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IAppEmailSender _emailSender;
-        private readonly ILogger<AccountController> _logger;
-        private readonly RegistrationSettings _registration;
         private readonly IWebHostEnvironment _env;
         private readonly IRewardService _rewardService;
 
@@ -29,23 +24,15 @@ namespace Flight_Booking_System.Areas.Identity.Controllers
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IAppEmailSender emailSender,
-            ILogger<AccountController> logger,
-            IOptions<RegistrationSettings> registration)
             IWebHostEnvironment env,
             IRewardService rewardService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
-            _logger = logger;
-            _registration = registration.Value;
             _env = env;
             _rewardService = rewardService;
         }
-
-        // true: the administrator confirms the new accounts (no email is sent)
-        private bool AdminConfirms =>
-            string.Equals(_registration.ConfirmationMode, "Admin", StringComparison.OrdinalIgnoreCase);
 
         // =====================================================
         // Register + email confirmation
@@ -60,19 +47,13 @@ namespace Flight_Booking_System.Areas.Identity.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            if (await _userManager.FindByNameAsync(model.UserName) is not null)
-            {
-                ModelState.AddModelError(nameof(model.UserName), "This username is already taken.");
-                return View(model);
-            }
-
             var user = new ApplicationUser
             {
-                UserName = model.UserName,
+                UserName = model.Email,
                 Email = model.Email,
                 PhoneNumber = model.PhoneNumber,
                 FirstName = model.FirstName,
-                MiddelName = string.Empty,
+                MiddelName = model.MiddleName ?? string.Empty,
                 LastName = model.LastName
             };
 
@@ -80,19 +61,6 @@ namespace Flight_Booking_System.Areas.Identity.Controllers
 
             if (result.Succeeded)
             {
-                // anyone who registers from the site is a customer
-                await _userManager.AddToRoleAsync(user, AppRoles.Customer);
-
-                if (AdminConfirms)
-                {
-                    // no email: the administrator confirms the account from the users page
-                    TempData["WaitingForAdmin"] = true;
-                }
-                else
-                {
-                    var sent = await TrySendConfirmationEmailAsync(user);
-                    TempData["EmailFailed"] = !sent;
-                }
                 // Create Customer role assignment
                 await _userManager.AddToRoleAsync(user, "Customer");
 
@@ -111,52 +79,14 @@ namespace Flight_Booking_System.Areas.Identity.Controllers
             return View(model);
         }
 
-        // Called by the register form while the user types (remote validation)
-        [AcceptVerbs("GET", "POST")]
-        public async Task<IActionResult> CheckUserName(string userName)
-        {
-            if (string.IsNullOrWhiteSpace(userName) || !UserNameRegex.IsMatch(userName))
-                return Json("Use 3 to 20 letters, numbers, dot, dash or underscore.");
-
-            if (await _userManager.FindByNameAsync(userName) is null)
-                return Json(true);
-
-            // taken: look for a free name close to it
-            var random = new Random();
-            var baseName = userName.Length > 17 ? userName.Substring(0, 17) : userName;
-
-            for (var i = 0; i < 10; i++)
-            {
-                var candidate = baseName + random.Next(10, 99);
-                if (await _userManager.FindByNameAsync(candidate) is null)
-                    return Json($"'{userName}' is already taken. Try '{candidate}'.");
-            }
-
-            return Json($"'{userName}' is already taken.");
-        }
-
         [HttpGet]
         public IActionResult RegisterConfirmation()
         {
-            if (TempData["WaitingForAdmin"] is true)
-            {
-                return View("Message", new MessageViewModel
-                {
-                    Title = "Account created",
-                    Message = "Thank you! An administrator will confirm your account. After that you can log in.",
-                    LinkText = "Back to login",
-                    LinkUrl = LoginUrl()
-                });
-            }
-
-            var failed = TempData["EmailFailed"] is true;
-
             return View("Message", new MessageViewModel
             {
-                Title = failed ? "Account created" : "Check your email",
-                Message = failed
-                    ? "Your account was created, but we could not send the confirmation email. Use \"Resend confirmation\" on the login page in a few minutes."
-                    : "We sent you a confirmation link. Click it to activate your account, then log in.",
+                Title = "Check your email",
+                Message = "We sent you a confirmation link. Click it to activate your account, then log in.",
+                DevLink = TempData["DevLink"] as string,
                 LinkText = "Back to login",
                 LinkUrl = LoginUrl()
             });
@@ -195,23 +125,11 @@ namespace Flight_Booking_System.Areas.Identity.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-                        if (AdminConfirms)
-            {
-                return View("Message", new MessageViewModel
-                {
-                    Title = "Waiting for the administrator",
-                    Message = "New accounts are confirmed by the administrator. Please try to log in again later.",
-                    LinkText = "Back to login",
-                    LinkUrl = LoginUrl()
-                });
-            }
-
-var user = await _userManager.FindByEmailAsync(model.Email);
+            string? devLink = null;
+            var user = await _userManager.FindByEmailAsync(model.Email);
 
             if (user is not null && !await _userManager.IsEmailConfirmedAsync(user))
-                await TrySendConfirmationEmailAsync(user);
-
-            // Same answer whether or not the email exists (don't leak which emails are registered)
+            {
                 var link = await SendConfirmationEmailAsync(user);
 
                 if (_env.IsDevelopment())
@@ -222,6 +140,7 @@ var user = await _userManager.FindByEmailAsync(model.Email);
             {
                 Title = "Check your email",
                 Message = "If that account exists and is not confirmed yet, we sent a new confirmation link.",
+                DevLink = devLink,
                 LinkText = "Back to login",
                 LinkUrl = LoginUrl()
             });
@@ -233,7 +152,6 @@ var user = await _userManager.FindByEmailAsync(model.Email);
 
         [HttpGet]
         public IActionResult Login(string? returnUrl = null)
-            => View(new LoginViewModel { ReturnUrl = returnUrl });
         {
             return View(new LoginViewModel
             {
@@ -241,51 +159,24 @@ var user = await _userManager.FindByEmailAsync(model.Email);
             });
         }
 
-        [HttpPost, ValidateAntiForgeryToken]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
                 return View(model);
 
-            // the user can type his username or his email
-            var input = model.UserNameOrEmail.Trim();
-            var user = input.Contains('@')
-                ? await _userManager.FindByEmailAsync(input)
-                : await _userManager.FindByNameAsync(input);
             var user = await _userManager.FindByEmailAsync(model.Email);
 
-            if (user is not null)
+            if (user == null)
             {
-                var result = await _signInManager.PasswordSignInAsync(
-                    user, model.Password, model.RememberMe, lockoutOnFailure: true);
                 ModelState.AddModelError(
                     string.Empty,
                     "Invalid email or password.");
 
-                if (result.Succeeded)
-                    return await RedirectAfterLoginAsync(user, model.ReturnUrl);
+                return View(model);
+            }
 
-                if (result.RequiresTwoFactor)
-                    return RedirectToAction(nameof(LoginWith2fa),
-                        new { rememberMe = model.RememberMe, returnUrl = model.ReturnUrl });
-
-                if (result.IsLockedOut)
-                {
-                    ModelState.AddModelError(string.Empty, "This account is locked. Try again later or contact the administrator.");
-                    return View(model);
-                }
-
-                if (result.IsNotAllowed)
-                {
-                    if (AdminConfirms)
-                    {
-                        ModelState.AddModelError(string.Empty, "Your account is waiting for the administrator to confirm it. Please try again later.");
-                    }
-                    else
-                    {
-                        ModelState.AddModelError(string.Empty, "You need to confirm your email before logging in.");
-                        ViewData["ShowResend"] = true;
-                    }
             var result = await _signInManager.PasswordSignInAsync(
                 user,
                 model.Password,
@@ -330,12 +221,9 @@ var user = await _userManager.FindByEmailAsync(model.Email);
 
                 ViewData["ShowResend"] = true;
 
-                    return View(model);
-                }
+                return View(model);
             }
 
-            // Same message for "no such user" and "wrong password"
-            ModelState.AddModelError(string.Empty, "Invalid username/email or password.");
             ModelState.AddModelError(
                 string.Empty,
                 "Invalid email or password.");
@@ -364,8 +252,7 @@ var user = await _userManager.FindByEmailAsync(model.Email);
             if (!ModelState.IsValid)
                 return View(model);
 
-            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
-            if (user is null)
+            if (await _signInManager.GetTwoFactorAuthenticationUserAsync() is null)
                 return RedirectToAction(nameof(Login));
 
             var code = model.TwoFactorCode
@@ -378,10 +265,8 @@ var user = await _userManager.FindByEmailAsync(model.Email);
                 model.RememberMachine);
 
             if (result.Succeeded)
-                return await RedirectAfterLoginAsync(user, model.ReturnUrl);
+                return RedirectToLocal(model.ReturnUrl);
 
-            ModelState.AddModelError(string.Empty,
-                result.IsLockedOut ? "This account is locked. Try again later." : "Invalid authenticator code.");
             ModelState.AddModelError(
                 string.Empty,
                 result.IsLockedOut
@@ -407,22 +292,13 @@ var user = await _userManager.FindByEmailAsync(model.Email);
         public async Task<IActionResult> LoginWithRecoveryCode(
             RecoveryCodeLoginViewModel model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
-            if (user is null)
-                return RedirectToAction(nameof(Login));
-
             var code = model.RecoveryCode.Replace(" ", string.Empty);
 
             var result = await _signInManager.TwoFactorRecoveryCodeSignInAsync(code);
 
             if (result.Succeeded)
-                return await RedirectAfterLoginAsync(user, model.ReturnUrl);
+                return RedirectToLocal(model.ReturnUrl);
 
-            ModelState.AddModelError(string.Empty,
-                result.IsLockedOut ? "This account is locked. Try again later." : "Invalid recovery code.");
             ModelState.AddModelError(
                 string.Empty,
                 result.IsLockedOut
@@ -436,7 +312,6 @@ var user = await _userManager.FindByEmailAsync(model.Email);
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            return RedirectToAction(nameof(Login));
 
             return RedirectToAction("Index", "Home", new { area = "" });
         }
@@ -464,23 +339,6 @@ var user = await _userManager.FindByEmailAsync(model.Email);
 
             if (user is not null && await _userManager.IsEmailConfirmedAsync(user))
             {
-                try
-                {
-                    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                    var code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-
-                    var link = Url.Action(nameof(ResetPassword), "Account",
-                        new { area = "Identity", code, email = model.Email }, Request.Scheme)!;
-
-                    var body = EmailTemplates.WithButton(user.FirstName,
-                        "We received a request to reset your password.", "Reset my password", link);
-
-                    await _emailSender.SendAsync(user.Email!, "Reset your password", body);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Could not send the password reset email to {Email}", model.Email);
-                }
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
                 var code = WebEncoders.Base64UrlEncode(
@@ -507,6 +365,7 @@ var user = await _userManager.FindByEmailAsync(model.Email);
             {
                 Title = "Check your email",
                 Message = "If an account with that email exists and is confirmed, we sent a link to reset the password.",
+                DevLink = devLink,
                 LinkText = "Back to login",
                 LinkUrl = LoginUrl()
             });
@@ -605,44 +464,8 @@ var user = await _userManager.FindByEmailAsync(model.Email);
         // Helpers
         // =====================================================
 
-        // Returns false if the email could not be sent (the error is logged)
-        private async Task<bool> TrySendConfirmationEmailAsync(ApplicationUser user)
+        private async Task<string> SendConfirmationEmailAsync(ApplicationUser user)
         {
-            try
-            {
-                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                var code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-
-                var link = Url.Action(nameof(ConfirmEmail), "Account",
-                    new { area = "Identity", userId = user.Id, code }, Request.Scheme)!;
-
-                var body = EmailTemplates.WithButton(user.FirstName,
-                    "Thanks for registering. Please confirm your email address to activate your account.",
-                    "Confirm my email", link);
-
-                await _emailSender.SendAsync(user.Email!, "Confirm your email", body);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Could not send the confirmation email to {Email}", user.Email);
-                return false;
-            }
-        }
-
-        // After login: admins go to the admin panel, employees to the staff desk, customers to the home page
-        private async Task<IActionResult> RedirectAfterLoginAsync(ApplicationUser user, string? returnUrl)
-        {
-            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                return LocalRedirect(returnUrl);
-
-            var roles = await _userManager.GetRolesAsync(user);
-
-            if (roles.Contains(AppRoles.Admin))
-                return RedirectToAction("Index", "Home", new { area = "Admin" });
-
-            if (roles.Contains(AppRoles.Receptionist) || roles.Contains(AppRoles.BookingAgent))
-                return RedirectToAction("Index", "Home", new { area = "Staff" });
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
             var code = WebEncoders.Base64UrlEncode(
@@ -665,8 +488,7 @@ var user = await _userManager.FindByEmailAsync(model.Email);
                 $"<p>Hi {HtmlEncoder.Default.Encode(user.FirstName)},</p>" +
                 $"<p>Please confirm your account by <a href=\"{HtmlEncoder.Default.Encode(link)}\">clicking here</a>.</p>");
 
-            // customers (and booking agents) start from the flights page
-            return RedirectToAction("Index", "Flights", new { area = "Customer" });
+            return link;
         }
 
         private static bool TryDecode(string? code, out string decoded)
@@ -698,7 +520,6 @@ var user = await _userManager.FindByEmailAsync(model.Email);
         }
 
         private static MessageViewModel Error(string title, string message)
-            => new() { Title = title, Message = message, IsSuccess = false };
         {
             return new MessageViewModel
             {
