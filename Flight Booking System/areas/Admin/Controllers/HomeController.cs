@@ -1,4 +1,5 @@
-﻿using Flight_Booking_System.Models;
+using Microsoft.AspNetCore.Authorization;
+using Flight_Booking_System.Models;
 using Flight_Booking_System.Models.Identity;
 using Flight_Booking_System.Repositories;
 using Flight_Booking_System.ViewModels;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Flight_Booking_System.areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "Admin")]
     public class HomeController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;

@@ -1,3 +1,4 @@
+
 ﻿
 using System.Linq.Expressions;
 using System.Security.Claims;
@@ -12,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Flight_Booking_System.Areas.Customer.Controllers
 {
     [Area("Customer")]
-    [Authorize]
+    [Authorize(Roles = "Customer,BookingAgent,Admin")]
     public class BookingController : Controller
     {
         private readonly IRepository<Booking> _bookingRepository;

@@ -1,5 +1,4 @@
 
-
 using Flight_Booking_System.Data;
 using Flight_Booking_System.Models;
 using Flight_Booking_System.Models.Identity;
@@ -18,15 +17,22 @@ namespace Flight_Booking_System
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Database
+            // =====================================================
+            // DATABASE
+            // =====================================================
+
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            // Identity
+            // =====================================================
+            // IDENTITY
+            // =====================================================
+
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
                 options.User.RequireUniqueEmail = true;
+
                 options.SignIn.RequireConfirmedAccount = true;
 
                 options.Password.RequiredLength = 8;
@@ -42,56 +48,76 @@ namespace Flight_Booking_System
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
-            // Repositories
-            builder.Services.AddScoped<IRepository<Flight>, Repository<Flight>>();
-            builder.Services.AddScoped<IRepository<Booking>, Repository<Booking>>();
-            builder.Services.AddScoped<IRepository<Passenger>, Repository<Passenger>>();
-            builder.Services.AddScoped<IRepository<Aircraft>, Repository<Aircraft>>();
-            builder.Services.AddScoped<IRepository<AirPort>, Repository<AirPort>>();
-            builder.Services.AddScoped<IRepository<Flight_Booking_System.Models.Route>,
-                Repository<Flight_Booking_System.Models.Route>>();
-            builder.Services.AddScoped<IRepository<Seat>, Repository<Seat>>();
-            builder.Services.AddScoped<IRepository<Payment>, Repository<Payment>>();
-            builder.Services.AddScoped<IRepository<city>, Repository<city>>();
-            builder.Services.AddScoped<IRepository<AircraftClass>, Repository<AircraftClass>>();
-            builder.Services.AddScoped<IRepository<Class>, Repository<Class>>();
-            builder.Services.AddScoped<IRepository<Airline>, Repository<Airline>>();
-            builder.Services.AddScoped<IRepository<Setting>, Repository<Setting>>();
-            builder.Services.AddScoped<IRepository<Ticket>, Repository<Ticket>>();
+            // Validate security stamp on every request.
+            // Changes to roles and lockout take effect immediately.
+            builder.Services.Configure<SecurityStampValidatorOptions>(options =>
+            {
+                options.ValidationInterval = TimeSpan.Zero;
+            });
 
-            // Activity Log
-            builder.Services.AddScoped<IRepository<ActivityLog>,
-                Repository<ActivityLog>>();
+            // =====================================================
+            // HTTP CONTEXT
+            // =====================================================
 
             builder.Services.AddHttpContextAccessor();
 
-            builder.Services.AddScoped<IActivityLogService,
-                ActivityLogService>();
+            // =====================================================
+            // REPOSITORIES
+            // =====================================================
 
-            // Other services
+            builder.Services.AddScoped(
+                typeof(IRepository<>),
+                typeof(Repository<>));
+
+            // =====================================================
+            // APPLICATION SERVICES
+            // =====================================================
+
             builder.Services.AddHttpClient<AirportCoordinateService>();
+
             builder.Services.AddScoped<DistanceCalculatorService>();
-            builder.Services.AddScoped<IRewardService, RewardService>();
+
+            builder.Services.AddScoped<ISeatService, SeatService>();
+
+            // =====================================================
+            // ACTIVITY LOG
+            // =====================================================
 
             builder.Services.AddScoped<
-                Flight_Booking_System.Services.ISeatService,
-                SeatService>();
+                IActivityLogService,
+                ActivityLogService>();
 
-            // Cookies
-            builder.Services.ConfigureApplicationCookie(options =>
-            {
-                options.LoginPath = "/Identity/Account/Login";
-                options.AccessDeniedPath = "/Identity/Account/AccessDenied";
-            });
+            // =====================================================
+            // REWARD POINTS
+            // =====================================================
 
-            // Email
+            builder.Services.AddScoped<
+                IRewardService,
+                RewardService>();
+
+            // =====================================================
+            // EMAIL SETTINGS
+            // =====================================================
+
             builder.Services.Configure<EmailSettings>(
                 builder.Configuration.GetSection("Email"));
 
-            builder.Services.AddTransient<IAppEmailSender, SmtpEmailSender>();
+            builder.Services.Configure<RegistrationSettings>(
+                builder.Configuration.GetSection("Registration"));
 
-            // Stripe
-            var stripeSecretKey = builder.Configuration["Stripe:SecretKey"];
+            builder.Services.AddTransient<
+                IAppEmailSender,
+                SmtpEmailSender>();
+
+            // =====================================================
+            // STRIPE PAYMENT
+            // =====================================================
+
+            builder.Services.Configure<StripeSettings>(
+                builder.Configuration.GetSection("Stripe"));
+
+            var stripeSecretKey =
+                builder.Configuration["Stripe:SecretKey"];
 
             if (string.IsNullOrWhiteSpace(stripeSecretKey))
             {
@@ -99,18 +125,59 @@ namespace Flight_Booking_System
                     "Stripe SecretKey is missing. Check User Secrets configuration.");
             }
 
-            builder.Services.Configure<StripeSettings>(
-                builder.Configuration.GetSection("Stripe"));
+            // =====================================================
+            // COOKIES
+            // =====================================================
+
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Identity/Account/Login";
+                options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+            });
+
+            // =====================================================
+            // AUTHORIZATION POLICIES
+            // =====================================================
+
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy(AppPolicies.StaffOnly, policy =>
+                    policy.RequireRole(
+                        AppRoles.Admin,
+                        AppRoles.Receptionist,
+                        AppRoles.BookingAgent));
+
+                options.AddPolicy(AppPolicies.CanBookForCustomers, policy =>
+                    policy.RequireRole(
+                        AppRoles.Admin,
+                        AppRoles.BookingAgent));
+            });
+
+            // =====================================================
             // MVC
+            // =====================================================
+
             builder.Services.AddControllersWithViews();
+
+            // =====================================================
+            // BUILD APPLICATION
+            // =====================================================
 
             var app = builder.Build();
 
-            // Seed Identity
+            // =====================================================
+            // SEED IDENTITY
+            // =====================================================
+
             using (var scope = app.Services.CreateScope())
             {
-                await IdentitySeeder.SeedAsync(scope.ServiceProvider);
+                await IdentitySeeder.SeedAsync(
+                    scope.ServiceProvider);
             }
+
+            // =====================================================
+            // MIDDLEWARE
+            // =====================================================
 
             if (!app.Environment.IsDevelopment())
             {
@@ -119,6 +186,7 @@ namespace Flight_Booking_System
             }
 
             app.UseHttpsRedirection();
+
             app.UseRouting();
 
             app.UseAuthentication();
@@ -126,10 +194,15 @@ namespace Flight_Booking_System
 
             app.MapStaticAssets();
 
-            // Identity / Default route
+            // Areas route must come before the default route.
+            app.MapControllerRoute(
+                name: "areas",
+                pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}")
+                .WithStaticAssets();
+
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{area=identity}/{controller=Account}/{action=login}/{id?}")
+                pattern: "{controller=Home}/{action=Index}/{id?}")
                 .WithStaticAssets();
 
             app.Run();

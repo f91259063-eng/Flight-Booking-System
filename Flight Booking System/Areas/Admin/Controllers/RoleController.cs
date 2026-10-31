@@ -1,3 +1,4 @@
+
 ﻿
 using Flight_Booking_System.Models;
 using Flight_Booking_System.Models.Identity;
@@ -103,6 +104,10 @@ namespace Flight_Booking_System.Controllers
             if (role == null)
                 return NotFound();
 
+            // the system needs these roles (Admin, Receptionist, BookingAgent, Customer)
+            if (role.Name != null && Flight_Booking_System.Models.Identity.AppRoles.All.Contains(role.Name))
+            {
+                TempData["Error"] = $"The {role.Name} role is used by the system and cannot be deleted.";
             // Prevent deleting Admin role
             if (string.Equals(
                 role.Name,

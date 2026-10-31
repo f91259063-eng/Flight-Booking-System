@@ -1,3 +1,13 @@
+@model UserListViewModel
+@{
+    ViewData["Title"] = "Users";
+}
+
+@if (TempData["Success"] is string okMessage)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @okMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 @model IEnumerable<Flight_Booking_System.ViewModels.UserRowViewModel>
 
 @{
@@ -24,29 +34,76 @@
         </a>
 
     </div>
+}
+@if (TempData["Error"] is string errorMessage)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @errorMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
 
+@if (Model.PendingCount > 0)
+{
+    <div class="alert alert-warning d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span><span class="fas fa-user-clock me-2"></span>@Model.PendingCount account(s) are waiting for confirmation.</span>
+        <a asp-area="Admin" asp-controller="Admin" asp-action="Users" asp-route-status="unconfirmed" class="btn btn-falcon-warning btn-sm">Show them</a>
+    </div>
+}
+
+<div class="card mb-3">
+    <div class="card-header">
+        <div class="row flex-between-center">
+            <div class="col-auto">
+                <h5 class="mb-0"><span class="fas fa-users me-2"></span>Users (@Model.Users.Count)</h5>
+            </div>
+            <div class="col-auto">
+                <a asp-area="Admin" asp-controller="Admin" asp-action="CreateUser" class="btn btn-primary btn-sm">
+                    <span class="fas fa-user-plus me-1"></span>Create user
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body bg-light">
+        <form method="get" asp-area="Admin" asp-controller="Admin" asp-action="Users" class="row g-2">
+            <div class="col-md-5">
+                <input name="search" value="@Model.Search" class="form-control" placeholder="Search by name, username, email or phone" />
+            </div>
+            <div class="col-md-3">
+                <select name="role" class="form-select">
+                    <option value="">All roles</option>
+                    @foreach (var r in Model.AllRoles)
+                    {
+                        <option value="@r" selected="@(r == Model.Role)">@r</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="status" class="form-select">
+                    <option value="">Any status</option>
+                    <option value="active" selected="@(Model.Status == "active")">Active</option>
+                    <option value="locked" selected="@(Model.Status == "locked")">Locked</option>
+                    <option value="unconfirmed" selected="@(Model.Status == "unconfirmed")">Not confirmed</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-falcon-default w-100">Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
     <div class="card-body p-0">
-
-        @if (TempData["Success"] != null)
-        {
-            <div class="alert alert-success m-3">
-                @TempData["Success"]
-            </div>
-        }
-
-        @if (TempData["Error"] != null)
-        {
-            <div class="alert alert-danger m-3">
-                @TempData["Error"]
-            </div>
-        }
-
         <div class="table-responsive scrollbar">
-
             <table class="table table-hover table-striped fs--1 mb-0 overflow-hidden align-middle">
-
                 <thead class="bg-200 text-900">
                     <tr>
+                        <th>User</th>
+                        <th>Email / phone</th>
+                        <th>Roles</th>
+                        <th>Status</th>
                         <th>Full Name</th>
                         <th>Email Address</th>
                         <th>User Role</th>
@@ -54,31 +111,86 @@
                         <th class="text-end">Actions</th>
                     </tr>
                 </thead>
-
                 <tbody>
-
-                    @if (Model.Any())
+                    @foreach (var u in Model.Users)
                     {
-                        foreach (var u in Model)
-                        {
-                            <tr>
+                        var isMe = u.Id == Model.CurrentUserId;
 
-                                <td class="fw-semi-bold">
-                                    @u.FullName
-                                </td>
-
-                                <td>
-                                    @u.Email
-
-                                    @if (!u.EmailConfirmed)
+                        <tr>
+                            <td>
+                                <div class="fw-semi-bold">@u.FullName @(isMe ? "(you)" : "")</div>
+                                <div class="text-600">@@@u.UserName</div>
+                            </td>
+                            <td>
+                                @u.Email
+                                @if (!u.EmailConfirmed)
+                                {
+                                    <span class="badge rounded-pill badge-soft-warning ms-1">Unconfirmed</span>
+                                }
+                                @if (u.TwoFactorEnabled)
+                                {
+                                    <span class="badge rounded-pill badge-soft-success ms-1">2FA</span>
+                                }
+                                <div class="text-600">@u.PhoneNumber</div>
+                            </td>
+                            <td>
+                                @foreach (var r in u.Roles)
+                                {
+                                    <span class="badge rounded-pill @(r == "Admin" ? "badge-soft-danger" : "badge-soft-primary") me-1">@r</span>
+                                }
+                            </td>
+                            <td>
+                                @if (u.IsLocked)
+                                {
+                                    <span class="badge rounded-pill badge-soft-danger">Locked</span>
+                                    if (u.LockoutEnd.HasValue && u.LockoutEnd.Value.Year < DateTime.UtcNow.Year + 50)
                                     {
+                                        <div class="text-600">until @u.LockoutEnd.Value.LocalDateTime.ToString("yyyy-MM-dd HH:mm")</div>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="badge rounded-pill badge-soft-success">Active</span>
+                                }
+                            </td>
+                            <td class="text-end text-nowrap">
+                                @if (!u.EmailConfirmed)
+                                {
+                                    <form asp-area="Admin" asp-controller="Admin" asp-action="ConfirmAccount" asp-route-id="@u.Id" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-falcon-success btn-sm"><span class="fas fa-check me-1"></span>Confirm</button>
+                                    </form>
+                                }
+
+                                <a asp-area="Admin" asp-controller="Admin" asp-action="EditUser" asp-route-id="@u.Id" class="btn btn-falcon-default btn-sm">
+                                    <span class="fas fa-edit me-1"></span>Edit
+                                </a>
+
+                                @if (!isMe)
+                                {
+                                    if (u.IsLocked)
+                                    {
+                                        <form asp-area="Admin" asp-controller="Admin" asp-action="Unlock" asp-route-id="@u.Id" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-falcon-success btn-sm"><span class="fas fa-unlock me-1"></span>Unlock</button>
+                                        </form>
                                         <span class="badge rounded-pill badge-soft-warning ms-1">
                                             Unverified
                                         </span>
                                     }
-
-                                    @if (u.TwoFactorEnabled)
+                                    else
                                     {
+                                        <form asp-area="Admin" asp-controller="Admin" asp-action="Lock" asp-route-id="@u.Id" method="post" class="d-inline-flex gap-1 align-middle">
+                                            <select name="duration" class="form-select form-select-sm w-auto">
+                                                <option value="1h">1 hour</option>
+                                                <option value="1d">1 day</option>
+                                                <option value="7d">7 days</option>
+                                                <option value="forever">Forever</option>
+                                            </select>
+                                            <button type="submit" class="btn btn-falcon-danger btn-sm"><span class="fas fa-lock me-1"></span>Lock</button>
+                                        </form>
+                                    }
+                                }
+                            </td>
+                        </tr>
                                         <span class="badge rounded-pill badge-soft-success ms-1">
                                             2FA Enabled
                                         </span>
@@ -173,9 +285,11 @@
                             </tr>
                         }
                     }
-                    else
+
+                    @if (!Model.Users.Any())
                     {
                         <tr>
+                            <td colspan="5" class="text-center text-600 p-4">No users found.</td>
                             <td colspan="5" class="text-center py-4 text-muted">
 
                                 <i class="fas fa-users fa-2x mb-2"></i>
@@ -187,11 +301,8 @@
                             </td>
                         </tr>
                     }
-
                 </tbody>
-
             </table>
-
         </div>
 
     </div>

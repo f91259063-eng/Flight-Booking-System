@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authorization;
+
 ﻿
 using System.Linq.Expressions;
 using System.Security.Claims;
@@ -17,6 +19,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Flight_Booking_System.Areas.Customer.Controllers
 {
     [Area("Customer")]
+    [Authorize(Roles = "Customer,BookingAgent,Admin")]
     public class PassengerController : Controller
     {
         private readonly IRepository<Passenger> _passengerRepository;

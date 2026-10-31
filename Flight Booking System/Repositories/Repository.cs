@@ -1,4 +1,4 @@
-﻿    using Flight_Booking_System.Data;
+    using Flight_Booking_System.Data;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.ChangeTracking;
     using System.Linq.Expressions;
@@ -9,10 +9,13 @@
     {
         protected readonly ApplicationDbContext _context; // = new ApplicationDbContext();
         public DbSet<T> _dbset;
-        public Repository(ApplicationDbContext context)
+        private readonly ILogger<Repository<T>> _logger;
+
+        public Repository(ApplicationDbContext context, ILogger<Repository<T>> logger)
         {
             _context = context;
             _dbset = _context.Set<T>();
+            _logger = logger;
         }
 
 
@@ -87,9 +90,12 @@
             {
                 return await _context.SaveChangesAsync();
             }
-            catch (Exception ex)
+            catch (DbUpdateException ex)
             {
-                return -1; // Return -1 to indicate an error occurred
+                // a database problem (for example a record that is still used by another one):
+                // write it to the log and tell the caller with -1
+                _logger.LogError(ex, "Saving changes of {Entity} failed", typeof(T).Name);
+                return -1;
             }
         }
 
