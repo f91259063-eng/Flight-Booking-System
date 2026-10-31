@@ -1,4 +1,5 @@
-﻿@model IEnumerable<Flight_Booking_System.Models.Passenger>
+﻿
+@model IEnumerable<Flight_Booking_System.Models.Passenger>
 
 @{
     ViewData["Title"] = "Passenger Management";
@@ -8,6 +9,7 @@
 <div class="container-fluid py-4" dir="ltr">
 
     <!-- Page Header -->
+    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
         <div>
             <h2 class="fw-bold mb-1">
@@ -16,6 +18,7 @@
             </h2>
             <p class="text-muted mb-0">
                 Manage registered passengers and their personal information.
+                View and manage passenger information.
             </p>
         </div>
 
@@ -29,6 +32,11 @@
     </div>
 
     <!-- Notifications -->
+            Add Passenger
+        </a>
+    </div>
+
+    <!-- Success Message -->
     @if (TempData["Success"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -39,6 +47,14 @@
         </div>
     }
 
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Error Message -->
     @if (TempData["Error"] != null)
     {
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -50,6 +66,14 @@
     }
 
     <!-- Registered Passengers -->
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Passenger List -->
     <div class="card border-0 shadow-sm">
 
         <div class="card-header bg-white py-3">
@@ -63,6 +87,10 @@
                     @(Model?.Count() ?? 0) Passengers
                 </span>
             </div>
+            <h5 class="mb-0 fw-bold">
+                <i class="bi bi-list-ul me-1"></i>
+                Passenger List
+            </h5>
         </div>
 
         <div class="card-body">
@@ -77,6 +105,11 @@
                             <th>National ID</th>
                             <th>Phone Number</th>
                             <th>Email Address</th>
+                            <th>Passenger Name</th>
+                            <th>Passport Number</th>
+                            <th>National ID</th>
+                            <th>Phone</th>
+                            <th>Email</th>
                             <th>Date of Birth</th>
                             <th class="text-center">Actions</th>
                         </tr>
@@ -153,6 +186,9 @@
                                     <h5>No Passengers Available</h5>
                                     <p class="mb-0">
                                         There are currently no registered passengers.
+                                    <h5>No Passengers Found</h5>
+                                    <p class="mb-0">
+                                        No passengers have been registered yet.
                                     </p>
                                 </td>
                             </tr>
@@ -163,4 +199,5 @@
             </div>
         </div>
     </div>
+
 </div>

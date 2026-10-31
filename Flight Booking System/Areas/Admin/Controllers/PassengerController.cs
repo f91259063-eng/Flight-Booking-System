@@ -55,6 +55,8 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 ModelState.AddModelError(
                     "",
                     "Unable to save passenger information.");
+                    "Unable to save passenger information."
+                );
 
                 return View(passenger);
             }
@@ -118,6 +120,8 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 ModelState.AddModelError(
                     "",
                     "Unable to update passenger information.");
+                    "Unable to update passenger information."
+                );
 
                 return View(passenger);
             }
