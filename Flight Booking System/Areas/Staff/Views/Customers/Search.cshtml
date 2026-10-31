@@ -1,0 +1,73 @@
+@model CustomerSearchViewModel
+@{
+    ViewData["Title"] = "Customer lookup";
+}
+
+<div class="card mb-3">
+    <div class="card-header"><h5 class="mb-0">Customer lookup</h5></div>
+    <div class="card-body bg-light">
+        <form method="get" asp-area="Staff" asp-controller="Customers" asp-action="Search" class="row g-2">
+            <div class="col-md-9">
+                <input name="q" value="@Model.Query" class="form-control" placeholder="Phone, national ID, name or email" />
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100">Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.Query) && !Model.Results.Any())
+{
+    <div class="alert alert-info">No customer found for "@Model.Query".</div>
+}
+
+@foreach (var c in Model.Results)
+{
+    <div class="card mb-3">
+        <div class="card-header bg-light">
+            <h6 class="mb-0">@c.FullName</h6>
+        </div>
+        <div class="card-body">
+            <div class="row fs--1 mb-3">
+                <div class="col-md-3"><span class="text-600">Phone</span><br />@c.Phone</div>
+                <div class="col-md-3"><span class="text-600">Email</span><br />@c.Email</div>
+                <div class="col-md-3"><span class="text-600">National ID</span><br />@c.NationalId</div>
+                <div class="col-md-3"><span class="text-600">Passport</span><br />@c.PassportNumber</div>
+            </div>
+
+            @if (!c.Tickets.Any())
+            {
+                <p class="text-600 mb-0">No previous bookings.</p>
+            }
+            else
+            {
+                <div class="table-responsive scrollbar">
+                    <table class="table table-sm table-striped fs--1 mb-0">
+                        <thead class="bg-200 text-900">
+                            <tr>
+                                <th>Booking</th>
+                                <th>Status</th>
+                                <th>Flight</th>
+                                <th>Route</th>
+                                <th>Departure</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var t in c.Tickets)
+                            {
+                                <tr>
+                                    <td>@t.BookingReference</td>
+                                    <td><span class="badge rounded-pill badge-soft-primary">@t.Status</span></td>
+                                    <td>@t.FlightNumber</td>
+                                    <td>@t.From to @t.To</td>
+                                    <td>@t.Departure.ToString("yyyy-MM-dd HH:mm")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+}

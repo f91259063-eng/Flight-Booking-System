@@ -1,4 +1,5 @@
-﻿using Flight_Booking_System.Models;
+using Microsoft.AspNetCore.Authorization;
+using Flight_Booking_System.Models;
 using Flight_Booking_System.Repositories;
 using Flight_Booking_System.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,7 @@ namespace Flight_Booking_System.Controllers
 {
 
     [Area("Admin")]
+    [Authorize(Roles = "Admin")]
     public class RoutesController : Controller
     {
         private readonly IRepository<Flight_Booking_System.Models.Route> _routeRepository;

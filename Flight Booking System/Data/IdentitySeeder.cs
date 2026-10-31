@@ -5,37 +5,60 @@ namespace Flight_Booking_System.Data
 {
     public static class IdentitySeeder
     {
-        public static readonly string[] Roles = { "Admin", "Customer" };
-
         public static async Task SeedAsync(IServiceProvider services)
         {
             var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
-            foreach (var role in Roles)
+            foreach (var role in AppRoles.All)
             {
                 if (!await roleManager.RoleExistsAsync(role))
                     await roleManager.CreateAsync(new IdentityRole(role));
             }
 
-            // Default admin for testing. Change this password before any real deployment.
-            const string adminEmail = "admin@flightbooking.com";
-            if (await userManager.FindByEmailAsync(adminEmail) is null)
+            // Demo accounts for testing. Change these passwords before any real deployment.
+            await EnsureUserAsync(userManager, "admin", "admin@flightbooking.com",
+                "System", "Admin", "Admin@12345", AppRoles.Admin);
+
+            await EnsureUserAsync(userManager, "reception", "reception@flightbooking.com",
+                "Front", "Desk", "Reception@123", AppRoles.Receptionist);
+
+            await EnsureUserAsync(userManager, "agent", "agent@flightbooking.com",
+                "Booking", "Agent", "Agent@12345", AppRoles.BookingAgent);
+        }
+
+        private static async Task EnsureUserAsync(
+            UserManager<ApplicationUser> userManager,
+            string userName, string email,
+            string firstName, string lastName,
+            string password, string role)
+        {
+            var user = await userManager.FindByEmailAsync(email);
+
+            if (user is null)
             {
-                var admin = new ApplicationUser
+                user = new ApplicationUser
                 {
-                    UserName = adminEmail,
-                    Email = adminEmail,
+                    UserName = userName,
+                    Email = email,
                     EmailConfirmed = true,
-                    FirstName = "System",
+                    FirstName = firstName,
                     MiddelName = string.Empty,
-                    LastName = "Admin"
+                    LastName = lastName
                 };
 
-                var result = await userManager.CreateAsync(admin, "Admin@12345");
-                if (result.Succeeded)
-                    await userManager.AddToRoleAsync(admin, "Admin");
+                var result = await userManager.CreateAsync(user, password);
+                if (!result.Succeeded)
+                    return;
             }
+            else if (user.UserName != userName)
+            {
+                // old demo accounts were created with the email as the username
+                await userManager.SetUserNameAsync(user, userName);
+            }
+
+            if (!await userManager.IsInRoleAsync(user, role))
+                await userManager.AddToRoleAsync(user, role);
         }
     }
 }

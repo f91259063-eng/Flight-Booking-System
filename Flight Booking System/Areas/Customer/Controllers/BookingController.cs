@@ -1,4 +1,4 @@
-﻿
+
 using Flight_Booking_System.Models;
 using Flight_Booking_System.Repositories;
 using Flight_Booking_System.ViewModels.Customer;
@@ -10,7 +10,7 @@ using System.Security.Claims;
 namespace Flight_Booking_System.Areas.Customer.Controllers
 {
     [Area("Customer")]
-    [Authorize]
+    [Authorize(Roles = "Customer,BookingAgent,Admin")]
     public class BookingController : Controller
     {
         private readonly IRepository<Booking> _bookingRepository;

@@ -1,4 +1,5 @@
-﻿
+using Microsoft.AspNetCore.Authorization;
+
 using Flight_Booking_System.Models;
 using Flight_Booking_System.Repositories;
 using Flight_Booking_System.ViewModels.Customer;
@@ -8,6 +9,7 @@ using System.Linq.Expressions;
 namespace Flight_Booking_System.Areas.Customer.Controllers
 {
     [Area("Customer")]
+    [Authorize(Roles = "Customer,BookingAgent,Admin")]
     public class FlightsController : Controller
     {
         private readonly IRepository<Flight> _flightRepository;

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Flight_Booking_System.Areas.Identity.ViewModels
 {
@@ -8,21 +9,24 @@ namespace Flight_Booking_System.Areas.Identity.ViewModels
         [Display(Name = "First name")]
         public string FirstName { get; set; } = string.Empty;
 
-        // string? => optional. (A non-nullable string is treated as [Required] by MVC.)
-        [StringLength(50)]
-        [Display(Name = "Middle name")]
-        public string? MiddleName { get; set; }
-
         [Required, StringLength(50)]
         [Display(Name = "Last name")]
         public string LastName { get; set; } = string.Empty;
 
+        // checked while typing by AccountController.CheckUserName
+        [Required]
+        [StringLength(20, MinimumLength = 3)]
+        [RegularExpression(@"^[A-Za-z0-9._-]+$", ErrorMessage = "Use only letters, numbers, dot, dash or underscore.")]
+        [Remote(action: "CheckUserName", controller: "Account", areaName: "Identity")]
+        [Display(Name = "Username")]
+        public string UserName { get; set; } = string.Empty;
+
         [Required, EmailAddress]
         public string Email { get; set; } = string.Empty;
 
-        [Phone]
+        [Required, Phone]
         [Display(Name = "Phone number")]
-        public string? PhoneNumber { get; set; }
+        public string PhoneNumber { get; set; } = string.Empty;
 
         [Required, DataType(DataType.Password)]
         public string Password { get; set; } = string.Empty;

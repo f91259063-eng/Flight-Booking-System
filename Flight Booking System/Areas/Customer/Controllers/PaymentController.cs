@@ -1,4 +1,4 @@
-﻿
+
 using Flight_Booking_System.Models;
 using Flight_Booking_System.Repositories;
 using Microsoft.AspNetCore.Authorization;
@@ -11,7 +11,7 @@ using System.Security.Claims;
 namespace Flight_Booking_System.Areas.Customer.Controllers
 {
     [Area("Customer")]
-    [Authorize]
+    [Authorize(Roles = "Customer,BookingAgent,Admin")]
     public class PaymentController : Controller
     {
         private readonly IRepository<Booking> _bookingRepository;

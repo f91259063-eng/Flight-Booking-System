@@ -1,10 +1,12 @@
-﻿using Flight_Booking_System.Models;
+using Microsoft.AspNetCore.Authorization;
+using Flight_Booking_System.Models;
 using Flight_Booking_System.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Flight_Booking_System.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "Admin")]
     public class PassengerController : Controller
     {
         private readonly IRepository<Passenger> _repositoryPassenger;

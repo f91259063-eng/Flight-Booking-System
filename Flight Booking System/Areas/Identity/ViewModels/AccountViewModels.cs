@@ -62,8 +62,5 @@ namespace Flight_Booking_System.Areas.Identity.ViewModels
         public bool IsSuccess { get; set; } = true;
         public string? LinkText { get; set; }
         public string? LinkUrl { get; set; }
-
-        // Only filled in Development, so you can test without an SMTP server
-        public string? DevLink { get; set; }
     }
 }

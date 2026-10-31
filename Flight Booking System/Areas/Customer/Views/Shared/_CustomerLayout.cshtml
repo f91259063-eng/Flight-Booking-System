@@ -1,4 +1,3 @@
-﻿```cshtml
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
@@ -133,9 +132,7 @@
                                 </div>
 
                                 <a class="nav-link"
-                                   asp-area="Customer"
-                                   asp-controller="Home"
-                                   asp-action="Index">
+                                   asp-area="" asp-controller="Home" asp-action="Index">
 
                                     <span class="nav-link-icon">
                                         <i class="fas fa-home"></i>
@@ -190,21 +187,6 @@
                                         My Bookings
                                     </span>
                                 </a>
-
-                                <!-- My Tickets -->
-                                <a class="nav-link"
-                                   asp-area="Customer"
-                                   asp-controller="Tickets"
-                                   asp-action="Index">
-
-                                    <span class="nav-link-icon">
-                                        <i class="fas fa-receipt"></i>
-                                    </span>
-
-                                    <span class="nav-link-text ps-1">
-                                        My Tickets
-                                    </span>
-                                </a>
                             </li>
 
                             <!-- Account Management -->
@@ -215,8 +197,7 @@
                                 </div>
 
                                 <a class="nav-link"
-                                   asp-area="Identity"
-                                   asp-page="/Account/Manage/Index">
+                                   asp-area="Identity" asp-controller="Manage" asp-action="Index">
 
                                     <span class="nav-link-icon">
                                         <i class="fas fa-user"></i>
@@ -301,8 +282,7 @@
                                 <div class="bg-white rounded-2 py-2">
 
                                     <a class="dropdown-item"
-                                       asp-area="Identity"
-                                       asp-page="/Account/Manage/Index">
+                                       asp-area="Identity" asp-controller="Manage" asp-action="Index">
 
                                         <i class="fas fa-user me-2"></i>
                                         My Account
@@ -311,10 +291,7 @@
                                     <div class="dropdown-divider"></div>
 
                                     <!-- Logout -->
-                                    <form asp-area="Identity"
-                                          asp-page="/Account/Logout"
-                                          asp-route-returnUrl="/Identity/Account/Login"
-                                          method="post">
+                                    <form asp-area="Identity" asp-controller="Account" asp-action="Logout" method="post">
 
                                         <button type="submit"
                                                 class="dropdown-item text-danger">
@@ -376,4 +353,3 @@
 
 </body>
 </html>
-```

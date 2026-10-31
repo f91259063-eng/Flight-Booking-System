@@ -14,17 +14,12 @@
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
             <div class="row gx-2">
-                <div class="mb-3 col-sm-4">
+                <div class="mb-3 col-sm-6">
                     <label asp-for="FirstName" class="form-label"></label>
                     <input asp-for="FirstName" class="form-control" />
                     <span asp-validation-for="FirstName" class="text-danger fs--1"></span>
                 </div>
-                <div class="mb-3 col-sm-4">
-                    <label asp-for="MiddleName" class="form-label"></label>
-                    <input asp-for="MiddleName" class="form-control" />
-                    <span asp-validation-for="MiddleName" class="text-danger fs--1"></span>
-                </div>
-                <div class="mb-3 col-sm-4">
+                <div class="mb-3 col-sm-6">
                     <label asp-for="LastName" class="form-label"></label>
                     <input asp-for="LastName" class="form-control" />
                     <span asp-validation-for="LastName" class="text-danger fs--1"></span>
@@ -32,8 +27,15 @@
             </div>
 
             <div class="mb-3">
+                <label asp-for="UserName" class="form-label"></label>
+                <input asp-for="UserName" class="form-control" autocomplete="username" />
+                <span asp-validation-for="UserName" class="text-danger fs--1"></span>
+                <div class="form-text fs--1">You will use it to log in. Letters, numbers, dot, dash and underscore only.</div>
+            </div>
+
+            <div class="mb-3">
                 <label asp-for="Email" class="form-label">Email address</label>
-                <input asp-for="Email" class="form-control" autocomplete="username" />
+                <input asp-for="Email" class="form-control" />
                 <span asp-validation-for="Email" class="text-danger fs--1"></span>
             </div>
 
@@ -67,4 +69,31 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        // suggest a username (first.last) when the user leaves the name fields
+        (function () {
+            var first = document.getElementById("FirstName");
+            var last = document.getElementById("LastName");
+            var user = document.getElementById("UserName");
+
+            function clean(text) {
+                return text.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+            }
+
+            function suggest() {
+                if (user.value) return;
+
+                var f = clean(first.value);
+                var l = clean(last.value);
+
+                if (f && l) {
+                    user.value = f + "." + l;
+                    if (window.jQuery) { jQuery(user).valid(); }
+                }
+            }
+
+            first.addEventListener("blur", suggest);
+            last.addEventListener("blur", suggest);
+        })();
+    </script>
 }

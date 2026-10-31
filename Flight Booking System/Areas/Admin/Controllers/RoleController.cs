@@ -1,4 +1,4 @@
-﻿
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -85,9 +85,10 @@ namespace Flight_Booking_System.Controllers
             if (role == null)
                 return NotFound();
 
-            if (role.Name == "Admin")
+            // the system needs these roles (Admin, Receptionist, BookingAgent, Customer)
+            if (role.Name != null && Flight_Booking_System.Models.Identity.AppRoles.All.Contains(role.Name))
             {
-                TempData["Error"] = "The Admin role cannot be deleted.";
+                TempData["Error"] = $"The {role.Name} role is used by the system and cannot be deleted.";
                 return RedirectToAction(nameof(Index));
             }
 

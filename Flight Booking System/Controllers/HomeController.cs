@@ -8,7 +8,17 @@ namespace Flight_Booking_System.Controllers
     {
         public IActionResult Index()
         {
-            return View();
+            // the site starts at the login page
+            if (User.Identity?.IsAuthenticated != true)
+                return RedirectToAction("Login", "Account", new { area = "Identity" });
+
+            if (User.IsInRole("Admin"))
+                return RedirectToAction("Index", "Home", new { area = "Admin" });
+
+            if (User.IsInRole("Receptionist") || User.IsInRole("BookingAgent"))
+                return RedirectToAction("Index", "Home", new { area = "Staff" });
+
+            return RedirectToAction("Index", "Flights", new { area = "Customer" });
         }
 
         public IActionResult Privacy()
