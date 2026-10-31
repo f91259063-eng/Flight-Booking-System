@@ -1,4 +1,3 @@
-
 ﻿
 using System.Security.Claims;
 using Flight_Booking_System.Data;
@@ -17,7 +16,7 @@ using Stripe.Checkout;
 namespace Flight_Booking_System.Areas.Customer.Controllers
 {
     [Area("Customer")]
-    [Authorize(Roles = "Customer,BookingAgent,Admin")]
+    [Authorize]
     public class PaymentController : Controller
     {
         private readonly IRepository<Booking> _bookingRepository;

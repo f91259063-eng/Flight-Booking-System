@@ -1,4 +1,4 @@
-
+﻿
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 
@@ -590,7 +590,7 @@
                                 <div class="bg-white rounded-2 py-2">
 
                                     <div class="dropdown-item-text">
-                                        <strong>@User.Identity?.Name</strong>
+                                        <strong>Administrator</strong>
                                     </div>
 
                                     <div class="dropdown-divider"></div>
@@ -608,7 +608,10 @@
                                     <div class="dropdown-divider"></div>
 
                                     <!-- Logout -->
-                                    <form asp-area="Identity" asp-controller="Account" asp-action="Logout" method="post">
+                                    <form asp-area="Identity"
+                                          asp-page="/Account/Logout"
+                                          asp-route-returnUrl="/Identity/Account/Login"
+                                          method="post">
 
                                         <button type="submit"
                                                 class="dropdown-item text-danger">
@@ -677,7 +680,6 @@
     </main>
 
     <!-- JavaScript -->
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/vendors/popper/popper.min.js"></script>
     <script src="~/vendors/bootstrap/bootstrap.min.js"></script>
     <script src="~/vendors/simplebar/simplebar.min.js"></script>

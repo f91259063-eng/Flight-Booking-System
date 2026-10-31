@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
-using Flight_Booking_System.Models;
 ﻿
 using Flight_Booking_System.Models;
 using Flight_Booking_System.ModelsServices;
@@ -10,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 namespace Flight_Booking_System.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = "Admin")]
     public class AircraftClassesController : Controller
     {
         private readonly IRepository<AircraftClass> _aircraftClassRepository;

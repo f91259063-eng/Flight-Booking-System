@@ -1,4 +1,4 @@
-
+﻿
 @model IEnumerable<Microsoft.AspNetCore.Identity.IdentityRole>
 
 @{
@@ -77,7 +77,7 @@
                                 </small>
                             </td>
                             <td>
-                                @if (!Flight_Booking_System.Models.Identity.AppRoles.All.Contains(role.Name ?? ""))
+                                @if (role.Name != "Admin")
                                 {
                                     <form asp-controller="Roles"
                                           asp-action="Delete"

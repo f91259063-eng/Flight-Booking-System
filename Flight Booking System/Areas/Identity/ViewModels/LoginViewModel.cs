@@ -4,9 +4,8 @@ namespace Flight_Booking_System.Areas.Identity.ViewModels
 {
     public class LoginViewModel
     {
-        [Required]
-        [Display(Name = "Username or email")]
-        public string UserNameOrEmail { get; set; } = string.Empty;
+        [Required, EmailAddress]
+        public string Email { get; set; } = string.Empty;
 
         [Required, DataType(DataType.Password)]
         public string Password { get; set; } = string.Empty;

@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
 ﻿
 
 using Flight_Booking_System.Data;
@@ -14,7 +13,6 @@ using Microsoft.EntityFrameworkCore;
 namespace Flight_Booking_System.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = "Admin")]
     public class FlightController : Controller
     {
         private readonly IRepository<Flight> _repository;

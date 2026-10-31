@@ -1,15 +1,13 @@
-@model UserEditViewModel
 ﻿@model Flight_Booking_System.ViewModels.UserEditViewModel
 
 @{
-    ViewData["Title"] = "Edit user";
+    ViewData["Title"] = "Edit User";
+    Layout = "_AdminLayout";
+
+    var roles = ViewBag.Roles as IEnumerable<Microsoft.AspNetCore.Identity.IdentityRole>
+                ?? Enumerable.Empty<Microsoft.AspNetCore.Identity.IdentityRole>();
 }
 
-@if (TempData["Success"] is string okMessage)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @okMessage
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 <div class="container-fluid py-4">
 
     <!-- Page Header -->
@@ -36,49 +34,7 @@
         </a>
 
     </div>
-}
-@if (TempData["Error"] is string errorMessage)
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        @errorMessage
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
 
-<div class="card mb-3">
-    <div class="card-header">
-        <h5 class="mb-0"><span class="fas fa-user-edit me-2"></span>Edit user</h5>
-    </div>
-    <div class="card-body">
-        <div class="mb-3">
-            @if (Model.IsLocked)
-            {
-                <span class="badge rounded-pill badge-soft-danger me-1">Locked</span>
-            }
-            @if (Model.TwoFactorEnabled)
-            {
-                <span class="badge rounded-pill badge-soft-success me-1">2FA on</span>
-            }
-            @if (Model.IsCurrentUser)
-            {
-                <span class="badge rounded-pill badge-soft-info me-1">This is you</span>
-            }
-        </div>
-
-        <form asp-area="Admin" asp-controller="Admin" asp-action="EditUser" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-            <input type="hidden" asp-for="Id" />
-
-            <div class="row gx-2">
-                <div class="mb-3 col-md-6">
-                    <label asp-for="FirstName" class="form-label"></label>
-                    <input asp-for="FirstName" class="form-control" />
-                    <span asp-validation-for="FirstName" class="text-danger fs--1"></span>
-                </div>
-                <div class="mb-3 col-md-6">
-                    <label asp-for="LastName" class="form-label"></label>
-                    <input asp-for="LastName" class="form-control" />
-                    <span asp-validation-for="LastName" class="text-danger fs--1"></span>
     <!-- Validation Summary -->
     <div asp-validation-summary="ModelOnly"
          class="alert alert-danger"
@@ -185,21 +141,6 @@
 
             </div>
 
-            <div class="row gx-2">
-                <div class="mb-3 col-md-4">
-                    <label asp-for="UserName" class="form-label"></label>
-                    <input asp-for="UserName" class="form-control" autocomplete="off" />
-                    <span asp-validation-for="UserName" class="text-danger fs--1"></span>
-                </div>
-                <div class="mb-3 col-md-4">
-                    <label asp-for="Email" class="form-label"></label>
-                    <input asp-for="Email" class="form-control" />
-                    <span asp-validation-for="Email" class="text-danger fs--1"></span>
-                </div>
-                <div class="mb-3 col-md-4">
-                    <label asp-for="PhoneNumber" class="form-label"></label>
-                    <input asp-for="PhoneNumber" class="form-control" />
-                    <span asp-validation-for="PhoneNumber" class="text-danger fs--1"></span>
             <!-- Account Status -->
             <div class="col-12 col-xl-4">
 
@@ -290,60 +231,6 @@
 
             </div>
 
-            <div class="form-check mb-3">
-                <input asp-for="EmailConfirmed" class="form-check-input" />
-                <label asp-for="EmailConfirmed" class="form-check-label"></label>
-            </div>
-
-            <div class="mb-3 col-md-6 px-0">
-                <label asp-for="NewPassword" class="form-label"></label>
-                <input asp-for="NewPassword" class="form-control" autocomplete="new-password" />
-                <span asp-validation-for="NewPassword" class="text-danger fs--1"></span>
-                <div class="form-text fs--1">Leave it empty to keep the current password.</div>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label d-block">Roles</label>
-                @foreach (var role in Model.AllRoles)
-                {
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" name="SelectedRoles" value="@role"
-                               id="role_@role" checked="@Model.SelectedRoles.Contains(role)" />
-                        <label class="form-check-label" for="role_@role">@role</label>
-                    </div>
-                }
-            </div>
-
-            <button type="submit" class="btn btn-primary">Save changes</button>
-            <a asp-area="Admin" asp-controller="Admin" asp-action="Users" class="btn btn-secondary">Back to users</a>
-        </form>
-    </div>
-</div>
-
-<div class="card border border-danger">
-    <div class="card-header bg-light">
-        <h6 class="mb-0 text-danger"><span class="fas fa-exclamation-triangle me-2"></span>Delete user</h6>
-    </div>
-    <div class="card-body">
-        @if (Model.IsCurrentUser)
-        {
-            <p class="mb-0 text-600">You can't delete your own account.</p>
-        }
-        else if (Model.BookingsCount > 0)
-        {
-            <p class="mb-0 text-600">
-                This user has @Model.BookingsCount booking(s), so he can't be deleted. Lock the account from the users list instead.
-            </p>
-        }
-        else
-        {
-            <p class="fs--1">The account will be deleted for good. This can't be undone.</p>
-            <form asp-area="Admin" asp-controller="Admin" asp-action="DeleteUser" asp-route-id="@Model.Id" method="post"
-                  onsubmit="return confirm('Delete this user for good?');">
-                <button type="submit" class="btn btn-falcon-danger btn-sm"><span class="fas fa-trash me-1"></span>Delete user</button>
-            </form>
-        }
-    </div>
             <!-- User Roles -->
             <div class="col-12">
 

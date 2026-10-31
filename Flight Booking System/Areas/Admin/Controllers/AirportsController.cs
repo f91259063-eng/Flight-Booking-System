@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
 ﻿
 using System.Linq.Expressions;
 
@@ -12,7 +11,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 namespace Flight_Booking_System.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = "Admin")]
     public class AirportsController : Controller
     {
         private readonly IRepository<AirPort> _airportRepository;
