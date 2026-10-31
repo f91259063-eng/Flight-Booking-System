@@ -1,4 +1,4 @@
-﻿
+﻿```cshtml
 @model Flight_Booking_System.ViewModels.Customer.PassengerBookingViewModel
 
 @{
@@ -8,6 +8,13 @@
     var subtotal = Model == null
         ? 0m
         : Model.TicketPrice * (Model.Passengers?.Count ?? 0);
+
+    var maxRedeemablePoints = Model == null
+        ? 0
+        : Math.Min(
+            (Model.AvailablePoints / 100) * 100,
+            (int)(subtotal / 50m) * 100
+        );
 }
 
 @if (Model == null)
@@ -321,7 +328,7 @@ else
                                     <input asp-for="PointsToRedeem"
                                            type="number"
                                            min="0"
-                                           max="@Model.AvailablePoints"
+                                           max="@maxRedeemablePoints"
                                            step="100"
                                            value="0"
                                            class="form-control"
@@ -330,7 +337,11 @@ else
                                     <small class="text-muted">
                                         Every 100 points = 50 EGP discount.
                                         Minimum redemption is 100 points.
+                                        Points must be redeemed in multiples of 100.
                                     </small>
+
+                                    <span asp-validation-for="PointsToRedeem"
+                                          class="text-danger"></span>
 
                                 </div>
 
@@ -410,13 +421,23 @@ else
             const totalElement =
                 document.getElementById("finalTotal");
 
-            // Check that all required elements exist.
+            const passengerForm =
+                document.getElementById("passengerForm");
+
+            // Ensure that the points element is an input.
+            // This also allows TypeScript/Visual Studio to recognize
+            // the max property correctly.
+
+            if (!(pointsInput instanceof HTMLInputElement)) {
+                return;
+            }
+
             if (
-                !(pointsInput instanceof HTMLInputElement) ||
                 !availablePointsElement ||
                 !subtotalElement ||
                 !discountElement ||
-                !totalElement
+                !totalElement ||
+                !passengerForm
             ) {
                 return;
             }
@@ -427,49 +448,116 @@ else
                     10
                 ) || 0;
 
+            const subtotalText =
+                subtotalElement.textContent || "0";
+
             const subtotal =
                 parseFloat(
-                    (subtotalElement.textContent || "0").replace(/,/g, "")
+                    subtotalText.replace(/,/g, "")
                 ) || 0;
 
-            pointsInput.addEventListener("input", function () {
+            // Maximum redeemable points:
+            // 1. Cannot exceed available points.
+            // 2. Must be multiples of 100.
+            // 3. Discount cannot exceed booking subtotal.
 
-                let points =
-                    parseInt(pointsInput.value, 10) || 0;
+            const maxPoints = Math.min(
+                Math.floor(availablePoints / 100) * 100,
+                Math.floor(subtotal / 50) * 100
+            );
 
-                if (points < 0) {
-                    points = 0;
+            // Set the maximum allowed value.
+            pointsInput.max = maxPoints.toString();
+
+            function calculateDiscount() {
+
+                const inputValue = pointsInput.value.trim();
+
+                // Empty input is treated as zero.
+                if (inputValue === "") {
+                    pointsInput.setCustomValidity("");
+                    discountElement.textContent = "0.00";
+                    totalElement.textContent = subtotal.toFixed(2);
+                    return;
                 }
 
-                if (points > availablePoints) {
-                    points = availablePoints;
+                const points = Number(inputValue);
+
+                // Invalid numeric value.
+                if (!Number.isInteger(points)) {
+                    pointsInput.setCustomValidity(
+                        "Please enter a valid whole number of points."
+                    );
+
+                    discountElement.textContent = "0.00";
+                    totalElement.textContent = subtotal.toFixed(2);
+                    return;
                 }
 
-                // Only multiples of 100 are accepted.
-                points = Math.floor(points / 100) * 100;
-
-                // Prevent discount from exceeding subtotal.
-                const maximumPointsForPrice =
-                    Math.floor(subtotal / 50) * 100;
-
-                if (points > maximumPointsForPrice) {
-                    points = maximumPointsForPrice;
+                // Zero points means no discount.
+                if (points === 0) {
+                    pointsInput.setCustomValidity("");
+                    discountElement.textContent = "0.00";
+                    totalElement.textContent = subtotal.toFixed(2);
+                    return;
                 }
 
-                pointsInput.value = points.toString();
+                // Validate redemption rules.
+                if (
+                    points < 100 ||
+                    points % 100 !== 0 ||
+                    points > maxPoints
+                ) {
+                    pointsInput.setCustomValidity(
+                        "Enter points in multiples of 100, within your available balance and booking total."
+                    );
 
-                const discount =
-                    (points / 100) * 50;
+                    discountElement.textContent = "0.00";
+                    totalElement.textContent = subtotal.toFixed(2);
+                    return;
+                }
 
-                const finalTotal =
-                    subtotal - discount;
+                // Valid points.
+                pointsInput.setCustomValidity("");
+
+                const discount = (points / 100) * 50;
+
+                const finalTotal = subtotal - discount;
 
                 discountElement.textContent =
                     discount.toFixed(2);
 
                 totalElement.textContent =
                     finalTotal.toFixed(2);
-            });
+            }
+
+            // Recalculate when the user changes the points.
+            pointsInput.addEventListener(
+                "input",
+                calculateDiscount
+            );
+
+            pointsInput.addEventListener(
+                "change",
+                calculateDiscount
+            );
+
+            // Validate points before submitting the form.
+            passengerForm.addEventListener(
+                "submit",
+                function (event) {
+
+                    calculateDiscount();
+
+                    if (!pointsInput.checkValidity()) {
+                        event.preventDefault();
+                        pointsInput.reportValidity();
+                    }
+                }
+            );
+
+            // Initial calculation.
+            calculateDiscount();
 
         });
     </script>
