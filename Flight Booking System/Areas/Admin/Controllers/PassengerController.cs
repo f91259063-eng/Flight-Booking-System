@@ -22,7 +22,10 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
             _activityLogService = activityLogService;
         }
 
-        // GET: Admin/Passenger
+        // =========================================================
+        // INDEX
+        // =========================================================
+
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -31,14 +34,20 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
             return View(passengers);
         }
 
-        // GET: Admin/Passenger/Create
+        // =========================================================
+        // CREATE - GET
+        // =========================================================
+
         [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Admin/Passenger/Create
+        // =========================================================
+        // CREATE - POST
+        // =========================================================
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Passenger passenger)
@@ -53,10 +62,8 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
             if (result <= 0)
             {
                 ModelState.AddModelError(
-                    "",
+                    string.Empty,
                     "Unable to save passenger information.");
-                    "Unable to save passenger information."
-                );
 
                 return View(passenger);
             }
@@ -66,15 +73,17 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 nameof(Create),
                 nameof(Passenger),
                 passenger.Id.ToString(),
-                $"Created passenger: {passenger.FirstName} {passenger.LastName}."
-            );
+                $"Created passenger: {passenger.FirstName} {passenger.LastName}.");
 
             TempData["Success"] = "Passenger created successfully.";
 
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: Admin/Passenger/Edit/5
+        // =========================================================
+        // EDIT - GET
+        // =========================================================
+
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -87,10 +96,15 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
             return View(passenger);
         }
 
-        // POST: Admin/Passenger/Edit/5
+        // =========================================================
+        // EDIT - POST
+        // =========================================================
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Passenger passenger)
+        public async Task<IActionResult> Edit(
+            int id,
+            Passenger passenger)
         {
             if (id != passenger.Id)
                 return NotFound();
@@ -118,10 +132,8 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
             if (result <= 0)
             {
                 ModelState.AddModelError(
-                    "",
+                    string.Empty,
                     "Unable to update passenger information.");
-                    "Unable to update passenger information."
-                );
 
                 return View(passenger);
             }
@@ -131,15 +143,17 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 nameof(Edit),
                 nameof(Passenger),
                 existingPassenger.Id.ToString(),
-                $"Updated passenger: {existingPassenger.FirstName} {existingPassenger.LastName}."
-            );
+                $"Updated passenger: {existingPassenger.FirstName} {existingPassenger.LastName}.");
 
             TempData["Success"] = "Passenger updated successfully.";
 
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: Admin/Passenger/Delete/5
+        // =========================================================
+        // DELETE - GET
+        // =========================================================
+
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
@@ -152,7 +166,10 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
             return View(passenger);
         }
 
-        // POST: Admin/Passenger/Delete/5
+        // =========================================================
+        // DELETE - POST
+        // =========================================================
+
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -179,8 +196,7 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                     nameof(Delete),
                     nameof(Passenger),
                     passengerId,
-                    $"Failed to delete passenger: {passengerName}."
-                );
+                    $"Failed to delete passenger: {passengerName}.");
 
                 TempData["Error"] =
                     "Unable to delete the passenger. The passenger may be linked to existing records.";
@@ -193,8 +209,7 @@ namespace Flight_Booking_System.Areas.Admin.Controllers
                 nameof(Delete),
                 nameof(Passenger),
                 passengerId,
-                $"Deleted passenger: {passengerName}."
-            );
+                $"Deleted passenger: {passengerName}.");
 
             TempData["Success"] = "Passenger deleted successfully.";
 

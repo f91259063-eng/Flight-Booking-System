@@ -1,0 +1,54 @@
+@{
+    ViewData["Title"] = "Staff desk";
+    var canBook = User.IsInRole("Admin") || User.IsInRole("BookingAgent");
+    var role = User.IsInRole("Admin") ? "Admin" : User.IsInRole("BookingAgent") ? "Booking agent" : "Receptionist";
+}
+
+<div class="card mb-3">
+    <div class="card-body">
+        <h4 class="mb-1">Staff desk</h4>
+        <p class="mb-0 text-600">Signed in as <strong>@User.Identity?.Name</strong> (@role)</p>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6 col-xl-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <span class="fas fa-user-clock text-primary fs-3 mb-3"></span>
+                <h5>Customer lookup</h5>
+                <p class="fs--1">Search a customer by phone, national ID, name or email, and see his previous bookings.</p>
+                <a class="btn btn-primary btn-sm" asp-area="Staff" asp-controller="Customers" asp-action="Search">Open</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <span class="fas fa-plane-departure text-primary fs-3 mb-3"></span>
+                <h5>Flights</h5>
+                <p class="fs--1">Check the flights between two airports on a date, and how many seats are free.</p>
+                <a class="btn btn-primary btn-sm" asp-area="Staff" asp-controller="Flights" asp-action="Index">Open</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <span class="fas fa-ticket-alt text-primary fs-3 mb-3"></span>
+                <h5>Book for a customer</h5>
+                @if (canBook)
+                {
+                    <p class="fs--1">Choose the flight and the seat, then enter the customer's data. The booking is saved under your account.</p>
+                    <a class="btn btn-primary btn-sm" asp-area="Customer" asp-controller="Flights" asp-action="Index">Start booking</a>
+                }
+                else
+                {
+                    <p class="fs--1 mb-0">Your role can only view. Ask a booking agent to book for the customer.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
