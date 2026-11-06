@@ -3,56 +3,311 @@
 @{
     ViewData["Title"] = "Aircraft Classes";
     Layout = "_AdminLayout";
+
+    var aircraftClasses = Model?.ToList()
+        ?? new List<Flight_Booking_System.Models.AircraftClass>();
+
+    var totalClasses = aircraftClasses.Count;
+    var totalSeats = aircraftClasses.Sum(x => x.NumberOfSeats);
+
+    var totalAircraft = aircraftClasses
+        .Where(x => x.Aircraft != null)
+        .Select(x => x.Aircraft!.Id)
+        .Distinct()
+        .Count();
 }
 
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Aircraft Classes</h2>
+<div class="container-fluid py-4 aircraft-class-management">
+
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Aircraft Classes</h2>
+            <p class="text-muted mb-0">
+                Manage aircraft classes and their seat capacities.
+            </p>
+        </div>
 
         <a asp-controller="AircraftClasses"
            asp-action="Create"
-           class="btn btn-primary">
-            <i class="fas fa-plus"></i> Add Aircraft Class
+           asp-area="Admin"
+           class="btn btn-primary rounded-3 px-4 py-2">
+            <i class="fas fa-plus me-2"></i>
+            Add Aircraft Class
         </a>
     </div>
 
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-striped table-hover align-middle">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>ID</th>
-                            <th>Aircraft</th>
-                            <th>Class</th>
-                            <th>Seat Count</th>
-                        </tr>
-                    </thead>
+    <!-- ALERTS -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
-                    <tbody>
-                        @if (Model != null && Model.Any())
-                        {
-                            foreach (var item in Model)
-                            {
-                                <tr>
-                                    <td>@item.ID</td>
-                                    <td>@item.Aircraft.RegistrationNumber</td>
-                                    <td>@item.Class.Name</td>
-                                    <td>@item.NumberOfSeats</td>
-                                </tr>
-                            }
-                        }
-                        else
-                        {
-                            <tr>
-                                <td colspan="4" class="text-center text-muted">
-                                    No aircraft classes found.
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- STATISTICS -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm airline-stat-card">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="airline-table-icon">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted small mb-1">Total Classes</p>
+                        <h4 class="fw-bold mb-0">@totalClasses</h4>
+                    </div>
+                </div>
             </div>
         </div>
+
+        <div class="col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm airline-stat-card">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="airline-table-icon">
+                        <i class="fas fa-plane"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted small mb-1">Aircraft Covered</p>
+                        <h4 class="fw-bold mb-0">@totalAircraft</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm airline-stat-card">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="airline-table-icon">
+                        <i class="fas fa-chair"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted small mb-1">Total Seats</p>
+                        <h4 class="fw-bold mb-0">@totalSeats</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="card border-0 shadow-sm flight-table-card">
+
+        <div class="card-header bg-white border-0 px-4 py-3">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h5 class="fw-bold mb-1">Aircraft Class List</h5>
+                    <p class="text-muted small mb-0">
+                        View and manage all configured aircraft classes.
+                    </p>
+                </div>
+
+                <div class="input-group" style="max-width:300px;">
+                    <span class="input-group-text bg-light border-end-0">
+                        <i class="fas fa-search text-muted"></i>
+                    </span>
+                    <input type="search"
+                           id="classSearch"
+                           class="form-control border-start-0"
+                           placeholder="Search classes..." />
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table flight-table table-hover align-middle mb-0">
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Aircraft</th>
+                        <th>Class</th>
+                        <th>Seat Count</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody id="aircraftClassTableBody">
+
+                    @if (aircraftClasses.Any())
+                    {
+                        foreach (var item in aircraftClasses)
+                        {
+                            <tr class="aircraft-class-row"
+                                data-search="@($"{item.ID} {item.Aircraft?.RegistrationNumber} {item.Aircraft?.Model} {item.Class?.Name} {item.NumberOfSeats}")">
+
+                                <td>
+                                    <span class="text-muted fw-semibold">
+                                        #@item.ID
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="airline-table-icon">
+                                            <i class="fas fa-plane"></i>
+                                        </div>
+                                        <div>
+                                            <span class="fw-semibold d-block">
+                                                @(item.Aircraft?.RegistrationNumber ?? "N/A")
+                                            </span>
+                                            <small class="text-muted">
+                                                @(item.Aircraft?.Model ?? "Unknown Model")
+                                            </small>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="badge bg-primary-subtle text-primary px-3 py-2">
+                                        @(item.Class?.Name ?? "N/A")
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="fw-semibold">
+                                        @item.NumberOfSeats
+                                    </span>
+                                    <small class="text-muted ms-1">Seats</small>
+                                </td>
+
+                                <td>
+                                    <div class="d-flex justify-content-center gap-2 flex-wrap">
+
+                                        <a asp-controller="AircraftClasses"
+                                           asp-action="Edit"
+                                           asp-area="Admin"
+                                           asp-route-id="@item.ID"
+                                           class="flight-action-btn btn btn-outline-primary">
+                                            <i class="fas fa-edit"></i>
+                                            Edit
+                                        </a>
+
+                                        <a asp-controller="AircraftClasses"
+                                           asp-action="Delete"
+                                           asp-area="Admin"
+                                           asp-route-id="@item.ID"
+                                           class="flight-action-btn btn btn-outline-danger">
+                                            <i class="fas fa-trash-alt"></i>
+                                            Delete
+                                        </a>
+
+                                    </div>
+                                </td>
+
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <i class="fas fa-layer-group fa-2x text-muted mb-3"></i>
+                                <h6 class="fw-bold">No Aircraft Classes Found</h6>
+                                <p class="text-muted mb-0">
+                                    Start by adding your first aircraft class.
+                                </p>
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+        </div>
+
+        <!-- NO SEARCH RESULTS -->
+        <div id="classNoResults" class="text-center py-5 d-none">
+            <i class="fas fa-search fa-2x text-muted mb-3"></i>
+            <h6 class="fw-bold">No Matching Results</h6>
+            <p class="text-muted mb-0">
+                Try searching with another keyword.
+            </p>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="card-footer bg-white border-0 px-4 py-3">
+            <small class="text-muted">
+                Displaying
+                <strong id="visibleClassCount">@totalClasses</strong>
+                aircraft classes
+            </small>
+        </div>
+
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const searchElement = document.getElementById("classSearch");
+            const tableBody = document.getElementById("aircraftClassTableBody");
+            const noResults = document.getElementById("classNoResults");
+            const visibleCount = document.getElementById("visibleClassCount");
+
+            if (
+                !(searchElement instanceof HTMLInputElement) ||
+                !(tableBody instanceof HTMLTableSectionElement) ||
+                !(noResults instanceof HTMLElement) ||
+                !(visibleCount instanceof HTMLElement)
+            ) {
+                return;
+            }
+
+            const searchInput = searchElement;
+            const tbody = tableBody;
+            const emptyState = noResults;
+            const countElement = visibleCount;
+
+            const tableContainer = tbody.closest(".table-responsive");
+
+            if (!(tableContainer instanceof HTMLElement)) {
+                return;
+            }
+
+            const container = tableContainer;
+            const rows = tbody.querySelectorAll(".aircraft-class-row");
+
+            function filterClasses() {
+                const searchValue = searchInput.value.trim().toLowerCase();
+                let visible = 0;
+
+                rows.forEach(function (item) {
+                    if (!(item instanceof HTMLTableRowElement)) {
+                        return;
+                    }
+
+                    const row = item;
+                    const searchText = row.dataset.search || "";
+                    const matchesSearch =
+                        searchText.toLowerCase().includes(searchValue);
+
+                    row.style.display = matchesSearch ? "" : "none";
+
+                    if (matchesSearch) {
+                        visible++;
+                    }
+                });
+
+                countElement.textContent = visible.toString();
+                emptyState.classList.toggle("d-none", visible > 0);
+                container.classList.toggle("d-none", visible === 0);
+            }
+
+            searchInput.addEventListener("input", filterClasses);
+        });
+    </script>
+}
