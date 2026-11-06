@@ -190,6 +190,12 @@ namespace Flight_Booking_System.Areas.Identity.Controllers
                     return Redirect("/Admin/Home/Index");
                 }
 
+
+               else if (await _userManager.IsInRoleAsync(user, "BookingAgent"))
+                {
+                    return Redirect("/Staff/Flights/Index");
+                }
+
                 return Redirect("/Customer/Flights/Index");
             }
 
