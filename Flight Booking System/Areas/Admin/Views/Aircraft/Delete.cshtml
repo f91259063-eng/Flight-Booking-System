@@ -1,0 +1,155 @@
+﻿@model Flight_Booking_System.Models.Aircraft
+
+@{
+    ViewData["Title"] = "Delete Aircraft";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid py-4" dir="ltr">
+
+    <!-- Page Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 text-muted small mb-2">
+                <i class="bi bi-airplane"></i>
+                <span>Fleet Management</span>
+                <i class="bi bi-chevron-right"></i>
+                <span>Aircraft</span>
+                <i class="bi bi-chevron-right"></i>
+                <span>Delete</span>
+            </div>
+
+            <h2 class="fw-bold mb-1">Delete Aircraft</h2>
+            <p class="text-muted mb-0">
+                Review the aircraft information before confirming deletion.
+            </p>
+        </div>
+
+        <a asp-area="Admin"
+           asp-controller="Aircraft"
+           asp-action="Index"
+           class="btn btn-light border">
+            <i class="bi bi-arrow-left me-2"></i>
+            Back to Aircraft
+        </a>
+    </div>
+
+    <!-- Warning -->
+    <div class="alert alert-danger border-0 shadow-sm d-flex align-items-start gap-3 mb-4"
+         role="alert">
+        <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+        <div>
+            <h6 class="fw-bold mb-1">Warning: Permanent Deletion</h6>
+            <p class="mb-0">
+                You are about to delete this aircraft. This action may affect
+                its associated classes and seats. Please review the information
+                before proceeding.
+            </p>
+        </div>
+    </div>
+
+    <!-- Aircraft Information -->
+    <div class="card flight-form-card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white p-4">
+            <div class="d-flex align-items-center gap-3">
+                <div class="flight-form-header-icon text-danger"
+                     style="background-color: #fff0f0;">
+                    <i class="bi bi-airplane"></i>
+                </div>
+
+                <div>
+                    <h5 class="fw-bold mb-1">Aircraft Information</h5>
+                    <p class="text-muted small mb-0">
+                        Details of the aircraft selected for deletion.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="row g-4">
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="text-muted small mb-2">Aircraft ID</div>
+                    <h6 class="fw-bold mb-0">#@Model.Id</h6>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="text-muted small mb-2">Registration Number</div>
+                    <h6 class="fw-bold mb-0">
+                        @Model.RegistrationNumber
+                    </h6>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="text-muted small mb-2">Aircraft Model</div>
+                    <h6 class="fw-bold mb-0">@Model.Model</h6>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="text-muted small mb-2">Airline</div>
+                    <h6 class="fw-bold mb-0">
+                        @(Model.Airline?.Name ?? "Not specified")
+                    </h6>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="text-muted small mb-2">Total Seat Capacity</div>
+                    <h6 class="fw-bold text-primary mb-0">
+                        @Model.Capacity Seats
+                    </h6>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <i class="bi bi-shield-exclamation text-danger fs-5"></i>
+                <h6 class="fw-bold mb-0">Confirm Aircraft Deletion</h6>
+            </div>
+
+            <p class="text-muted mb-4">
+                Are you sure you want to delete aircraft
+                <strong>@Model.RegistrationNumber</strong>?
+                This operation cannot be undone.
+            </p>
+
+            <form asp-area="Admin"
+                  asp-controller="Aircraft"
+                  asp-action="Delete"
+                  asp-route-id="@Model.Id"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" asp-for="Id" />
+
+                <div class="d-flex flex-wrap justify-content-end gap-2">
+
+                    <a asp-area="Admin"
+                       asp-controller="Aircraft"
+                       asp-action="Index"
+                       class="btn btn-light border px-4">
+                        <i class="bi bi-x-circle me-2"></i>
+                        Cancel
+                    </a>
+
+                    <button type="submit"
+                            class="btn btn-danger px-4">
+                        <i class="bi bi-trash3 me-2"></i>
+                        Confirm Delete
+                    </button>
+
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+</div>

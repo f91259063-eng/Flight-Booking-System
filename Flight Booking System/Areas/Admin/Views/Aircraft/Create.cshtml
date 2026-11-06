@@ -1,5 +1,5 @@
-﻿```cshtml
-@model Flight_Booking_System.Models.Aircraft
+﻿@model Flight_Booking_System.Models.Aircraft
+
 @using Microsoft.AspNetCore.Mvc.Rendering
 
 @{
@@ -10,91 +10,222 @@
         ?? Enumerable.Empty<Flight_Booking_System.Models.Airline>();
 }
 
-<div class="container">
-    <h2 class="mb-4">Create Aircraft</h2>
+<div class="container-fluid py-4" dir="ltr">
 
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <form asp-area="Admin"
-                  asp-controller="Aircraft"
-                  asp-action="Create"
-                  method="post">
+    <!-- Page Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <span class="text-primary fw-semibold small text-uppercase">
+                Fleet Management
+            </span>
 
-                <div asp-validation-summary="ModelOnly"
-                     class="text-danger mb-3"></div>
+            <h2 class="fw-bold mb-1">Create New Aircraft</h2>
 
-                <div class="mb-3">
-                    <label asp-for="AirlineId" class="form-label">
-                        Airline
-                    </label>
+            <p class="text-muted mb-0">
+                Register a new aircraft and assign it to an airline.
+            </p>
+        </div>
 
-                    <select asp-for="AirlineId"
-                            class="form-select"
-                            asp-items="@(new SelectList(airlines, "Id", "Name"))">
-                        <option value="">-- Select Airline --</option>
-                    </select>
+        <a asp-area="Admin"
+           asp-controller="Aircraft"
+           asp-action="Index"
+           class="btn btn-light border">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Aircraft
+        </a>
+    </div>
 
-                    <span asp-validation-for="AirlineId"
-                          class="text-danger"></span>
+    <div class="row justify-content-center">
+        <div class="col-md-9 col-lg-7 col-xl-6">
+
+            <div class="card flight-form-card border-0 shadow-sm">
+
+                <!-- Card Header -->
+                <div class="card-header bg-white p-4">
+                    <div class="d-flex align-items-center gap-3">
+
+                        <div class="flight-form-header-icon">
+                            <i class="bi bi-airplane"></i>
+                        </div>
+
+                        <div>
+                            <h5 class="fw-bold mb-1">Aircraft Information</h5>
+                            <p class="text-muted small mb-0">
+                                Enter the aircraft details below.
+                            </p>
+                        </div>
+
+                    </div>
                 </div>
 
-                <div class="mb-3">
-                    <label asp-for="RegistrationNumber"
-                           class="form-label"></label>
+                <!-- Form Body -->
+                <div class="card-body p-4">
 
-                    <input asp-for="RegistrationNumber"
-                           class="form-control"
-                           placeholder="Enter registration number" />
+                    <form asp-area="Admin"
+                          asp-controller="Aircraft"
+                          asp-action="Create"
+                          method="post">
 
-                    <span asp-validation-for="RegistrationNumber"
-                          class="text-danger"></span>
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="alert alert-danger mb-4"
+                             role="alert">
+                        </div>
+
+                        <!-- Airline Information -->
+                        <h6 class="flight-section-title mb-3">
+                            <i class="bi bi-building"></i>
+                            Airline Assignment
+                        </h6>
+
+                        <div class="mb-4">
+
+                            <label asp-for="AirlineId"
+                                   class="form-label fw-semibold">
+                                Airline
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="bi bi-airplane text-muted"></i>
+                                </span>
+
+                                <select asp-for="AirlineId"
+                                        class="form-select"
+                                        asp-items="@(new SelectList(airlines, "Id", "Name"))">
+
+                                    <option value="">-- Select Airline --</option>
+
+                                </select>
+                            </div>
+
+                            <span asp-validation-for="AirlineId"
+                                  class="text-danger small">
+                            </span>
+
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <!-- Aircraft Details -->
+                        <h6 class="flight-section-title mb-3">
+                            <i class="bi bi-info-circle"></i>
+                            Aircraft Details
+                        </h6>
+
+                        <div class="mb-3">
+
+                            <label asp-for="RegistrationNumber"
+                                   class="form-label fw-semibold">
+                                Registration Number
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="bi bi-upc-scan text-muted"></i>
+                                </span>
+
+                                <input asp-for="RegistrationNumber"
+                                       class="form-control"
+                                       placeholder="Enter registration number"
+                                       autocomplete="off" />
+                            </div>
+
+                            <span asp-validation-for="RegistrationNumber"
+                                  class="text-danger small">
+                            </span>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label asp-for="Model"
+                                   class="form-label fw-semibold">
+                                Aircraft Model
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="bi bi-airplane-engines text-muted"></i>
+                                </span>
+
+                                <input asp-for="Model"
+                                       class="form-control"
+                                       placeholder="e.g. Boeing 737"
+                                       autocomplete="off" />
+                            </div>
+
+                            <span asp-validation-for="Model"
+                                  class="text-danger small">
+                            </span>
+
+                        </div>
+
+                        <div class="mb-4">
+
+                            <label asp-for="Capacity"
+                                   class="form-label fw-semibold">
+                                Total Seat Capacity
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="bi bi-people text-muted"></i>
+                                </span>
+
+                                <input asp-for="Capacity"
+                                       type="number"
+                                       min="1"
+                                       class="form-control"
+                                       placeholder="Total seats in all classes" />
+                            </div>
+
+                            <span asp-validation-for="Capacity"
+                                  class="text-danger small">
+                            </span>
+
+                            <small class="form-text text-muted">
+                                Total number of seats across all classes.
+                            </small>
+
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <!-- Form Actions -->
+                        <div class="d-flex flex-wrap justify-content-end gap-2">
+
+                            <a asp-area="Admin"
+                               asp-controller="Aircraft"
+                               asp-action="Index"
+                               class="btn btn-light border px-4">
+                                <i class="bi bi-x-circle me-1"></i>
+                                Cancel
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-primary px-4">
+                                <i class="bi bi-check-circle me-1"></i>
+                                Save Aircraft
+                            </button>
+
+                        </div>
+
+                    </form>
+
                 </div>
+            </div>
 
-                <div class="mb-3">
-                    <label asp-for="Model" class="form-label">
-                        Aircraft Model
-                    </label>
-
-                    <input asp-for="Model"
-                           class="form-control"
-                           placeholder="e.g. Boeing 737" />
-
-                    <span asp-validation-for="Model"
-                          class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Capacity" class="form-label">
-                        Total Seat Capacity
-                    </label>
-
-                    <input asp-for="Capacity"
-                           type="number"
-                           min="1"
-                           class="form-control"
-                           placeholder="Total seats in all classes" />
-
-                    <span asp-validation-for="Capacity"
-                          class="text-danger"></span>
-
-                    <small class="form-text text-muted">
-                        Total number of seats across all classes.
-                    </small>
-                </div>
-
-                <button type="submit" class="btn btn-primary">
-                    Save
-                </button>
-
-                <a asp-action="Index" class="btn btn-secondary">
-                    Cancel
-                </a>
-            </form>
         </div>
     </div>
+
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
-```

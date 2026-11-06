@@ -1,137 +1,224 @@
-﻿```cshtml
-@model Flight_Booking_System.ViewModels.AircraftSeatsViewModel
+﻿@model Flight_Booking_System.ViewModels.AircraftSeatsViewModel
 
 @{
     ViewData["Title"] = "Aircraft Details";
     Layout = "_AdminLayout";
 }
 
-<div class="container-fluid py-4" dir="ltr">
+<div class="container-fluid py-4 airline-management" dir="ltr">
 
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <!-- Page Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
-            <h2 class="fw-bold mb-1">
+            <div class="d-flex align-items-center gap-2 text-muted small mb-2">
                 <i class="bi bi-airplane"></i>
-                Aircraft Details
-            </h2>
+                <span>Fleet Management</span>
+                <i class="bi bi-chevron-right"></i>
+                <span>Aircraft</span>
+                <i class="bi bi-chevron-right"></i>
+                <span>Details</span>
+            </div>
+
+            <h2 class="fw-bold mb-1">Aircraft Details</h2>
             <p class="text-muted mb-0">
-                Aircraft information, travel classes, and seats
+                Aircraft information, travel classes, and seat configuration.
             </p>
         </div>
 
-        <div class="d-flex gap-2">
+        <div class="d-flex flex-wrap gap-2">
             <a asp-area="Admin"
                asp-controller="Aircraft"
                asp-action="Edit"
                asp-route-id="@Model.Id"
-               class="btn btn-warning">
-                <i class="bi bi-pencil-square"></i>
-                Edit
+               class="btn btn-primary">
+                <i class="bi bi-pencil-square me-2"></i>
+                Edit Aircraft
             </a>
 
             <a asp-area="Admin"
                asp-controller="Aircraft"
                asp-action="Index"
-               class="btn btn-secondary">
-                <i class="bi bi-arrow-left"></i>
-                Back to List
+               class="btn btn-light border">
+                <i class="bi bi-arrow-left me-2"></i>
+                Back to Aircraft
             </a>
         </div>
     </div>
 
-    <!-- Aircraft Information -->
-    <div class="card shadow-sm border-0 mb-4">
-        <div class="card-header bg-primary text-white py-3">
-            <h5 class="mb-0">
-                <i class="bi bi-info-circle"></i>
-                Aircraft Information
-            </h5>
+    <!-- Aircraft Overview -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-xl-4 col-md-6">
+            <div class="card airline-stat-card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="airline-table-icon">
+                        <i class="bi bi-airplane"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small mb-1">Aircraft Model</div>
+                        <h5 class="fw-bold mb-0">@Model.Model</h5>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="card-body">
+        <div class="col-xl-4 col-md-6">
+            <div class="card airline-stat-card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="airline-table-icon">
+                        <i class="bi bi-grid-3x3-gap"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small mb-1">Total Seat Capacity</div>
+                        <h5 class="fw-bold mb-0">
+                            @Model.Capacity
+                            <small class="text-muted fw-normal">Seats</small>
+                        </h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6">
+            <div class="card airline-stat-card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="airline-table-icon">
+                        <i class="bi bi-ticket-perforated"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small mb-1">Travel Classes</div>
+                        <h5 class="fw-bold mb-0">
+                            @(Model.Classes?.Count ?? 0)
+                        </h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Aircraft Information -->
+    <div class="card flight-form-card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white p-4">
+            <div class="d-flex align-items-center gap-3">
+                <div class="flight-form-header-icon">
+                    <i class="bi bi-info-circle"></i>
+                </div>
+
+                <div>
+                    <h5 class="fw-bold mb-1">Aircraft Information</h5>
+                    <p class="text-muted small mb-0">
+                        General information and airline assignment.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-4">
             <div class="row g-4">
 
-                <div class="col-md-4">
-                    <div class="text-muted mb-1">Aircraft ID</div>
-                    <h5 class="fw-bold">@Model.Id</h5>
+                <div class="col-lg-4 col-md-6">
+                    <div class="text-muted small mb-2">Aircraft ID</div>
+                    <h6 class="fw-bold mb-0">#@Model.Id</h6>
                 </div>
 
-                <div class="col-md-4">
-                    <div class="text-muted mb-1">Registration Number</div>
-                    <h5 class="fw-bold">@Model.RegistrationNumber</h5>
+                <div class="col-lg-4 col-md-6">
+                    <div class="text-muted small mb-2">Registration Number</div>
+                    <h6 class="fw-bold mb-0">
+                        @Model.RegistrationNumber
+                    </h6>
                 </div>
 
-                <div class="col-md-4">
-                    <div class="text-muted mb-1">Aircraft Model</div>
-                    <h5 class="fw-bold">@Model.Model</h5>
+                <div class="col-lg-4 col-md-6">
+                    <div class="text-muted small mb-2">Aircraft Model</div>
+                    <h6 class="fw-bold mb-0">@Model.Model</h6>
                 </div>
 
-                <div class="col-md-4">
-                    <div class="text-muted mb-1">Airline</div>
-                    <h5 class="fw-bold">@(Model.AirlineName ?? "Not specified")</h5>
+                <div class="col-lg-4 col-md-6">
+                    <div class="text-muted small mb-2">Airline</div>
+                    <h6 class="fw-bold mb-0">
+                        @(Model.AirlineName ?? "Not specified")
+                    </h6>
                 </div>
 
-                <div class="col-md-4">
-                    <div class="text-muted mb-1">Total Capacity</div>
-                    <h5 class="fw-bold text-primary">
+                <div class="col-lg-4 col-md-6">
+                    <div class="text-muted small mb-2">Total Capacity</div>
+                    <h6 class="fw-bold text-primary mb-0">
                         @Model.Capacity Seats
-                    </h5>
+                    </h6>
                 </div>
 
-                <div class="col-md-4">
-                    <div class="text-muted mb-1">Number of Travel Classes</div>
-                    <h5 class="fw-bold">
+                <div class="col-lg-4 col-md-6">
+                    <div class="text-muted small mb-2">Number of Travel Classes</div>
+                    <h6 class="fw-bold mb-0">
                         @(Model.Classes?.Count ?? 0)
-                    </h5>
+                    </h6>
                 </div>
 
             </div>
         </div>
     </div>
 
-    <!-- Classes and Seats -->
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-white py-3">
-            <h5 class="fw-bold mb-0">
-                <i class="bi bi-grid-3x3-gap"></i>
-                Travel Classes and Seats
-            </h5>
+    <!-- Travel Classes and Seats -->
+    <div class="card flight-table-card border-0 shadow-sm">
+
+        <div class="card-header bg-white p-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="flight-form-header-icon">
+                        <i class="bi bi-grid-3x3-gap"></i>
+                    </div>
+
+                    <div>
+                        <h5 class="fw-bold mb-1">Travel Classes and Seats</h5>
+                        <p class="text-muted small mb-0">
+                            View allocated classes and their registered seats.
+                        </p>
+                    </div>
+                </div>
+
+                <span class="badge bg-light text-dark border px-3 py-2">
+                    @(Model.Classes?.Count ?? 0) Classes
+                </span>
+            </div>
         </div>
 
-        <div class="card-body">
+        <div class="card-body p-4">
 
             @if (Model.Classes != null && Model.Classes.Any())
             {
                 @foreach (var aircraftClass in Model.Classes)
                 {
-                    <div class="card border-0 shadow-sm mb-4">
+                    <div class="card border shadow-sm rounded-3 mb-4 overflow-hidden">
 
                         <!-- Class Header -->
-                        <div class="card-header bg-light py-3">
-                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div class="card-header bg-light p-3">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
 
-                                <div>
-                                    <h5 class="fw-bold mb-1">
-                                        <i class="bi bi-ticket-perforated text-primary"></i>
-                                        @aircraftClass.ClassName
-                                    </h5>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="airline-table-icon">
+                                        <i class="bi bi-ticket-perforated"></i>
+                                    </div>
 
-                                    <small class="text-muted">
-                                        Aircraft Class ID:
-                                        @aircraftClass.AircraftClassId
-                                    </small>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">
+                                            @aircraftClass.ClassName
+                                        </h6>
+
+                                        <small class="text-muted">
+                                            Class ID: @aircraftClass.AircraftClassId
+                                        </small>
+                                    </div>
                                 </div>
 
-                                <div class="d-flex gap-2 flex-wrap">
-                                    <span class="badge bg-primary fs-6">
-                                        Allocated Seats:
-                                        @aircraftClass.NumberOfSeats
+                                <div class="d-flex flex-wrap gap-2">
+                                    <span class="badge bg-primary px-3 py-2">
+                                        Allocated: @aircraftClass.NumberOfSeats
                                     </span>
 
-                                    <span class="badge bg-success fs-6">
-                                        Registered Seats:
-                                        @(aircraftClass.Seats?.Count ?? 0)
+                                    <span class="badge bg-success px-3 py-2">
+                                        Registered: @(aircraftClass.Seats?.Count ?? 0)
                                     </span>
                                 </div>
 
@@ -139,7 +226,7 @@
                         </div>
 
                         <!-- Seats -->
-                        <div class="card-body">
+                        <div class="card-body p-3">
 
                             @if (aircraftClass.Seats != null &&
                                  aircraftClass.Seats.Any())
@@ -158,7 +245,7 @@
                                             <div class="seat-card h-100">
 
                                                 <div class="seat-icon">
-                                                    <i class="bi bi-armchair-fill"></i>
+                                                    <i class="bi bi-person-workspace"></i>
                                                 </div>
 
                                                 <div class="seat-number">
@@ -166,7 +253,7 @@
                                                 </div>
 
                                                 <div class="seat-details">
-                                                    <span class="badge bg-light text-dark">
+                                                    <span class="badge bg-light text-dark border">
                                                         Seat @seatCounter
                                                     </span>
                                                 </div>
@@ -176,7 +263,6 @@
                                                 </small>
 
                                             </div>
-
                                         </div>
 
                                         seatCounter++;
@@ -187,7 +273,7 @@
                             else
                             {
                                 <div class="alert alert-warning mb-0">
-                                    <i class="bi bi-exclamation-triangle"></i>
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
                                     No seats have been registered for this class.
                                 </div>
                             }
@@ -199,11 +285,11 @@
             else
             {
                 <div class="text-center py-5">
-                    <i class="bi bi-grid display-4 text-muted"></i>
+                    <div class="display-4 text-muted mb-3">
+                        <i class="bi bi-grid"></i>
+                    </div>
 
-                    <h5 class="mt-3">
-                        No Travel Classes Assigned
-                    </h5>
+                    <h5 class="fw-bold">No Travel Classes Assigned</h5>
 
                     <p class="text-muted mb-0">
                         Add travel classes and their associated seats to display them here.
@@ -220,21 +306,21 @@
     .seat-card {
         padding: 16px 8px;
         text-align: center;
-        border: 1px solid #dee2e6;
+        border: 1px solid var(--admin-border, #dee2e6);
         border-radius: 12px;
         background: #fff;
         transition: all 0.2s ease;
     }
 
         .seat-card:hover {
-            border-color: #0d6efd;
+            border-color: var(--admin-primary, #2563eb);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             transform: translateY(-2px);
         }
 
     .seat-icon {
         font-size: 28px;
-        color: #0d6efd;
+        color: var(--admin-primary, #2563eb);
         margin-bottom: 8px;
     }
 
@@ -264,4 +350,3 @@
         }
     }
 </style>
-```
