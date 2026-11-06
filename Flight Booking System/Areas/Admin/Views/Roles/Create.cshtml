@@ -1,59 +1,108 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "Create Role";
     Layout = "_AdminLayout";
 }
 
 <div class="container-fluid py-4" dir="ltr">
 
+    <!-- Page Header -->
     <div class="mb-4">
-        <h2 class="fw-bold">
+        <h2 class="fw-bold mb-1">
             <i class="fas fa-plus-circle text-primary me-2"></i>
             Create Role
         </h2>
-        <p class="text-body-secondary">
+
+        <p class="text-body-secondary mb-0">
             Add a new role to the system.
         </p>
     </div>
 
-    <div class="card">
-        <div class="card-body">
+    <div class="row justify-content-center">
 
-            <div asp-validation-summary="All"
-                 class="alert alert-danger"></div>
+        <div class="col-lg-7 col-xl-6">
 
-            <form asp-controller="Roles"
-                  asp-action="Create"
-                  method="post">
+            <div class="card border-0 shadow-sm">
 
-                @Html.AntiForgeryToken()
-
-                <div class="mb-3">
-                    <label for="name" class="form-label">
-                        Role Name
-                    </label>
-
-                    <input type="text"
-                           id="name"
-                           name="name"
-                           class="form-control"
-                           placeholder="Example: Admin, Employee, Customer"
-                           required />
+                <!-- Card Header -->
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-user-shield text-primary me-2"></i>
+                        Role Information
+                    </h5>
                 </div>
 
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i>
-                        Save Role
-                    </button>
+                <!-- Card Body -->
+                <div class="card-body p-4">
 
-                    <a asp-controller="Roles"
-                       asp-action="Index"
-                       class="btn btn-light border">
-                        Cancel
-                    </a>
+                    <div asp-validation-summary="All"
+                         class="alert alert-danger"
+                         role="alert">
+                    </div>
+
+                    <form asp-area="Admin"
+                          asp-controller="Roles"
+                          asp-action="Create"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <!-- Role Name -->
+                        <div class="mb-4">
+
+                            <label for="name" class="form-label fw-semibold">
+                                Role Name
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <input type="text"
+                                   id="name"
+                                   name="name"
+                                   class="form-control"
+                                   placeholder="Example: Admin, Employee, Customer"
+                                   maxlength="256"
+                                   required
+                                   autocomplete="off" />
+
+                            <small class="text-body-secondary mt-2 d-block">
+                                Enter a unique name for the new system role.
+                            </small>
+
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <!-- Actions -->
+                        <div class="d-flex gap-2 flex-wrap">
+
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>
+                                Save Role
+                            </button>
+
+                            <a asp-area="Admin"
+                               asp-controller="Roles"
+                               asp-action="Index"
+                               class="btn btn-light border">
+                                <i class="fas fa-arrow-left me-1"></i>
+                                Back to Roles
+                            </a>
+
+                        </div>
+
+                    </form>
+
                 </div>
-            </form>
+            </div>
+
+            <!-- Information -->
+            <div class="alert alert-info mt-3 mb-0">
+                <i class="fas fa-info-circle me-2"></i>
+                Roles are used to organize users and control access
+                to different areas of the system.
+            </div>
+
         </div>
+
     </div>
+
 </div>

@@ -14,7 +14,7 @@ namespace Flight_Booking_System.Models
 
         public string PassportNumber { get; set; } = string.Empty;
 
-        public string NationalID { get; set; } = string.Empty;
+        public string? NationalID { get; set; } = string.Empty;
 
         [MaxLength(11)]
         [MinLength(11)]

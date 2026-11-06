@@ -1,5 +1,4 @@
-﻿```cshtml
-@model Flight_Booking_System.Models.Passenger
+﻿@model Flight_Booking_System.Models.Passenger
 
 @{
     ViewData["Title"] = "Delete Passenger";
@@ -14,6 +13,7 @@
             <i class="bi bi-person-x me-1"></i>
             Delete Passenger
         </h2>
+
         <p class="text-muted">
             Review the passenger information before confirming deletion.
         </p>
@@ -33,6 +33,7 @@
 
                 <div class="card-body p-4">
 
+                    <!-- Warning -->
                     <div class="alert alert-warning">
                         <i class="bi bi-exclamation-circle me-1"></i>
                         Are you sure you want to delete this passenger?
@@ -48,27 +49,37 @@
 
                         <dt class="col-sm-4">Full Name</dt>
                         <dd class="col-sm-8">
-                            @Model.FirstName @Model.MiddleName @Model.LastName
+                            @Model.FirstName
+                            @Model.MiddleName
+                            @Model.LastName
                         </dd>
 
                         <dt class="col-sm-4">Passport Number</dt>
-                        <dd class="col-sm-8">
-                            @Model.PassportNumber
+                        <dd class="col-sm-8" dir="ltr">
+                            @(string.IsNullOrWhiteSpace(Model.PassportNumber)
+                                ? "Not provided"
+                                : Model.PassportNumber)
                         </dd>
 
                         <dt class="col-sm-4">National ID</dt>
-                        <dd class="col-sm-8">
-                            @Model.NationalID
+                        <dd class="col-sm-8" dir="ltr">
+                            @(string.IsNullOrWhiteSpace(Model.NationalID)
+                                ? "Not provided"
+                                : Model.NationalID)
                         </dd>
 
                         <dt class="col-sm-4">Phone Number</dt>
                         <dd class="col-sm-8" dir="ltr">
-                            @Model.Phone
+                            @(string.IsNullOrWhiteSpace(Model.Phone)
+                                ? "Not provided"
+                                : Model.Phone)
                         </dd>
 
                         <dt class="col-sm-4">Email Address</dt>
                         <dd class="col-sm-8">
-                            @Model.Email
+                            @(string.IsNullOrWhiteSpace(Model.Email)
+                                ? "Not provided"
+                                : Model.Email)
                         </dd>
 
                         <dt class="col-sm-4">Date of Birth</dt>
@@ -103,8 +114,6 @@
 
                                 <i class="bi bi-arrow-left me-1"></i>
                                 Back to Passenger List
-                                <i class="bi bi-arrow-left me-1"></i>
-                                Cancel
                             </a>
 
                         </div>
