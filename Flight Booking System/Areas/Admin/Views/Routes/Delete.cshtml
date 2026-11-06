@@ -1,0 +1,237 @@
+﻿@model Flight_Booking_System.Models.Route
+
+@{
+    ViewData["Title"] = "Delete Route";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid py-4 route-delete-page" dir="ltr">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Delete Route</h2>
+            <p class="text-muted mb-0">
+                Review the route information before confirming deletion.
+            </p>
+        </div>
+
+        <a asp-area="Admin"
+           asp-controller="Routes"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>
+            Back to Routes
+        </a>
+    </div>
+
+    <!-- Warning -->
+    <div class="alert alert-danger d-flex align-items-start gap-3 mb-4"
+         role="alert">
+        <i class="fas fa-exclamation-triangle fs-4 mt-1"></i>
+        <div>
+            <h6 class="fw-bold mb-1">Confirm Route Deletion</h6>
+            <p class="mb-0">
+                Are you sure you want to delete this route?
+                This action cannot be undone. Routes associated with existing
+                flights may not be deleted.
+            </p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xl-8 col-lg-10">
+
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+
+                <!-- Card Header -->
+                <div class="card-header bg-white border-bottom p-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="route-delete-icon">
+                            <i class="fas fa-route"></i>
+                        </div>
+
+                        <div>
+                            <h5 class="fw-bold mb-1">Route Information</h5>
+                            <p class="text-muted small mb-0">
+                                Route ID: #@Model.Id
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Route Details -->
+                <div class="card-body p-4">
+
+                    <div class="row g-4 mb-4">
+
+                        <div class="col-md-5">
+                            <div class="route-airport-box">
+                                <span class="route-detail-label">
+                                    <i class="fas fa-plane-departure me-2"></i>
+                                    Departure Airport
+                                </span>
+
+                                <h5 class="fw-bold mt-3 mb-1">
+                                    @(Model.FromAirport?.Name ?? "Unknown Airport")
+                                </h5>
+
+                                <span class="text-muted small">
+                                    From Airport
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2 d-flex align-items-center justify-content-center">
+                            <div class="route-direction-icon">
+                                <i class="fas fa-long-arrow-alt-right"></i>
+                            </div>
+                        </div>
+
+                        <div class="col-md-5">
+                            <div class="route-airport-box">
+                                <span class="route-detail-label">
+                                    <i class="fas fa-plane-arrival me-2"></i>
+                                    Destination Airport
+                                </span>
+
+                                <h5 class="fw-bold mt-3 mb-1">
+                                    @(Model.ToAirport?.Name ?? "Unknown Airport")
+                                </h5>
+
+                                <span class="text-muted small">
+                                    To Airport
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Additional Information -->
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <div class="route-info-item">
+                                <span class="text-muted small">Route ID</span>
+                                <strong>#@Model.Id</strong>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="route-info-item">
+                                <span class="text-muted small">Distance</span>
+                                <strong>
+                                    @Model.Distance.ToString("N2") km
+                                </strong>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- Footer Actions -->
+                <div class="card-footer bg-light border-0 p-4">
+                    <form asp-area="Admin"
+                          asp-controller="Routes"
+                          asp-action="Delete"
+                          asp-route-id="@Model.Id"
+                          method="post"
+                          class="d-flex justify-content-end flex-wrap gap-2">
+
+                        @Html.AntiForgeryToken()
+
+                        <a asp-area="Admin"
+                           asp-controller="Routes"
+                           asp-action="Index"
+                           class="btn btn-outline-secondary px-4">
+                            Cancel
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-danger px-4"
+                                onclick="return confirm('Are you sure you want to delete this route?');">
+                            <i class="fas fa-trash-alt me-2"></i>
+                            Confirm Delete
+                        </button>
+
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .route-delete-page .route-delete-icon {
+        width: 52px;
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 13px;
+        background: #fff0f0;
+        color: #dc3545;
+        font-size: 22px;
+    }
+
+    .route-delete-page .route-airport-box {
+        height: 100%;
+        padding: 22px;
+        background: #f8fafc;
+        border: 1px solid #e9edf3;
+        border-radius: 12px;
+    }
+
+    .route-delete-page .route-detail-label {
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+    }
+
+    .route-delete-page .route-direction-icon {
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #eaf1ff;
+        color: #2563eb;
+        font-size: 20px;
+    }
+
+    .route-delete-page .route-info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        padding: 15px;
+        background: #f8fafc;
+        border-radius: 10px;
+    }
+
+        .route-delete-page .route-info-item strong {
+            color: #253047;
+            font-size: 15px;
+        }
+
+    .route-delete-page .btn {
+        min-height: 42px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9px;
+        font-weight: 600;
+    }
+
+    @@media (max-width: 767px) {
+        .route-delete-page .route-direction-icon {
+            transform: rotate(90deg);
+        }
+    }
+</style>

@@ -6,6 +6,7 @@ using Flight_Booking_System.Repositories;
 using Flight_Booking_System.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
 namespace Flight_Booking_System.Controllers
 {
@@ -29,7 +30,10 @@ namespace Flight_Booking_System.Controllers
             _activityLogService = activityLogService;
         }
 
-        // GET: Routes
+        // ==========================================
+        // GET: Admin/Routes
+        // ==========================================
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             Expression<Func<Flight_Booking_System.Models.Route, object>>[] includes =
@@ -45,21 +49,38 @@ namespace Flight_Booking_System.Controllers
             return View(routes);
         }
 
-        // GET: Routes/Create
+        // ==========================================
+        // GET: Admin/Routes/Create
+        // ==========================================
         [HttpGet]
         public async Task<IActionResult> Create()
         {
             await LoadAirportsAsync();
+
             return View();
         }
 
-        // POST: Routes/Create
+        // ==========================================
+        // POST: Admin/Routes/Create
+        // ==========================================
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
             int FromAirportId,
             int ToAirportId)
         {
+            // Validate airport selection
+            if (FromAirportId <= 0 || ToAirportId <= 0)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Please select both departure and destination airports.");
+
+                await LoadAirportsAsync(FromAirportId, ToAirportId);
+                return View();
+            }
+
+            // Prevent same departure and arrival airport
             if (FromAirportId == ToAirportId)
             {
                 ModelState.AddModelError(
@@ -70,11 +91,15 @@ namespace Flight_Booking_System.Controllers
                 return View();
             }
 
+            // Get departure airport
             var fromAirport = await _airportRepository.GetOneAsync(
-                a => a.Id == FromAirportId);
+                a => a.Id == FromAirportId,
+                IsTracking: false);
 
+            // Get destination airport
             var toAirport = await _airportRepository.GetOneAsync(
-                a => a.Id == ToAirportId);
+                a => a.Id == ToAirportId,
+                IsTracking: false);
 
             if (fromAirport == null || toAirport == null)
             {
@@ -86,20 +111,23 @@ namespace Flight_Booking_System.Controllers
                 return View();
             }
 
+            // Validate coordinates
             if (!HasCoordinates(fromAirport) ||
                 !HasCoordinates(toAirport))
             {
                 ModelState.AddModelError(
                     string.Empty,
-                    "Both airports must have coordinates.");
+                    "Both airports must have valid coordinates.");
 
                 await LoadAirportsAsync(FromAirportId, ToAirportId);
                 return View();
             }
 
+            // Check duplicate route
             var duplicate = await _routeRepository.GetOneAsync(
                 r => r.FromAirportId == FromAirportId &&
-                     r.ToAirportId == ToAirportId);
+                     r.ToAirportId == ToAirportId,
+                IsTracking: false);
 
             if (duplicate != null)
             {
@@ -111,6 +139,7 @@ namespace Flight_Booking_System.Controllers
                 return View();
             }
 
+            // Calculate distance
             var route = new Flight_Booking_System.Models.Route
             {
                 FromAirportId = FromAirportId,
@@ -148,10 +177,15 @@ namespace Flight_Booking_System.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: Routes/Edit/5
+        // ==========================================
+        // GET: Admin/Routes/Edit/5
+        // ==========================================
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
+            if (id <= 0)
+                return BadRequest();
+
             var route = await _routeRepository.GetOneAsync(
                 r => r.Id == id);
 
@@ -165,7 +199,9 @@ namespace Flight_Booking_System.Controllers
             return View(route);
         }
 
-        // POST: Routes/Edit/5
+        // ==========================================
+        // POST: Admin/Routes/Edit/5
+        // ==========================================
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
@@ -182,6 +218,18 @@ namespace Flight_Booking_System.Controllers
             if (route == null)
                 return NotFound();
 
+            // Validate airport selection
+            if (FromAirportId <= 0 || ToAirportId <= 0)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Please select both departure and destination airports.");
+
+                await LoadAirportsAsync(FromAirportId, ToAirportId);
+                return View(route);
+            }
+
+            // Prevent same airport
             if (FromAirportId == ToAirportId)
             {
                 ModelState.AddModelError(
@@ -192,11 +240,14 @@ namespace Flight_Booking_System.Controllers
                 return View(route);
             }
 
+            // Get selected airports
             var fromAirport = await _airportRepository.GetOneAsync(
-                a => a.Id == FromAirportId);
+                a => a.Id == FromAirportId,
+                IsTracking: false);
 
             var toAirport = await _airportRepository.GetOneAsync(
-                a => a.Id == ToAirportId);
+                a => a.Id == ToAirportId,
+                IsTracking: false);
 
             if (fromAirport == null || toAirport == null)
             {
@@ -208,21 +259,24 @@ namespace Flight_Booking_System.Controllers
                 return View(route);
             }
 
+            // Validate coordinates
             if (!HasCoordinates(fromAirport) ||
                 !HasCoordinates(toAirport))
             {
                 ModelState.AddModelError(
                     string.Empty,
-                    "Both airports must have coordinates.");
+                    "Both airports must have valid coordinates.");
 
                 await LoadAirportsAsync(FromAirportId, ToAirportId);
                 return View(route);
             }
 
+            // Check duplicate route excluding current route
             var duplicate = await _routeRepository.GetOneAsync(
                 r => r.FromAirportId == FromAirportId &&
                      r.ToAirportId == ToAirportId &&
-                     r.Id != id);
+                     r.Id != id,
+                IsTracking: false);
 
             if (duplicate != null)
             {
@@ -234,6 +288,7 @@ namespace Flight_Booking_System.Controllers
                 return View(route);
             }
 
+            // Update route
             route.FromAirportId = FromAirportId;
             route.ToAirportId = ToAirportId;
             route.Distance = CalculateDistance(fromAirport, toAirport);
@@ -269,11 +324,48 @@ namespace Flight_Booking_System.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // POST: Routes/Delete/5
+        // ==========================================
+        // GET: Admin/Routes/Delete/5
+        // Display Delete Confirmation Page
+        // ==========================================
+        [HttpGet]
+        [ActionName("Delete")]
+        public async Task<IActionResult> DeleteConfirmation(int id)
+        {
+            if (id <= 0)
+                return BadRequest();
+
+            Expression<Func<Flight_Booking_System.Models.Route, object>>[] includes =
+            {
+                r => r.FromAirport,
+                r => r.ToAirport
+            };
+
+            var route = await _routeRepository.GetOneAsync(
+                r => r.Id == id,
+                includes: includes,
+                IsTracking: false);
+
+            if (route == null)
+                return NotFound();
+
+            return View("Delete", route);
+        }
+
+        // ==========================================
+        // POST: Admin/Routes/Delete/5
+        // Execute Delete
+        // ==========================================
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
+            if (id <= 0)
+            {
+                TempData["Error"] = "Invalid route ID.";
+                return RedirectToAction(nameof(Index));
+            }
+
             var route = await _routeRepository.GetOneAsync(
                 r => r.Id == id);
 
@@ -287,34 +379,47 @@ namespace Flight_Booking_System.Controllers
             int fromAirportId = route.FromAirportId;
             int toAirportId = route.ToAirportId;
 
-            _routeRepository.Delete(route);
+            try
+            {
+                _routeRepository.Delete(route);
 
-            int result = await _routeRepository.CommitAsync();
+                int result = await _routeRepository.CommitAsync();
 
-            if (result <= 0)
+                if (result <= 0)
+                {
+                    TempData["Error"] =
+                        "Unable to delete the route. It may be associated with existing flights.";
+
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+            catch (DbUpdateException)
             {
                 TempData["Error"] =
-                    "Unable to delete the route. It may be associated with existing flights.";
-            }
-            else
-            {
-                // Activity Log
-                await _activityLogService.LogAsync(
-                    nameof(RoutesController),
-                    nameof(Delete),
-                    nameof(Flight_Booking_System.Models.Route),
-                    routeId.ToString(),
-                    $"Deleted route ID {routeId}. " +
-                    $"From Airport ID: {fromAirportId}, " +
-                    $"To Airport ID: {toAirportId}."
-                );
+                    "This route cannot be deleted because it is associated with existing flights or other records.";
 
-                TempData["Success"] = "Route deleted successfully.";
+                return RedirectToAction(nameof(Index));
             }
+
+            // Activity Log
+            await _activityLogService.LogAsync(
+                nameof(RoutesController),
+                nameof(Delete),
+                nameof(Flight_Booking_System.Models.Route),
+                routeId.ToString(),
+                $"Deleted route ID {routeId}. " +
+                $"From Airport ID: {fromAirportId}, " +
+                $"To Airport ID: {toAirportId}."
+            );
+
+            TempData["Success"] = "Route deleted successfully.";
 
             return RedirectToAction(nameof(Index));
         }
 
+        // ==========================================
+        // Calculate Distance
+        // ==========================================
         private double CalculateDistance(
             AirPort fromAirport,
             AirPort toAirport)
@@ -326,12 +431,18 @@ namespace Flight_Booking_System.Controllers
                 toAirport.Longitude!.Value);
         }
 
+        // ==========================================
+        // Validate Coordinates
+        // ==========================================
         private bool HasCoordinates(AirPort airport)
         {
             return airport.Latitude.HasValue &&
                    airport.Longitude.HasValue;
         }
 
+        // ==========================================
+        // Load Airport Dropdowns
+        // ==========================================
         private async Task LoadAirportsAsync(
             int? selectedFrom = null,
             int? selectedTo = null)

@@ -1,91 +1,313 @@
 ﻿@model IEnumerable<Flight_Booking_System.Models.Route>
 
 @{
-    ViewData["Title"] = "مسارات الطيران";
+    ViewData["Title"] = "Routes Management";
+    Layout = "_AdminLayout";
+
+    var routes = Model?.ToList() ?? new List<Flight_Booking_System.Models.Route>();
+    var totalRoutes = routes.Count;
+    var totalDistance = routes.Sum(r => r.Distance);
+    var averageDistance = totalRoutes > 0 ? totalDistance / totalRoutes : 0;
 }
 
-<div class="container mt-4">
+<div class="container-fluid py-4 route-management" dir="ltr">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>إدارة مسارات الطيران</h2>
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Routes Management</h2>
+            <p class="text-muted mb-0">
+                Manage flight routes, departure airports, arrival airports, and distances.
+            </p>
+        </div>
 
-        <a asp-action="Create" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i>
-            إضافة مسار
+        <a asp-area="Admin"
+           asp-controller="Routes"
+           asp-action="Create"
+           class="btn btn-primary rounded-3 px-4">
+            <i class="fas fa-plus me-2"></i>
+            Add New Route
         </a>
     </div>
 
+    <!-- ALERTS -->
     @if (TempData["Success"] != null)
     {
-        <div class="alert alert-success">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
             @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
 
     @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
             @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
 
-    @if (Model == null || !Model.Any())
-    {
-        <div class="alert alert-info">
-            لا توجد مسارات مسجلة حتى الآن.
+    <!-- STATISTICS -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm airline-stat-card">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="airline-table-icon">
+                        <i class="fas fa-route"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted small mb-1">Total Routes</p>
+                        <h4 class="fw-bold mb-0">@totalRoutes</h4>
+                    </div>
+                </div>
+            </div>
         </div>
-    }
-    else
-    {
+
+        <div class="col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm airline-stat-card">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="airline-table-icon">
+                        <i class="fas fa-ruler-horizontal"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted small mb-1">Total Distance</p>
+                        <h4 class="fw-bold mb-0">
+                            @totalDistance.ToString("N2")
+                            <small class="text-muted fs-6">KM</small>
+                        </h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm airline-stat-card">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="airline-table-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted small mb-1">Average Distance</p>
+                        <h4 class="fw-bold mb-0">
+                            @averageDistance.ToString("N2")
+                            <small class="text-muted fs-6">KM</small>
+                        </h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ROUTES TABLE -->
+    <div class="card border-0 shadow-sm flight-table-card">
+
+        <div class="card-header bg-white border-0 p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+                <div>
+                    <h5 class="fw-bold mb-1">All Routes</h5>
+                    <p class="text-muted small mb-0">
+                        View and manage all registered flight routes.
+                    </p>
+                </div>
+
+                <div class="position-relative" style="min-width:260px; max-width:100%;">
+                    <i class="fas fa-search position-absolute text-muted"
+                       style="left:13px; top:13px;"></i>
+
+                    <input type="text"
+                           id="routeSearch"
+                           class="form-control ps-5"
+                           placeholder="Search routes..."
+                           autocomplete="off" />
+                </div>
+
+            </div>
+        </div>
+
         <div class="table-responsive">
-            <table class="table table-bordered table-striped table-hover align-middle">
-                <thead class="table-dark">
+            <table class="table flight-table align-middle mb-0">
+
+                <thead>
                     <tr>
-                        <th>رقم</th>
-                        <th>مطار المغادرة</th>
-                        <th>مطار الوصول</th>
-                        <th>المسافة الجوية (كم)</th>
-                        <th>الإجراءات</th>
+                        <th class="ps-4">ID</th>
+                        <th>Departure Airport</th>
+                        <th>Arrival Airport</th>
+                        <th>Flight Distance</th>
+                        <th class="text-center">Actions</th>
                     </tr>
                 </thead>
 
-                <tbody>
-                    @foreach (var route in Model)
+                <tbody id="routeTableBody">
+
+                    @foreach (var route in routes)
                     {
-                        <tr>
-                            <td>@route.Id</td>
-                            <td>@(route.FromAirport?.Name ?? "غير محدد")</td>
-                            <td>@(route.ToAirport?.Name ?? "غير محدد")</td>
-                            <td>@route.Distance.ToString("F2")</td>
+                        <tr class="route-row"
+                            data-search="@($"{route.Id} {route.FromAirport?.Name} {route.ToAirport?.Name} {route.Distance}")">
+
+                            <td class="ps-4">
+                                <span class="fw-bold text-muted">
+                                    #@route.Id
+                                </span>
+                            </td>
 
                             <td>
-                                <div class="d-flex gap-2">
-                                    <a asp-action="Edit"
-                                       asp-route-id="@route.Id"
-                                       class="btn btn-warning btn-sm">
-                                        <i class="bi bi-pencil-square"></i>
-                                        تعديل
-                                    </a>
-
-                                    <form asp-action="Delete"
-                                          asp-route-id="@route.Id"
-                                          method="post"
-                                          onsubmit="return confirm('هل أنت متأكد من حذف هذا المسار؟');">
-
-                                        @Html.AntiForgeryToken()
-
-                                        <button type="submit"
-                                                class="btn btn-danger btn-sm">
-                                            <i class="bi bi-trash"></i>
-                                            حذف
-                                        </button>
-                                    </form>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="airline-table-icon">
+                                        <i class="fas fa-plane-departure"></i>
+                                    </div>
+                                    <span class="fw-semibold">
+                                        @(route.FromAirport?.Name ?? "Not specified")
+                                    </span>
                                 </div>
                             </td>
+
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="airline-table-icon">
+                                        <i class="fas fa-plane-arrival"></i>
+                                    </div>
+                                    <span class="fw-semibold">
+                                        @(route.ToAirport?.Name ?? "Not specified")
+                                    </span>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="fw-semibold">
+                                    @route.Distance.ToString("N2")
+                                </span>
+                                <small class="text-muted">KM</small>
+                            </td>
+
+                            <td>
+                                <div class="d-flex justify-content-center flex-wrap gap-2">
+
+                                    <!-- EDIT -->
+                                    <a asp-area="Admin"
+                                       asp-controller="Routes"
+                                       asp-action="Edit"
+                                       asp-route-id="@route.Id"
+                                       class="flight-action-btn btn-outline-primary">
+                                        <i class="fas fa-edit"></i>
+                                        Edit
+                                    </a>
+
+                                    <!-- DELETE CONFIRMATION -->
+                                    <a asp-area="Admin"
+                                       asp-controller="Routes"
+                                       asp-action="Delete"
+                                       asp-route-id="@route.Id"
+                                       class="flight-action-btn btn-outline-danger">
+                                        <i class="fas fa-trash-alt"></i>
+                                        Delete
+                                    </a>
+
+                                </div>
+                            </td>
+
                         </tr>
                     }
+
+                    <!-- NO RESULTS -->
+                    <tr id="routeNoResults" style="display:none;">
+                        <td colspan="5" class="text-center py-5">
+                            <i class="fas fa-search fa-2x text-muted mb-3"></i>
+                            <h6 class="fw-bold">No Routes Found</h6>
+                            <p class="text-muted small mb-0">
+                                Try changing your search keywords.
+                            </p>
+                        </td>
+                    </tr>
+
                 </tbody>
             </table>
         </div>
-    }
+
+        <!-- TABLE FOOTER -->
+        <div class="card-footer bg-white border-0 px-4 py-3">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <small class="text-muted">
+                    Showing <strong id="visibleRouteCount">@totalRoutes</strong>
+                    of <strong>@totalRoutes</strong> routes
+                </small>
+
+                <small class="text-muted">
+                    <i class="fas fa-database me-1"></i>
+                    Routes Database
+                </small>
+            </div>
+        </div>
+
+    </div>
+
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const searchElement = document.getElementById("routeSearch");
+            const tableElement = document.getElementById("routeTableBody");
+            const noResultsElement = document.getElementById("routeNoResults");
+            const countElement = document.getElementById("visibleRouteCount");
+
+            // Validate element types
+            if (
+                !(searchElement instanceof HTMLInputElement) ||
+                !(tableElement instanceof HTMLTableSectionElement) ||
+                !(noResultsElement instanceof HTMLTableRowElement) ||
+                !(countElement instanceof HTMLElement)
+            ) {
+                return;
+            }
+
+            // Strongly typed references
+            const searchInput = searchElement;
+            const tableBody = tableElement;
+            const noResults = noResultsElement;
+            const visibleCount = countElement;
+
+            const rows = Array.from(
+                tableBody.querySelectorAll(".route-row")
+            ).filter(
+                (row) => row instanceof HTMLTableRowElement
+            );
+
+            function filterRoutes() {
+
+                const searchValue = searchInput.value.trim().toLowerCase();
+
+                let visible = 0;
+
+                rows.forEach((row) => {
+
+                    const searchText = (
+                        row.getAttribute("data-search") || ""
+                    ).toLowerCase();
+
+                    const matches = searchText.includes(searchValue);
+
+                    row.style.display = matches ? "" : "none";
+
+                    if (matches) {
+                        visible++;
+                    }
+                });
+
+                noResults.style.display = visible === 0 ? "" : "none";
+
+                visibleCount.textContent = visible.toString();
+            }
+
+            searchInput.addEventListener("input", filterRoutes);
+
+            // Initial count
+            filterRoutes();
+        });
+    </script>
+}
