@@ -1,112 +1,338 @@
 ﻿@model IEnumerable<Flight_Booking_System.Models.Airline>
 
 @{
-    ViewData["Title"] = "Airlines";
+    ViewData["Title"] = "Manage Airlines";
     Layout = "_AdminLayout";
+
+    var airlines = Model?.ToList() ?? new List<Flight_Booking_System.Models.Airline>();
+    var totalAirlines = airlines.Count;
 }
 
-<div class="container-fluid py-4" dir="ltr">
+<div class="container-fluid py-4 airline-management">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- Page Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
         <div>
-            <h2 class="fw-bold mb-1">Airlines</h2>
+            <div class="text-muted small mb-1">
+                Airline Operations / Management
+            </div>
+
+            <h2 class="fw-bold mb-1">Manage Airlines</h2>
+
             <p class="text-muted mb-0">
-                Manage airline information.
+                Manage airline information and contact details.
             </p>
         </div>
 
         <a asp-area="Admin"
            asp-controller="Airline"
            asp-action="Create"
-           class="btn btn-primary">
-            <i class="bi bi-plus-circle me-1"></i>
-            Add Airline
+           class="btn btn-primary px-4 py-2">
+            <i class="bi bi-plus-lg me-2"></i>
+            Add New Airline
         </a>
+
     </div>
 
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white py-3">
-            <h5 class="mb-0">Airlines List</h5>
-        </div>
+    <!-- Statistics -->
+    <div class="row g-3 mb-4">
 
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+        <div class="col-12 col-sm-6 col-xl-4">
+            <div class="flight-stat-card airline-stat-card">
 
-                    <thead style="background-color: #0b1729; color: white;">
-                        <tr>
-                            <th>Airline Name</th>
-                            <th>Airline Code</th>
-                            <th>Email Address</th>
-                            <th>Phone Number</th>
-                            <th class="text-center" style="width: 220px;">
-                                Actions
-                            </th>
-                        </tr>
-                    </thead>
+                <div class="flight-stat-icon bg-primary-subtle text-primary">
+                    <i class="bi bi-buildings"></i>
+                </div>
 
-                    <tbody>
-                        @if (Model != null && Model.Any())
-                        {
-                            foreach (var airline in Model)
-                            {
-                                <tr>
-                                    <td class="fw-semibold">
-                                        @airline.Name
-                                    </td>
+                <div>
+                    <div class="text-muted small">Total Airlines</div>
+                    <h3 class="fw-bold mb-0">@totalAirlines</h3>
+                </div>
 
-                                    <td>
-                                        @airline.AirlineCode
-                                    </td>
-
-                                    <td dir="ltr">
-                                        @airline.Email
-                                    </td>
-
-                                    <td dir="ltr">
-                                        @airline.Phone
-                                    </td>
-
-                                    <td>
-                                        <div class="d-flex justify-content-center gap-2">
-
-                                            <a asp-area="Admin"
-                                               asp-controller="Airline"
-                                               asp-action="Edit"
-                                               asp-route-id="@airline.Id"
-                                               class="btn btn-warning btn-sm">
-                                                <i class="bi bi-pencil-square"></i>
-                                                Edit
-                                            </a>
-
-                                            <a asp-area="Admin"
-                                               asp-controller="Airline"
-                                               asp-action="Delete"
-                                               asp-route-id="@airline.Id"
-                                               class="btn btn-danger btn-sm">
-                                                <i class="bi bi-trash"></i>
-                                                Delete
-                                            </a>
-
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        }
-                        else
-                        {
-                            <tr>
-                                <td colspan="5"
-                                    class="text-center py-4 text-muted">
-                                    No airlines have been registered yet.
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-
-                </table>
             </div>
         </div>
+
+        <div class="col-12 col-sm-6 col-xl-4">
+            <div class="flight-stat-card airline-stat-card">
+
+                <div class="flight-stat-icon bg-success-subtle text-success">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+
+                <div>
+                    <div class="text-muted small">Registered Airlines</div>
+                    <h3 class="fw-bold mb-0">@totalAirlines</h3>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-4">
+            <div class="flight-stat-card airline-stat-card">
+
+                <div class="flight-stat-icon bg-info-subtle text-info">
+                    <i class="bi bi-airplane"></i>
+                </div>
+
+                <div>
+                    <div class="text-muted small">Airline Directory</div>
+                    <h3 class="fw-bold mb-0">Manage</h3>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Airlines List -->
+    <div class="card border-0 shadow-sm flight-table-card">
+
+        <!-- Card Header -->
+        <div class="card-header bg-white border-0 p-4">
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+
+                <div>
+                    <h5 class="fw-bold mb-1">Airlines List</h5>
+
+                    <span class="text-muted small">
+                        View and manage all registered airlines
+                    </span>
+                </div>
+
+                <span class="badge bg-primary-subtle text-primary px-3 py-2">
+                    @totalAirlines Airlines
+                </span>
+
+            </div>
+
+        </div>
+
+        <!-- Search -->
+        <div class="px-4 pb-3">
+
+            <div class="row g-3">
+
+                <div class="col-12 col-md-8">
+
+                    <div class="flight-search-box">
+
+                        <i class="bi bi-search"></i>
+
+                        <input type="text"
+                               id="airlineSearch"
+                               class="form-control"
+                               placeholder="Search by airline name, code, email or phone..."
+                               autocomplete="off" />
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Table -->
+        <div class="table-responsive">
+
+            <table class="table align-middle flight-table mb-0">
+
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Airline Name</th>
+                        <th>Airline Code</th>
+                        <th>Email Address</th>
+                        <th>Phone Number</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @if (airlines.Any())
+                    {
+                        var count = 1;
+
+                        foreach (var airline in airlines)
+                        {
+                            <tr class="airline-row"
+                                data-search="@($"{airline.Name} {airline.AirlineCode} {airline.Email} {airline.Phone}")">
+
+                                <td class="text-muted">
+                                    @count
+                                </td>
+
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+
+                                        <div class="airline-table-icon">
+                                            <i class="bi bi-airplane"></i>
+                                        </div>
+
+                                        <span class="fw-bold">
+                                            @airline.Name
+                                        </span>
+
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="airline-code-badge">
+                                        @airline.AirlineCode
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span dir="ltr" class="d-inline-block text-muted">
+                                        @(airline.Email ?? "N/A")
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span dir="ltr" class="d-inline-block text-muted">
+                                        @(airline.Phone ?? "N/A")
+                                    </span>
+                                </td>
+
+                                <!-- Actions -->
+                                <td>
+                                    <div class="d-flex justify-content-center align-items-center gap-2 flex-wrap">
+
+                                        <a asp-area="Admin"
+                                           asp-controller="Airline"
+                                           asp-action="Edit"
+                                           asp-route-id="@airline.Id"
+                                           class="btn btn-sm btn-outline-primary flight-action-btn">
+
+                                            <i class="bi bi-pencil-square"></i>
+                                            <span>Edit</span>
+
+                                        </a>
+
+                                        <a asp-area="Admin"
+                                           asp-controller="Airline"
+                                           asp-action="Delete"
+                                           asp-route-id="@airline.Id"
+                                           class="btn btn-sm btn-outline-danger flight-action-btn">
+
+                                            <i class="bi bi-trash"></i>
+                                            <span>Delete</span>
+
+                                        </a>
+
+                                    </div>
+                                </td>
+
+                            </tr>
+
+                            count++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+
+                                <i class="bi bi-buildings display-5 text-muted"></i>
+
+                                <h6 class="fw-bold mt-3">
+                                    No Airlines Found
+                                </h6>
+
+                                <p class="text-muted mb-0">
+                                    Start by adding your first airline.
+                                </p>
+
+                            </td>
+                        </tr>
+                    }
+
+                    <!-- Search Empty Result -->
+                    <tr id="noAirlineResults" style="display:none;">
+                        <td colspan="6" class="text-center py-5 text-muted">
+
+                            <i class="bi bi-search display-6"></i>
+
+                            <p class="mt-2 mb-0">
+                                No matching airlines found.
+                            </p>
+
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="card-footer bg-white border-0 px-4 py-3">
+
+            <small class="text-muted">
+                Showing
+                <strong id="visibleAirlineCount">@totalAirlines</strong>
+                of
+                <strong>@totalAirlines</strong>
+                airlines
+            </small>
+
+        </div>
+
     </div>
 
 </div>
+
+@section Scripts {
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const searchElement = document.getElementById("airlineSearch");
+            const resultsElement = document.getElementById("noAirlineResults");
+            const countElement = document.getElementById("visibleAirlineCount");
+
+            if (!(searchElement instanceof HTMLInputElement)) return;
+            if (!(resultsElement instanceof HTMLTableRowElement)) return;
+            if (!(countElement instanceof HTMLElement)) return;
+
+            const rows = document.querySelectorAll("tr.airline-row");
+
+            function filterAirlines() {
+
+                const search = searchElement.value.trim().toLowerCase();
+
+                let visible = 0;
+
+                rows.forEach(function (row) {
+
+                    if (!(row instanceof HTMLTableRowElement)) return;
+
+                    const searchText =
+                        (row.getAttribute("data-search") || "").toLowerCase();
+
+                    const shouldShow = searchText.includes(search);
+
+                    row.style.display = shouldShow ? "" : "none";
+
+                    if (shouldShow) {
+                        visible++;
+                    }
+
+                });
+
+                resultsElement.style.display =
+                    rows.length > 0 && visible === 0 ? "" : "none";
+
+                countElement.textContent = String(visible);
+            }
+
+            searchElement.addEventListener("input", filterAirlines);
+
+        });
+    </script>
+
+}
