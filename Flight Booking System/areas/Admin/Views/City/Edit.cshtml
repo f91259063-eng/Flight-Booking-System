@@ -1,44 +1,61 @@
-﻿```cshtml
-@model Flight_Booking_System.Models.city
+﻿@model Flight_Booking_System.Models.city
 
 @{
     ViewData["Title"] = "Edit City";
-    // Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    Layout = "_AdminLayout";
 }
 
-<div class="container-fluid py-4">
+<div class="container-fluid py-4" dir="ltr">
 
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
+            <span class="text-primary fw-semibold small text-uppercase">
+                Location Management
+            </span>
             <h2 class="fw-bold mb-1">Edit City</h2>
             <p class="text-muted mb-0">
-                Update city information
+                Update the city information in the flight booking system.
             </p>
         </div>
 
         <a asp-area="Admin"
-           asp-controller="Cities"
+           asp-controller="City"
            asp-action="Index"
-           class="btn btn-outline-secondary">
+           class="btn btn-light border">
             <i class="bi bi-arrow-left me-1"></i>
             Back to Cities
         </a>
     </div>
 
-    <!-- Edit Form -->
     <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
+        <div class="col-md-9 col-lg-7 col-xl-6">
 
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0">City Information</h5>
+            <div class="card flight-form-card border-0 shadow-sm">
+
+                <!-- Card Header -->
+                <div class="card-header bg-white p-4">
+                    <div class="d-flex align-items-center gap-3">
+
+                        <div class="flight-form-header-icon">
+                            <i class="bi bi-pencil-square"></i>
+                        </div>
+
+                        <div>
+                            <h5 class="fw-bold mb-1">Edit City Information</h5>
+                            <p class="text-muted small mb-0">
+                                Modify the details of this city.
+                            </p>
+                        </div>
+
+                    </div>
                 </div>
 
+                <!-- Form Body -->
                 <div class="card-body p-4">
 
                     <form asp-area="Admin"
-                          asp-controller="city"
+                          asp-controller="City"
                           asp-action="Edit"
                           asp-route-id="@Model.Id"
                           method="post">
@@ -48,38 +65,57 @@
                         <input type="hidden" asp-for="Id" />
 
                         <div asp-validation-summary="ModelOnly"
-                             class="alert alert-danger"
-                             role="alert"></div>
-
-                        <div class="mb-4">
-                            <label asp-for="Name"
-                                   class="form-label fw-semibold">
-                                City Name
-                            </label>
-
-                            <input asp-for="Name"
-                                   class="form-control"
-                                   placeholder="Enter city name" />
-
-                            <span asp-validation-for="Name"
-                                  class="text-danger"></span>
+                             class="alert alert-danger mb-4"
+                             role="alert">
                         </div>
 
-                        <hr />
+                        <h6 class="flight-section-title mb-3">
+                            <i class="bi bi-info-circle"></i>
+                            Basic Information
+                        </h6>
 
-                        <div class="d-flex justify-content-end gap-2">
+                        <div class="mb-4">
+
+                            <label asp-for="Name" class="form-label fw-semibold">
+                                City Name
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="bi bi-geo-alt text-muted"></i>
+                                </span>
+
+                                <input asp-for="Name"
+                                       class="form-control"
+                                       placeholder="Enter city name"
+                                       autocomplete="off" />
+                            </div>
+
+                            <span asp-validation-for="Name"
+                                  class="text-danger small">
+                            </span>
+
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <!-- Form Actions -->
+                        <div class="d-flex flex-wrap justify-content-end gap-2">
+
                             <a asp-area="Admin"
-                               asp-controller="Cities"
+                               asp-controller="City"
                                asp-action="Index"
-                               class="btn btn-light border">
+                               class="btn btn-light border px-4">
+                                <i class="bi bi-x-circle me-1"></i>
                                 Cancel
                             </a>
 
-                            <button type="submit"
-                                    class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary px-4">
                                 <i class="bi bi-save me-1"></i>
                                 Save Changes
                             </button>
+
                         </div>
 
                     </form>
@@ -89,9 +125,9 @@
 
         </div>
     </div>
+
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
-```
