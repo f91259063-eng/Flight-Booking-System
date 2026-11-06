@@ -1,5 +1,4 @@
-﻿
-@model Flight_Booking_System.Models.AirPort
+﻿@model Flight_Booking_System.Models.AirPort
 
 @{
     ViewData["Title"] = "Delete Airport";
@@ -7,78 +6,213 @@
 }
 
 <div class="container-fluid py-4" dir="ltr">
-    <div class="mb-4">
-        <h2 class="fw-bold mb-1">Delete Airport</h2>
-        <p class="text-muted mb-0">
-            Review the airport information before confirming deletion.
-        </p>
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <span class="text-danger fw-semibold small text-uppercase">
+                Airport Management
+            </span>
+
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-trash3 me-2"></i>
+                Delete Airport
+            </h2>
+
+            <p class="text-muted mb-0">
+                Review the airport information before confirming deletion.
+            </p>
+        </div>
+
+        <a asp-area="Admin"
+           asp-controller="Airports"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Airports
+        </a>
     </div>
 
+    <!-- Delete Confirmation -->
     <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0 text-danger">
-                        <i class="bi bi-exclamation-triangle me-1"></i>
-                        Confirm Deletion
-                    </h5>
+        <div class="col-xl-8 col-lg-9 col-md-10">
+
+            <div class="card border-0 shadow-sm flight-form-card">
+
+                <!-- Card Header -->
+                <div class="card-header bg-white p-4">
+                    <div class="d-flex align-items-center gap-3">
+
+                        <div class="d-flex align-items-center justify-content-center rounded-3 bg-danger-subtle text-danger flex-shrink-0"
+                             style="width:48px;height:48px;font-size:22px;">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+
+                        <div>
+                            <h5 class="fw-bold text-danger mb-1">
+                                Confirm Airport Deletion
+                            </h5>
+                            <p class="text-muted small mb-0">
+                                Please review the details carefully.
+                            </p>
+                        </div>
+
+                    </div>
                 </div>
 
+                <!-- Card Body -->
                 <div class="card-body p-4">
-                    <div class="alert alert-warning">
-                        Are you sure you want to delete this airport?
-                        This action cannot be easily undone.
+
+                    <!-- Warning -->
+                    <div class="alert alert-warning border-0 d-flex gap-3 align-items-start mb-4">
+                        <i class="bi bi-exclamation-triangle-fill fs-5 mt-1"></i>
+
+                        <div>
+                            <h6 class="fw-bold mb-1">Are you sure?</h6>
+                            <p class="mb-0 small">
+                                You are about to permanently delete this airport.
+                                This action cannot be undone.
+                            </p>
+                        </div>
                     </div>
 
-                    <dl class="row mb-4">
-                        <dt class="col-sm-4">Airport ID</dt>
-                        <dd class="col-sm-8">@Model.Id</dd>
+                    <!-- Airport Information -->
+                    <h6 class="flight-section-title mb-3">
+                        <i class="bi bi-geo-alt"></i>
+                        Airport Information
+                    </h6>
 
-                        <dt class="col-sm-4">Airport Name</dt>
-                        <dd class="col-sm-8">@Model.Name</dd>
+                    <div class="border rounded-3 p-3">
 
-                        <dt class="col-sm-4">City</dt>
-                        <dd class="col-sm-8">
-                            @(Model.City?.Name ?? "Not specified")
-                        </dd>
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="airline-table-icon"
+                                 style="width:48px;height:48px;font-size:20px;">
+                                <i class="bi bi-building"></i>
+                            </div>
 
-                        <dt class="col-sm-4">Latitude</dt>
-                        <dd class="col-sm-8">
-                            @(Model.Latitude?.ToString("F6") ?? "Not available")
-                        </dd>
+                            <div>
+                                <h5 class="fw-bold mb-1">@Model.Name</h5>
+                                <span class="text-muted small">
+                                    Airport ID: #@Model.Id
+                                </span>
+                            </div>
+                        </div>
 
-                        <dt class="col-sm-4">Longitude</dt>
-                        <dd class="col-sm-8">
-                            @(Model.Longitude?.ToString("F6") ?? "Not available")
-                        </dd>
-                    </dl>
+                        <hr />
 
-                    <hr />
+                        <div class="row g-3">
 
+                            <div class="col-md-6">
+                                <small class="text-muted d-block mb-1">
+                                    Airport ID
+                                </small>
+                                <span class="fw-semibold">#@Model.Id</span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <small class="text-muted d-block mb-1">
+                                    Airport Name
+                                </small>
+                                <span class="fw-semibold">@Model.Name</span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <small class="text-muted d-block mb-1">
+                                    City
+                                </small>
+                                <span class="fw-semibold">
+                                    @(Model.City?.Name ?? "Not specified")
+                                </span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <small class="text-muted d-block mb-1">
+                                    Coordinates Status
+                                </small>
+
+                                @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
+                                {
+                                    <span class="badge bg-success-subtle text-success px-3 py-2">
+                                        <i class="bi bi-check-circle me-1"></i>
+                                        Available
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning-subtle text-warning-emphasis px-3 py-2">
+                                        <i class="bi bi-exclamation-circle me-1"></i>
+                                        Missing
+                                    </span>
+                                }
+                            </div>
+
+                            <div class="col-md-6">
+                                <small class="text-muted d-block mb-1">
+                                    Latitude
+                                </small>
+                                <span class="fw-semibold" dir="ltr">
+                                    @(Model.Latitude?.ToString("F6") ?? "Not available")
+                                </span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <small class="text-muted d-block mb-1">
+                                    Longitude
+                                </small>
+                                <span class="fw-semibold" dir="ltr">
+                                    @(Model.Longitude?.ToString("F6") ?? "Not available")
+                                </span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
                     <form asp-area="Admin"
                           asp-controller="Airports"
                           asp-action="Delete"
                           asp-route-id="@Model.Id"
-                          method="post">
+                          method="post"
+                          class="mt-4">
 
                         @Html.AntiForgeryToken()
 
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-danger">
-                                <i class="bi bi-trash me-1"></i>
-                                Confirm Delete
-                            </button>
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
 
                             <a asp-area="Admin"
                                asp-controller="Airports"
                                asp-action="Index"
                                class="btn btn-light border">
+                                <i class="bi bi-x-circle me-1"></i>
                                 Cancel
                             </a>
+
+                            <button type="submit"
+                                    class="btn btn-danger px-4"
+                                    onclick="return confirm('Are you absolutely sure you want to delete this airport?');">
+                                <i class="bi bi-trash3 me-2"></i>
+                                Confirm Delete
+                            </button>
+
                         </div>
+
                     </form>
+
                 </div>
             </div>
+
+            <!-- Information Note -->
+            <div class="alert alert-info border-0 shadow-sm mt-3 mb-0">
+                <div class="d-flex gap-2">
+                    <i class="bi bi-info-circle-fill mt-1"></i>
+                    <p class="mb-0 small">
+                        If this airport is associated with existing flights or routes,
+                        deletion may be restricted by the system's relationship rules.
+                    </p>
+                </div>
+            </div>
+
         </div>
     </div>
+
 </div>

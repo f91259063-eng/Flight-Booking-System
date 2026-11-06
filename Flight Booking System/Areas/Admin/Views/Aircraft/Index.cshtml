@@ -17,12 +17,10 @@
             <span class="text-primary fw-semibold small text-uppercase">
                 Fleet Management
             </span>
-
             <h2 class="fw-bold mb-1">
                 <i class="bi bi-airplane me-1"></i>
                 Manage Aircraft
             </h2>
-
             <p class="text-muted mb-0">
                 View and manage aircraft, their information, and travel classes.
             </p>
@@ -37,18 +35,13 @@
         </a>
     </div>
 
-    <!-- Success and Error Messages -->
+    <!-- Alerts -->
     @if (TempData["Success"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="bi bi-check-circle me-2"></i>
             @TempData["Success"]
-
-            <button type="button"
-                    class="btn-close"
-                    data-bs-dismiss="alert"
-                    aria-label="Close">
-            </button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
@@ -57,12 +50,7 @@
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="bi bi-exclamation-circle me-2"></i>
             @TempData["Error"]
-
-            <button type="button"
-                    class="btn-close"
-                    data-bs-dismiss="alert"
-                    aria-label="Close">
-            </button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
@@ -75,7 +63,6 @@
                     <div class="airline-table-icon">
                         <i class="bi bi-airplane"></i>
                     </div>
-
                     <div>
                         <p class="text-muted small mb-1">Total Aircraft</p>
                         <h4 class="fw-bold mb-0">@totalAircraft</h4>
@@ -90,7 +77,6 @@
                     <div class="airline-table-icon">
                         <i class="bi bi-people"></i>
                     </div>
-
                     <div>
                         <p class="text-muted small mb-1">Total Seat Capacity</p>
                         <h4 class="fw-bold mb-0">@totalCapacity.ToString("N0")</h4>
@@ -105,7 +91,6 @@
                     <div class="airline-table-icon">
                         <i class="bi bi-building"></i>
                     </div>
-
                     <div>
                         <p class="text-muted small mb-1">Fleet Directory</p>
                         <h6 class="fw-bold mb-0">Manage Aircraft</h6>
@@ -129,15 +114,17 @@
                     </p>
                 </div>
 
-                <div class="position-relative" style="width: min(100%, 300px);">
-                    <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-
-                    <input type="search"
-                           id="aircraftSearch"
-                           class="form-control ps-5"
-                           placeholder="Search aircraft..."
-                           aria-label="Search aircraft" />
-                </div>
+                @if (aircraftList.Any())
+                {
+                    <div class="position-relative" style="width: min(100%, 300px);">
+                        <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                        <input type="search"
+                               id="aircraftSearch"
+                               class="form-control ps-5"
+                               placeholder="Search aircraft..."
+                               aria-label="Search aircraft" />
+                    </div>
+                }
 
             </div>
         </div>
@@ -146,7 +133,7 @@
 
             @if (aircraftList.Any())
             {
-                <div class="table-responsive">
+                <div class="table-responsive" id="aircraftTableContainer">
                     <table class="table table-hover align-middle mb-0 flight-table">
 
                         <thead>
@@ -156,14 +143,11 @@
                                 <th>Aircraft Model</th>
                                 <th>Airline</th>
                                 <th>Capacity</th>
-                                <th class="text-center" style="min-width: 280px;">
-                                    Actions
-                                </th>
+                                <th class="text-center" style="min-width: 280px;">Actions</th>
                             </tr>
                         </thead>
 
                         <tbody id="aircraftTableBody">
-
                             @{
                                 var counter = 1;
                             }
@@ -171,33 +155,27 @@
                             @foreach (var aircraft in aircraftList)
                             {
                                 <tr class="aircraft-row">
-
-                                    <td class="ps-4 text-muted">
-                                        @counter
-                                    </td>
+                                    <td class="ps-4 text-muted">@counter</td>
 
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
                                             <div class="airline-table-icon">
                                                 <i class="bi bi-airplane"></i>
                                             </div>
-
                                             <span class="fw-semibold aircraft-registration">
                                                 @aircraft.RegistrationNumber
                                             </span>
                                         </div>
                                     </td>
 
-                                    <td class="aircraft-model">
-                                        @aircraft.Model
-                                    </td>
+                                    <td class="aircraft-model">@aircraft.Model</td>
 
                                     <td class="aircraft-airline">
                                         @(aircraft.Airline?.Name ?? "Not specified")
                                     </td>
 
                                     <td>
-                                        <span class="badge bg-info text-dark px-3 py-2 aircraft-capacity">
+                                        <span class="badge bg-info text-dark px-3 py-2">
                                             <i class="bi bi-people me-1"></i>
                                             @aircraft.Capacity Seats
                                         </span>
@@ -238,12 +216,10 @@
 
                                         </div>
                                     </td>
-
                                 </tr>
 
                                 counter++;
                             }
-
                         </tbody>
 
                     </table>
@@ -257,9 +233,11 @@
                     <p class="mb-0">Try another search term.</p>
                 </div>
 
+                <!-- Footer -->
                 <div class="card-footer bg-white border-0 px-4 py-3">
                     <small class="text-muted">
-                        Showing <strong id="visibleAircraftCount">@totalAircraft</strong>
+                        Showing
+                        <strong id="visibleAircraftCount">@totalAircraft</strong>
                         of <strong>@totalAircraft</strong> aircraft
                     </small>
                 </div>
@@ -267,14 +245,12 @@
             else
             {
                 <div class="text-center py-5">
-
                     <div class="airline-table-icon mx-auto mb-3"
                          style="width:65px;height:65px;font-size:28px;">
                         <i class="bi bi-airplane"></i>
                     </div>
 
                     <h5 class="fw-bold">No Aircraft Registered</h5>
-
                     <p class="text-muted mb-3">
                         Start by adding the first aircraft to the system.
                     </p>
@@ -286,7 +262,6 @@
                         <i class="bi bi-plus-circle me-1"></i>
                         Add Aircraft
                     </a>
-
                 </div>
             }
 
@@ -294,6 +269,7 @@
     </div>
 
 </div>
+
 
 @section Scripts {
     <script>
@@ -303,26 +279,48 @@
             const tableBody = document.getElementById("aircraftTableBody");
             const noResults = document.getElementById("aircraftNoResults");
             const visibleCount = document.getElementById("visibleAircraftCount");
+            const tableContainer = document.getElementById("aircraftTableContainer");
 
-            if (!(searchElement instanceof HTMLInputElement)) return;
-            if (!(tableBody instanceof HTMLTableSectionElement)) return;
-            if (!(noResults instanceof HTMLElement)) return;
-            if (!(visibleCount instanceof HTMLElement)) return;
+            if (
+                !(searchElement instanceof HTMLInputElement) ||
+                !(tableBody instanceof HTMLTableSectionElement) ||
+                !(noResults instanceof HTMLElement) ||
+                !(visibleCount instanceof HTMLElement) ||
+                !(tableContainer instanceof HTMLElement)
+            ) {
+                return;
+            }
 
-            const rows = tableBody.querySelectorAll(".aircraft-row");
+            // Use non-null local references after validation
+            const searchInput = searchElement;
+            const tbody = tableBody;
+            const emptyState = noResults;
+            const countElement = visibleCount;
+            const container = tableContainer;
+
+            const rows = tbody.querySelectorAll(".aircraft-row");
 
             function filterAircraft() {
 
-                const searchValue = searchElement.value.trim().toLowerCase();
+                const searchValue = searchInput.value.trim().toLowerCase();
                 let visibleRows = 0;
 
-                rows.forEach(function (row) {
+                rows.forEach(function (item) {
 
-                    if (!(row instanceof HTMLTableRowElement)) return;
+                    if (!(item instanceof HTMLTableRowElement)) {
+                        return;
+                    }
 
-                    const registration = row.querySelector(".aircraft-registration");
-                    const model = row.querySelector(".aircraft-model");
-                    const airline = row.querySelector(".aircraft-airline");
+                    const row = item;
+
+                    const registration =
+                        row.querySelector(".aircraft-registration");
+
+                    const model =
+                        row.querySelector(".aircraft-model");
+
+                    const airline =
+                        row.querySelector(".aircraft-airline");
 
                     const searchableText = [
                         registration?.textContent ?? "",
@@ -339,12 +337,13 @@
                     }
                 });
 
-                visibleCount.textContent = visibleRows.toString();
+                countElement.textContent = visibleRows.toString();
 
-                noResults.classList.toggle("d-none", visibleRows !== 0);
+                emptyState.classList.toggle("d-none", visibleRows > 0);
+                container.classList.toggle("d-none", visibleRows === 0);
             }
 
-            searchElement.addEventListener("input", filterAircraft);
+            searchInput.addEventListener("input", filterAircraft);
 
         });
     </script>
