@@ -54,7 +54,6 @@
     <!-- Statistics -->
     <div class="row g-3 mb-4">
 
-        <!-- Total -->
         <div class="col-12 col-sm-6 col-xl">
             <div class="flight-stat-card">
                 <div class="flight-stat-icon bg-primary-subtle text-primary">
@@ -67,7 +66,6 @@
             </div>
         </div>
 
-        <!-- Scheduled -->
         <div class="col-12 col-sm-6 col-xl">
             <div class="flight-stat-card">
                 <div class="flight-stat-icon bg-success-subtle text-success">
@@ -80,7 +78,6 @@
             </div>
         </div>
 
-        <!-- In Progress -->
         <div class="col-12 col-sm-6 col-xl">
             <div class="flight-stat-card">
                 <div class="flight-stat-icon bg-info-subtle text-info">
@@ -93,7 +90,6 @@
             </div>
         </div>
 
-        <!-- Completed -->
         <div class="col-12 col-sm-6 col-xl">
             <div class="flight-stat-card">
                 <div class="flight-stat-icon bg-success-subtle text-success">
@@ -106,7 +102,6 @@
             </div>
         </div>
 
-        <!-- Cancelled -->
         <div class="col-12 col-sm-6 col-xl">
             <div class="flight-stat-card">
                 <div class="flight-stat-icon bg-danger-subtle text-danger">
@@ -124,7 +119,6 @@
     <!-- Flight List -->
     <div class="card border-0 shadow-sm flight-table-card">
 
-        <!-- Card Header -->
         <div class="card-header bg-white border-0 p-4">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
                 <div>
@@ -271,25 +265,26 @@
                                     </span>
                                 </td>
 
+                                <!-- Actions -->
                                 <td>
-                                    <div class="d-flex justify-content-center gap-2">
+                                    <div class="d-flex justify-content-center align-items-center gap-2 flex-wrap">
 
                                         <a asp-area="Admin"
                                            asp-controller="Flight"
                                            asp-action="Edit"
                                            asp-route-id="@flight.Id"
-                                           class="btn btn-sm btn-light border"
-                                           title="Edit Flight">
+                                           class="btn btn-sm btn-outline-primary flight-action-btn">
                                             <i class="bi bi-pencil-square"></i>
+                                            <span>Edit</span>
                                         </a>
 
                                         <a asp-area="Admin"
                                            asp-controller="Flight"
                                            asp-action="Delete"
                                            asp-route-id="@flight.Id"
-                                           class="btn btn-sm btn-light border text-danger"
-                                           title="Delete Flight">
+                                           class="btn btn-sm btn-outline-danger flight-action-btn">
                                             <i class="bi bi-trash"></i>
+                                            <span>Delete</span>
                                         </a>
 
                                     </div>
@@ -341,7 +336,6 @@
     </div>
 
 </div>
-
 
 @section Scripts {
     <script>
@@ -406,4 +400,3 @@
         });
     </script>
 }
-

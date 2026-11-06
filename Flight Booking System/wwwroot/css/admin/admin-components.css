@@ -95,3 +95,35 @@
 .admin-alert-danger { color: #991b1b; background: #fef2f2; border-color: #fecaca; }
 .admin-empty-state { padding: 38px 18px; color: var(--admin-text-soft); text-align: center; }
 .admin-empty-state i { display: block; margin-bottom: 10px; color: #9aabc1; font-size: 28px; }
+
+/* FLIGHT TABLE ACTION BUTTONS */
+
+.flight-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-width: 85px;
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+    .flight-action-btn i {
+        font-size: 14px;
+    }
+
+    .flight-action-btn.btn-outline-primary:hover {
+        background-color: var(--admin-primary, #2563eb);
+        color: #fff;
+    }
+
+    .flight-action-btn.btn-outline-danger:hover {
+        background-color: #dc3545;
+        color: #fff;
+    }
+
