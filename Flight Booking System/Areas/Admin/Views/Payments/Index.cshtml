@@ -1,0 +1,383 @@
+﻿@model IEnumerable<Flight_Booking_System.Models.Payment>
+
+@{
+    ViewData["Title"] = "Payment Management";
+    Layout = "_AdminLayout";
+
+    var payments = Model?.OrderByDescending(x => x.PaymentDate).ToList()
+                   ?? new List<Flight_Booking_System.Models.Payment>();
+
+    var totalPayments = payments.Count;
+    var paidPayments = payments.Count(x => x.PaymentStatus);
+    var unpaidPayments = payments.Count(x => !x.PaymentStatus);
+
+    var totalPaidAmount = payments
+        .Where(x => x.PaymentStatus)
+        .Sum(x => x.Amount);
+
+    var paymentMethods = payments
+        .Select(x => x.PaymentMethod)
+        .Distinct()
+        .OrderBy(x => x.ToString())
+        .ToList();
+}
+
+<div class="container-fluid py-4" dir="ltr">
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="airline-table-icon">
+                    <i class="fas fa-credit-card"></i>
+                </span>
+                <span class="text-muted small">Admin / Payments</span>
+            </div>
+
+            <h2 class="fw-bold mb-1">Payment Management</h2>
+            <p class="text-muted mb-0">
+                Monitor customer payments and transaction information.
+            </p>
+        </div>
+
+        <span class="badge bg-light text-dark border px-3 py-2">
+            <i class="fas fa-shield-alt me-1"></i>
+            Payment Overview
+        </span>
+    </div>
+
+    <!-- Statistics -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted small mb-1">Total Payments</p>
+                        <h3 class="fw-bold mb-0">@totalPayments</h3>
+                    </div>
+                    <div class="rounded-3 bg-primary bg-opacity-10 text-primary p-3">
+                        <i class="fas fa-receipt fa-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted small mb-1">Paid Transactions</p>
+                        <h3 class="fw-bold text-success mb-0">@paidPayments</h3>
+                    </div>
+                    <div class="rounded-3 bg-success bg-opacity-10 text-success p-3">
+                        <i class="fas fa-check-circle fa-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted small mb-1">Unpaid Transactions</p>
+                        <h3 class="fw-bold text-warning mb-0">@unpaidPayments</h3>
+                    </div>
+                    <div class="rounded-3 bg-warning bg-opacity-10 text-warning p-3">
+                        <i class="fas fa-clock fa-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted small mb-1">Total Paid Amount</p>
+                        <h3 class="fw-bold text-success mb-0">
+                            @totalPaidAmount.ToString("N2")
+                        </h3>
+                        <small class="text-muted">EGP</small>
+                    </div>
+                    <div class="rounded-3 bg-success bg-opacity-10 text-success p-3">
+                        <i class="fas fa-wallet fa-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Payments Table -->
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white border-0 pt-4 px-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <h5 class="fw-bold mb-1">All Transactions</h5>
+                    <p class="text-muted small mb-0">
+                        Review payment records and their associated bookings.
+                    </p>
+                </div>
+
+                <span class="badge bg-light text-dark border px-3 py-2">
+                    <span id="visiblePaymentCount">@totalPayments</span> Records
+                </span>
+            </div>
+        </div>
+
+        <div class="card-body px-4">
+
+            <!-- Search and Filters -->
+            <div class="row g-3 mb-4">
+
+                <div class="col-lg-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text"
+                               id="paymentSearch"
+                               class="form-control bg-light border-start-0"
+                               placeholder="Search by payment ID or booking reference..." />
+                    </div>
+                </div>
+
+                <div class="col-lg-2">
+                    <select id="paymentStatusFilter" class="form-select bg-light">
+                        <option value="">All Statuses</option>
+                        <option value="paid">Paid</option>
+                        <option value="unpaid">Unpaid</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-3">
+                    <select id="paymentMethodFilter" class="form-select bg-light">
+                        <option value="">All Payment Methods</option>
+                        @foreach (var method in paymentMethods)
+                        {
+                            <option value="@method.ToString()">
+                                @method.ToString()
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-lg-2">
+                    <button type="button"
+                            id="resetPaymentFilters"
+                            class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-undo me-1"></i>
+                        Reset
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Table -->
+            <div class="table-responsive">
+                <table class="table align-middle table-hover" id="paymentsTable">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th class="py-3">Payment ID</th>
+                            <th class="py-3">Booking Reference</th>
+                            <th class="py-3">Payment Date</th>
+                            <th class="py-3">Payment Method</th>
+                            <th class="py-3">Amount</th>
+                            <th class="py-3">Payment Status</th>
+                            <th class="py-3 text-center">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="paymentsTableBody">
+
+                        @if (payments.Any())
+                        {
+                            foreach (var payment in payments)
+                            {
+                                var statusText = payment.PaymentStatus ? "Paid" : "Unpaid";
+
+                                var statusClass = payment.PaymentStatus
+                                    ? "bg-success"
+                                    : "bg-warning text-dark";
+
+                                var method = payment.PaymentMethod.ToString();
+
+                                <tr class="payment-row">
+
+                                    <td>
+                                        <span class="fw-semibold">
+                                            #@payment.Id
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <div class="fw-semibold text-primary booking-reference">
+                                            @(payment.Booking?.BookingReference ?? "Not available")
+                                        </div>
+
+                                        <small class="text-muted">
+                                            Booking ID: @payment.BookingId
+                                        </small>
+                                    </td>
+
+                                    <td>
+                                        <div class="fw-medium">
+                                            @payment.PaymentDate.ToString("dd MMM yyyy")
+                                        </div>
+                                        <small class="text-muted">
+                                            @payment.PaymentDate.ToString("hh:mm tt")
+                                        </small>
+                                    </td>
+
+                                    <td>
+                                        <span class="badge bg-light text-dark border payment-method">
+                                            <i class="fas fa-credit-card me-1"></i>
+                                            @method
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class="fw-bold">
+                                            @payment.Amount.ToString("N2") EGP
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class="badge @statusClass payment-status px-3 py-2">
+                                            <i class="fas @(payment.PaymentStatus ? "fa-check-circle" : "fa-clock") me-1"></i>
+                                            @statusText
+                                        </span>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <a asp-area="Admin"
+                                           asp-controller="Payments"
+                                           asp-action="Details"
+                                           asp-route-id="@payment.Id"
+                                           class="flight-action-btn btn-outline-primary"
+                                           title="View Payment Details">
+                                            <i class="fas fa-eye"></i>
+                                            Details
+                                        </a>
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center py-5">
+                                    <i class="fas fa-credit-card fa-3x text-muted mb-3"></i>
+                                    <h6 class="fw-bold">No Payments Found</h6>
+                                    <p class="text-muted mb-0">
+                                        No payment records are available yet.
+                                    </p>
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- No Results -->
+            <div id="paymentNoResults" class="text-center py-5 d-none">
+                <i class="fas fa-search fa-2x text-muted mb-3"></i>
+                <h6 class="fw-bold">No Matching Payments</h6>
+                <p class="text-muted mb-0">
+                    Try changing your search or filters.
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const searchElement = document.getElementById("paymentSearch");
+            const statusElement = document.getElementById("paymentStatusFilter");
+            const methodElement = document.getElementById("paymentMethodFilter");
+            const resetElement = document.getElementById("resetPaymentFilters");
+            const tableBodyElement = document.getElementById("paymentsTableBody");
+            const countElement = document.getElementById("visiblePaymentCount");
+            const noResultsElement = document.getElementById("paymentNoResults");
+
+            if (!(searchElement instanceof HTMLInputElement) ||
+                !(statusElement instanceof HTMLSelectElement) ||
+                !(methodElement instanceof HTMLSelectElement) ||
+                !(resetElement instanceof HTMLButtonElement) ||
+                !(tableBodyElement instanceof HTMLTableSectionElement) ||
+                !(countElement instanceof HTMLElement) ||
+                !(noResultsElement instanceof HTMLElement)) {
+                return;
+            }
+
+            const searchInput = searchElement;
+            const statusFilter = statusElement;
+            const methodFilter = methodElement;
+            const resetButton = resetElement;
+            const tableBody = tableBodyElement;
+            const visibleCount = countElement;
+            const noResults = noResultsElement;
+
+            function filterPayments() {
+                const searchValue = searchInput.value.trim().toLowerCase();
+                const selectedStatus = statusFilter.value.toLowerCase();
+                const selectedMethod = methodFilter.value.toLowerCase();
+
+                const rows = tableBody.querySelectorAll(".payment-row");
+                let visibleRows = 0;
+
+                rows.forEach(function (row) {
+                    const paymentId = row.querySelector("td:nth-child(1)")?.textContent?.toLowerCase() ?? "";
+                    const bookingReference = row.querySelector(".booking-reference")?.textContent?.toLowerCase() ?? "";
+                    const paymentStatus = row.querySelector(".payment-status")?.textContent?.trim().toLowerCase() ?? "";
+                    const paymentMethod = row.querySelector(".payment-method")?.textContent?.trim().toLowerCase() ?? "";
+
+                    const matchesSearch =
+                        paymentId.includes(searchValue) ||
+                        bookingReference.includes(searchValue);
+
+                    const matchesStatus =
+                        selectedStatus === "" || paymentStatus.includes(selectedStatus);
+
+                    const matchesMethod =
+                        selectedMethod === "" || paymentMethod === selectedMethod;
+
+                    const isVisible = matchesSearch && matchesStatus && matchesMethod;
+
+                    row.classList.toggle("d-none", !isVisible);
+
+                    if (isVisible) {
+                        visibleRows++;
+                    }
+                });
+
+                visibleCount.textContent = String(visibleRows);
+                noResults.classList.toggle("d-none", visibleRows > 0);
+            }
+
+            searchInput.addEventListener("input", filterPayments);
+            statusFilter.addEventListener("change", filterPayments);
+            methodFilter.addEventListener("change", filterPayments);
+
+            resetButton.addEventListener("click", function () {
+                searchInput.value = "";
+                statusFilter.value = "";
+                methodFilter.value = "";
+                filterPayments();
+            });
+
+            filterPayments();
+        });
+    </script>
+}
