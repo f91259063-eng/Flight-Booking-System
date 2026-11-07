@@ -1,0 +1,362 @@
+﻿
+/* =========================================================
+   Flight Booking System
+   Customer Dashboard
+   ========================================================= */
+
+/* =========================
+   Welcome Section
+   ========================= */
+
+.customer-welcome {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    min-height: 175px;
+    padding: 28px 32px;
+    overflow: hidden;
+    border-radius: var(--customer-radius-lg);
+    background: linear-gradient(120deg, #1e40af, #2563eb);
+    color: #fff;
+    box-shadow: var(--customer-shadow);
+}
+
+.customer-welcome-content {
+    position: relative;
+    z-index: 1;
+}
+
+.customer-welcome h2 {
+    margin-bottom: 9px;
+    color: #fff;
+    font-size: 25px;
+    font-weight: 750;
+}
+
+.customer-welcome p {
+    max-width: 480px;
+    margin: 0;
+    color: rgba(255,255,255,.85);
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.customer-welcome-icon {
+    position: absolute;
+    right: 35px;
+    bottom: -35px;
+    color: rgba(255,255,255,.13);
+    font-size: 150px;
+    transform: rotate(-12deg);
+}
+
+/* =========================
+   Statistics
+   ========================= */
+
+.customer-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.customer-stat-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    min-width: 0;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid var(--customer-border);
+    border-radius: var(--customer-radius-lg);
+    box-shadow: var(--customer-shadow-sm);
+    transition: var(--customer-transition);
+}
+
+    .customer-stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--customer-shadow);
+    }
+
+.customer-stat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    background: var(--customer-primary-light);
+    color: var(--customer-primary);
+    font-size: 19px;
+}
+
+    .customer-stat-icon.success {
+        background: var(--customer-success-light);
+        color: var(--customer-success);
+    }
+
+    .customer-stat-icon.warning {
+        background: var(--customer-warning-light);
+        color: var(--customer-warning);
+    }
+
+    .customer-stat-icon.info {
+        background: var(--customer-info-light);
+        color: var(--customer-info);
+    }
+
+.customer-stat-info {
+    min-width: 0;
+}
+
+.customer-stat-label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--customer-text-muted);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.customer-stat-value {
+    display: block;
+    color: var(--customer-heading);
+    font-size: 23px;
+    font-weight: 750;
+    line-height: 1.2;
+}
+
+/* =========================
+   Dashboard Sections
+   ========================= */
+
+.customer-dashboard-section {
+    margin-bottom: 25px;
+}
+
+.customer-section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+    .customer-section-heading h4 {
+        margin: 0;
+        color: var(--customer-heading);
+        font-size: 16px;
+        font-weight: 750;
+    }
+
+.customer-section-link {
+    color: var(--customer-primary);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+    .customer-section-link:hover {
+        color: var(--customer-primary-dark);
+    }
+
+/* =========================
+   Flight Cards
+   ========================= */
+
+.customer-flight-card {
+    height: 100%;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid var(--customer-border);
+    border-radius: var(--customer-radius-lg);
+    box-shadow: var(--customer-shadow-sm);
+    transition: var(--customer-transition);
+}
+
+    .customer-flight-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--customer-shadow);
+    }
+
+.customer-flight-card-body {
+    padding: 20px;
+}
+
+.customer-flight-airline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.customer-flight-airline-name {
+    color: var(--customer-heading);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.customer-flight-route {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.customer-flight-location:last-child {
+    text-align: right;
+}
+
+.customer-flight-city {
+    display: block;
+    color: var(--customer-heading);
+    font-size: 18px;
+    font-weight: 750;
+}
+
+.customer-flight-airport {
+    display: block;
+    margin-top: 4px;
+    color: var(--customer-text-muted);
+    font-size: 10px;
+}
+
+.customer-flight-route-line {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--customer-primary);
+    font-size: 15px;
+}
+
+.customer-flight-details {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 15px;
+    border-top: 1px solid var(--customer-border-light);
+}
+
+.customer-flight-detail-label {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--customer-text-muted);
+    font-size: 10px;
+}
+
+.customer-flight-detail-value {
+    color: var(--customer-heading);
+    font-size: 12px;
+    font-weight: 650;
+}
+
+/* =========================
+   Booking Summary
+   ========================= */
+
+.customer-booking-summary {
+    padding: 20px;
+    background: #fff;
+    border: 1px solid var(--customer-border);
+    border-radius: var(--customer-radius-lg);
+    box-shadow: var(--customer-shadow-sm);
+}
+
+.customer-booking-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--customer-border-light);
+    font-size: 12px;
+}
+
+    .customer-booking-row:last-child {
+        border-bottom: 0;
+    }
+
+.customer-booking-label {
+    color: var(--customer-text-muted);
+}
+
+.customer-booking-value {
+    color: var(--customer-heading);
+    font-weight: 700;
+}
+
+/* =========================
+   Loyalty / Rewards
+   ========================= */
+
+.customer-rewards-card {
+    padding: 22px;
+    border-radius: var(--customer-radius-lg);
+    background: linear-gradient(120deg, #172554, #1e40af);
+    color: #fff;
+    box-shadow: var(--customer-shadow);
+}
+
+    .customer-rewards-card h5 {
+        margin-bottom: 8px;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+.customer-rewards-points {
+    display: block;
+    margin: 12px 0;
+    color: #fff;
+    font-size: 30px;
+    font-weight: 800;
+}
+
+.customer-rewards-card p {
+    margin: 0;
+    color: rgba(255,255,255,.8);
+    font-size: 11px;
+}
+
+/* =========================
+   Responsive Dashboard Grid
+   ========================= */
+
+@media (max-width: 1199.98px) {
+    .customer-stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 575.98px) {
+    .customer-welcome {
+        min-height: 150px;
+        padding: 22px;
+    }
+
+        .customer-welcome h2 {
+            font-size: 20px;
+        }
+
+    .customer-welcome-icon {
+        right: 10px;
+        font-size: 105px;
+    }
+
+    .customer-stats-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .customer-stat-card {
+        padding: 15px;
+    }
+
+    .customer-stat-value {
+        font-size: 20px;
+    }
+}

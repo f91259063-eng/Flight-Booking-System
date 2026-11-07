@@ -1,0 +1,124 @@
+﻿
+/* =========================================================
+   Flight Booking System
+   Customer Theme
+   ========================================================= */
+
+:root {
+    /* Brand Colors */
+    --customer-primary: #2563eb;
+    --customer-primary-dark: #1e40af;
+    --customer-primary-light: #eff6ff;
+    /* Sidebar */
+    --customer-sidebar-bg: #111827;
+    --customer-sidebar-text: #cbd5e1;
+    --customer-sidebar-muted: #94a3b8;
+    --customer-sidebar-hover: #1f2937;
+    --customer-sidebar-active: #2563eb;
+    /* Main Background */
+    --customer-body-bg: #f5f7fb;
+    --customer-surface: #ffffff;
+    /* Text */
+    --customer-text: #1e293b;
+    --customer-text-muted: #64748b;
+    --customer-heading: #0f172a;
+    /* Borders */
+    --customer-border: #e2e8f0;
+    --customer-border-light: #f1f5f9;
+    /* Status Colors */
+    --customer-success: #16a34a;
+    --customer-success-light: #dcfce7;
+    --customer-danger: #dc2626;
+    --customer-danger-light: #fee2e2;
+    --customer-warning: #d97706;
+    --customer-warning-light: #fef3c7;
+    --customer-info: #0284c7;
+    --customer-info-light: #e0f2fe;
+    /* Shadows */
+    --customer-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+    --customer-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+    --customer-shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.10);
+    /* Radius */
+    --customer-radius-sm: 6px;
+    --customer-radius: 10px;
+    --customer-radius-lg: 14px;
+    /* Spacing */
+    --customer-sidebar-width: 260px;
+    --customer-topbar-height: 72px;
+    /* Transitions */
+    --customer-transition: all 0.25s ease;
+}
+
+/* =========================================================
+   Global Customer Styles
+   ========================================================= */
+
+.customer-app {
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    background-color: var(--customer-body-bg);
+    color: var(--customer-text);
+    min-height: 100vh;
+}
+
+    .customer-app *,
+    .customer-app *::before,
+    .customer-app *::after {
+        box-sizing: border-box;
+    }
+
+    .customer-app a {
+        text-decoration: none;
+    }
+
+    .customer-app button,
+    .customer-app input,
+    .customer-app select,
+    .customer-app textarea {
+        font: inherit;
+    }
+
+/* =========================================================
+   Text Utilities
+   ========================================================= */
+
+.customer-text-primary {
+    color: var(--customer-primary) !important;
+}
+
+.customer-text-muted {
+    color: var(--customer-text-muted) !important;
+}
+
+.customer-heading {
+    color: var(--customer-heading);
+    font-weight: 700;
+}
+
+/* =========================================================
+   Background Utilities
+   ========================================================= */
+
+.customer-bg-primary {
+    background-color: var(--customer-primary) !important;
+}
+
+.customer-bg-light {
+    background-color: var(--customer-body-bg) !important;
+}
+
+.customer-bg-white {
+    background-color: var(--customer-surface) !important;
+}
+
+/* =========================================================
+   Focus Accessibility
+   ========================================================= */
+
+.customer-app a:focus-visible,
+.customer-app button:focus-visible,
+.customer-app input:focus-visible,
+.customer-app select:focus-visible,
+.customer-app textarea:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.35);
+    outline-offset: 2px;
+}

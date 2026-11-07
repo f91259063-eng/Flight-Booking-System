@@ -1,0 +1,226 @@
+﻿
+/* =========================================================
+   Flight Booking System
+   Customer Responsive Design
+   ========================================================= */
+
+/* =========================
+   Large Screens
+   ========================= */
+
+@media (max-width: 1399.98px) {
+    .customer-content {
+        padding: 24px;
+    }
+
+    .customer-topbar {
+        padding-inline: 24px;
+    }
+}
+
+/* =========================
+   Tablet and Mobile
+   ========================= */
+
+@media (max-width: 1199.98px) {
+
+    .customer-sidebar {
+        transform: translateX(-100%);
+    }
+
+    .customer-main {
+        margin-inline-start: 0;
+        width: 100%;
+    }
+
+    .customer-menu-toggle {
+        display: inline-flex;
+    }
+
+    .customer-shell.sidebar-open .customer-sidebar {
+        transform: translateX(0);
+    }
+
+    .customer-shell.sidebar-open .customer-sidebar-overlay {
+        display: block;
+        opacity: 1;
+    }
+
+    .customer-topbar-title {
+        font-size: 17px;
+    }
+}
+
+/* =========================
+   Small Tablets
+   ========================= */
+
+@media (max-width: 767.98px) {
+
+    .customer-topbar {
+        min-height: 64px;
+        padding: 10px 16px;
+        gap: 10px;
+    }
+
+    .customer-topbar-start,
+    .customer-topbar-end {
+        gap: 9px;
+    }
+
+    .customer-topbar-title {
+        font-size: 15px;
+    }
+
+    .customer-search {
+        display: none;
+    }
+
+    .customer-content {
+        padding: 20px 16px;
+    }
+
+    .customer-footer {
+        padding: 15px 16px;
+        font-size: 10px;
+    }
+
+    .customer-user-meta {
+        display: none;
+    }
+
+    .customer-page-header {
+        align-items: flex-start;
+    }
+
+    .customer-page-heading {
+        font-size: 20px;
+    }
+}
+
+/* =========================
+   Mobile Phones
+   ========================= */
+
+@media (max-width: 575.98px) {
+
+    .customer-topbar {
+        min-height: 60px;
+        padding: 9px 12px;
+    }
+
+    .customer-topbar-start,
+    .customer-topbar-end {
+        gap: 7px;
+    }
+
+    .customer-topbar-title {
+        max-width: 150px;
+        overflow: hidden;
+        font-size: 14px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .customer-menu-toggle,
+    .customer-icon-button {
+        width: 35px;
+        height: 35px;
+    }
+
+    .customer-user-avatar {
+        width: 34px;
+        height: 34px;
+    }
+
+    .customer-content {
+        padding: 16px 12px;
+    }
+
+    .customer-footer {
+        flex-direction: column;
+        justify-content: center;
+        gap: 6px;
+        padding: 14px 10px;
+        text-align: center;
+    }
+
+    .customer-sidebar {
+        width: min(280px, 85vw);
+    }
+
+    .customer-brand {
+        padding-inline: 16px;
+    }
+
+    .customer-card-header,
+    .customer-card-body {
+        padding: 15px;
+    }
+
+    .customer-page-header {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+        .customer-page-header .customer-btn {
+            width: 100%;
+        }
+
+    .customer-flight-card-body {
+        padding: 15px;
+    }
+
+    .customer-flight-city {
+        font-size: 15px;
+    }
+
+    .customer-table thead th,
+    .customer-table tbody td {
+        padding: 11px 12px;
+    }
+}
+
+/* =========================
+   Very Small Screens
+   ========================= */
+
+@media (max-width: 360px) {
+
+    .customer-topbar-title {
+        max-width: 105px;
+        font-size: 12px;
+    }
+
+    .customer-topbar {
+        padding-inline: 8px;
+    }
+
+    .customer-content {
+        padding: 12px 9px;
+    }
+
+    .customer-stat-card {
+        gap: 10px;
+    }
+
+    .customer-stat-icon {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* =========================
+   Reduced Motion
+   ========================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .customer-app *,
+    .customer-app *::before,
+    .customer-app *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+    }
+}
