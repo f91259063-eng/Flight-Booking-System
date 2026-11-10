@@ -6,25 +6,162 @@
 }
 
 <style>
-    .seat-page {
-        max-width: 1100px;
-        margin: 30px auto;
+    .choose-seat-page {
+        max-width: 1180px;
+        margin: 35px auto;
+        padding-bottom: 35px;
+        color: #172b4d;
     }
 
-    .seat-card {
-        background: #fff;
-        border-radius: 12px;
-        padding: 25px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, .08);
-    }
-
-    .seat-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 15px;
+    .seat-page-heading {
         margin-bottom: 25px;
+    }
+
+        .seat-page-heading h2 {
+            font-size: 27px;
+            font-weight: 750;
+            margin-bottom: 7px;
+            color: #172b4d;
+        }
+
+        .seat-page-heading p {
+            color: #718096;
+            margin: 0;
+        }
+
+    .booking-progress {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 25px 0;
+        padding: 18px 22px;
+        background: #fff;
+        border: 1px solid #e8edf5;
+        border-radius: 14px;
+    }
+
+    .progress-step {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        color: #94a3b8;
+        font-size: 13px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .progress-number {
+        width: 30px;
+        height: 30px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #edf1f7;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    .progress-step.active {
+        color: #2563eb;
+    }
+
+        .progress-step.active .progress-number {
+            background: #2563eb;
+            color: #fff;
+        }
+
+    .progress-line {
+        height: 1px;
+        flex: 1;
+        min-width: 15px;
+        background: #e2e8f0;
+    }
+
+    .seat-main-card {
+        background: #fff;
+        border: 1px solid #e8edf5;
+        border-radius: 18px;
+        padding: 28px;
+        box-shadow: 0 8px 30px rgba(15, 35, 65, .05);
+    }
+
+    .flight-summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 20px;
+        padding-bottom: 23px;
+        border-bottom: 1px solid #edf1f5;
+        margin-bottom: 23px;
+    }
+
+        .flight-summary h4 {
+            font-size: 20px;
+            font-weight: 750;
+            margin-bottom: 12px;
+            color: #172b4d;
+        }
+
+    .flight-details {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 22px;
+        color: #718096;
+        font-size: 14px;
+    }
+
+        .flight-details strong {
+            color: #334155;
+            font-weight: 650;
+        }
+
+    .ticket-price {
+        margin-top: 12px;
+        font-size: 14px;
+        color: #718096;
+    }
+
+        .ticket-price strong {
+            color: #2563eb;
+            font-size: 19px;
+            margin-left: 5px;
+        }
+
+    .selected-summary {
+        min-width: 145px;
+        padding: 13px 18px;
+        background: #eff6ff;
+        border: 1px solid #dbeafe;
+        border-radius: 12px;
+        text-align: center;
+    }
+
+        .selected-summary span {
+            display: block;
+            color: #64748b;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .selected-summary strong {
+            color: #2563eb;
+            font-size: 24px;
+            font-weight: 750;
+        }
+
+    .seat-section-title {
+        font-size: 17px;
+        font-weight: 700;
+        margin-bottom: 7px;
+        color: #172b4d;
+    }
+
+    .seat-section-description {
+        color: #8794a8;
+        font-size: 13px;
+        margin-bottom: 20px;
     }
 
     .seat-legend {
@@ -32,107 +169,149 @@
         flex-wrap: wrap;
         gap: 18px;
         margin-bottom: 25px;
+        padding: 15px 17px;
+        background: #f8fafc;
+        border-radius: 10px;
     }
 
     .legend-item {
         display: flex;
         align-items: center;
-        gap: 7px;
-        font-size: 14px;
+        gap: 8px;
+        color: #64748b;
+        font-size: 13px;
     }
 
     .legend-color {
         width: 17px;
         height: 17px;
-        border-radius: 4px;
         display: inline-block;
+        border-radius: 5px;
     }
 
     .legend-available {
-        background: #d1fae5;
-        border: 1px solid #10b981;
+        background: #dcfce7;
+        border: 1px solid #22c55e;
     }
 
     .legend-booked {
-        background: #fecaca;
+        background: #fee2e2;
         border: 1px solid #ef4444;
     }
 
     .legend-selected {
-        background: #d1d5db;
-        border: 1px solid #6b7280;
+        background: #2563eb;
+        border: 1px solid #1d4ed8;
     }
 
-    .plane {
-        max-width: 750px;
+    .plane-container {
+        max-width: 760px;
         margin: 0 auto;
-        padding: 25px 15px;
+        padding: 25px 25px 30px;
         background: #f8fafc;
-        border-radius: 15px;
+        border: 1px solid #e8edf5;
+        border-radius: 48% 48% 18px 18px / 8% 8% 18px 18px;
     }
 
     .cockpit {
+        max-width: 450px;
+        margin: 0 auto 28px;
+        padding: 24px 15px;
         text-align: center;
-        padding: 15px;
-        margin-bottom: 25px;
-        background: #e2e8f0;
-        border-radius: 50% 50% 10px 10px;
-        color: #475569;
-        font-weight: bold;
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 750;
+        letter-spacing: 2px;
+        background: #e9eff7;
+        border: 1px solid #dce5f0;
+        border-radius: 50% 50% 12px 12px / 80% 80% 12px 12px;
     }
 
     .seats-grid {
         display: grid;
         grid-template-columns: repeat(6, minmax(0, 1fr));
-        gap: 12px;
+        gap: 13px;
+        max-width: 600px;
+        margin: 0 auto;
     }
 
     .seat {
-        min-height: 75px;
-        border: 1px solid #10b981;
-        border-radius: 7px;
-        background: #d1fae5;
-        color: #047857;
-        font-weight: bold;
         position: relative;
+        min-height: 76px;
+        border: 1px solid #22c55e;
+        border-radius: 10px;
+        background: #dcfce7;
+        color: #15803d;
+        font-weight: 700;
         cursor: pointer;
-        transition: .2s;
+        transition: all .2s ease;
     }
 
+        /* Aisle between the two seat groups */
+        .seat:nth-child(6n + 4) {
+            margin-left: 17px;
+        }
+
         .seat:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 3px 10px rgba(0, 0, 0, .12);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 14px rgba(34, 197, 94, .15);
+            border-color: #16a34a;
         }
 
     .seat-number {
         display: block;
-        font-size: 15px;
         margin-top: 15px;
+        font-size: 15px;
     }
 
     .seat-icon {
         position: absolute;
-        top: 6px;
-        left: 7px;
-        font-size: 15px;
+        top: 7px;
+        left: 9px;
+        font-size: 13px;
     }
 
     .seat.booked {
-        background: #fecaca;
-        border-color: #ef4444;
+        background: #fee2e2;
+        border-color: #fca5a5;
         color: #b91c1c;
         cursor: not-allowed;
-        opacity: .9;
+        opacity: .85;
     }
 
     .seat.selected {
-        background: #d1d5db;
-        border-color: #6b7280;
-        color: #1f2937;
+        background: #2563eb;
+        border-color: #1d4ed8;
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, .22);
     }
 
     .seat:disabled {
         cursor: not-allowed;
+    }
+
+    .seat-selection-info {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 22px;
+        padding: 15px 18px;
+        background: #f8fafc;
+        border: 1px solid #edf1f5;
+        border-radius: 10px;
+    }
+
+        .seat-selection-info p {
+            margin: 0;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+    #selectedSeatNumbers {
+        color: #2563eb;
+        font-weight: 650;
     }
 
     .booking-footer {
@@ -141,65 +320,228 @@
         align-items: center;
         flex-wrap: wrap;
         gap: 15px;
-        margin-top: 25px;
+        margin-top: 28px;
+        padding-top: 22px;
+        border-top: 1px solid #edf1f5;
     }
 
-    .selected-badge {
+        .booking-footer .btn {
+            min-width: 145px;
+            padding: 11px 20px;
+            border-radius: 9px;
+            font-weight: 650;
+        }
+
+    .continue-btn {
         background: #2563eb;
-        color: white;
-        border-radius: 5px;
-        padding: 8px 12px;
-        font-size: 14px;
-        font-weight: bold;
+        border-color: #2563eb;
     }
 
-    @@media (max-width: 576px) {
-        .seat-card {
-            padding: 12px;
+        .continue-btn:hover:not(:disabled) {
+            background: #1d4ed8;
+            border-color: #1d4ed8;
+        }
+
+        .continue-btn:disabled {
+            background: #94a3b8;
+            border-color: #94a3b8;
+            cursor: not-allowed;
+            opacity: .65;
+        }
+
+    .no-seats-message {
+        padding: 35px 20px;
+        text-align: center;
+        border: 1px dashed #f59e0b;
+        background: #fffbeb;
+        border-radius: 12px;
+        color: #92400e;
+    }
+
+        .no-seats-message h5 {
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+    @@media (max-width: 768px) {
+        .choose-seat-page {
+            margin: 20px auto;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+        .seat-main-card {
+            padding: 18px;
+        }
+
+        .booking-progress {
+            gap: 7px;
+            padding: 14px 10px;
+            overflow-x: auto;
+        }
+
+        .progress-step {
+            font-size: 11px;
+            gap: 5px;
+        }
+
+        .progress-number {
+            width: 26px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+
+        .plane-container {
+            padding: 20px 12px;
         }
 
         .seats-grid {
-            gap: 6px;
+            gap: 8px;
+        }
+
+        .seat:nth-child(6n + 4) {
+            margin-left: 8px;
         }
 
         .seat {
-            min-height: 60px;
+            min-height: 62px;
         }
 
         .seat-number {
-            font-size: 12px;
+            font-size: 13px;
+        }
+
+        .flight-summary {
+            align-items: flex-start;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .seat-main-card {
+            padding: 13px;
+        }
+
+        .seat-page-heading h2 {
+            font-size: 22px;
+        }
+
+        .seats-grid {
+            gap: 5px;
+        }
+
+        .seat:nth-child(6n + 4) {
+            margin-left: 5px;
+        }
+
+        .seat {
+            min-height: 53px;
+            border-radius: 7px;
+        }
+
+        .seat-number {
+            font-size: 11px;
+            margin-top: 13px;
+        }
+
+        .seat-icon {
+            top: 4px;
+            left: 5px;
+            font-size: 11px;
+        }
+
+        .seat-legend {
+            gap: 12px;
+            padding: 12px;
+        }
+
+        .legend-item {
+            font-size: 11px;
+        }
+
+        .booking-footer .btn {
+            width: 100%;
         }
     }
 </style>
 
-<div class="container seat-page">
-    <div class="seat-card">
+<div class="container choose-seat-page">
 
-        <div class="seat-header">
+    <div class="seat-page-heading">
+        <h2>Choose Your Seats</h2>
+        <p>Select your preferred seats before entering passenger details.</p>
+    </div>
+
+    <!-- Booking Progress -->
+    <div class="booking-progress">
+        <div class="progress-step">
+            <span class="progress-number">1</span>
+            <span>Flight</span>
+        </div>
+
+        <div class="progress-line"></div>
+
+        <div class="progress-step active">
+            <span class="progress-number">2</span>
+            <span>Seats</span>
+        </div>
+
+        <div class="progress-line"></div>
+
+        <div class="progress-step">
+            <span class="progress-number">3</span>
+            <span>Passengers</span>
+        </div>
+
+        <div class="progress-line"></div>
+
+        <div class="progress-step">
+            <span class="progress-number">4</span>
+            <span>Payment</span>
+        </div>
+    </div>
+
+    <div class="seat-main-card">
+
+        <!-- Flight Information -->
+        <div class="flight-summary">
             <div>
-                <h3>Choose Your Seats</h3>
+                <h4>Flight Information</h4>
 
-                <div class="text-muted">
-                    Flight: <strong>@Model.FlightNumber</strong>
+                <div class="flight-details">
+                    <span>
+                        Flight:
+                        <strong>@Model.FlightNumber</strong>
+                    </span>
+
+                    <span>
+                        Aircraft:
+                        <strong>@Model.AircraftName</strong>
+                    </span>
+
+                    <span>
+                        Class:
+                        <strong>@Model.ClassName</strong>
+                    </span>
                 </div>
 
-                <div class="text-muted">
-                    Aircraft: <strong>@Model.AircraftName</strong>
-                    |
-                    Class: <strong>@Model.ClassName</strong>
-                </div>
-
-                <div class="mt-2">
+                <div class="ticket-price">
                     Ticket Price:
                     <strong>@Model.TicketPrice.ToString("N2")</strong>
                 </div>
             </div>
 
-            <div class="selected-badge">
-                Selected: <span id="selectedCount">0</span>
+            <div class="selected-summary">
+                <span>Selected Seats</span>
+                <strong id="selectedCount">0</strong>
             </div>
         </div>
 
+        <div class="seat-section-title">Select Your Seats</div>
+        <div class="seat-section-description">
+            Click on an available seat to select it. Click again to remove it.
+        </div>
+
+        <!-- Seat Legend -->
         <div class="seat-legend">
             <div class="legend-item">
                 <span class="legend-color legend-available"></span>
@@ -219,13 +561,16 @@
 
         @if (Model.Seats == null || !Model.Seats.Any())
         {
-            <div class="alert alert-warning">
-                No seats were found for this class.
+            <div class="no-seats-message">
+                <h5>No Seats Available</h5>
+                <p class="mb-0">No seats were found for this class.</p>
             </div>
         }
         else
         {
-            <div class="plane">
+            <!-- Aircraft Seats -->
+            <div class="plane-container">
+
                 <div class="cockpit">
                     FRONT OF AIRCRAFT
                 </div>
@@ -253,6 +598,20 @@
             </div>
         }
 
+        <!-- Selected Seats Information -->
+        <div class="seat-selection-info">
+            <p>
+                <strong>Selected seats:</strong>
+                <span id="selectedSeatNumbers">None</span>
+            </p>
+
+            <p>
+                <strong>Quantity:</strong>
+                <span id="selectedQuantity">0</span>
+            </p>
+        </div>
+
+        <!-- Continue Form -->
         <form id="seatForm"
               asp-area="Customer"
               asp-controller="Passenger"
@@ -272,45 +631,45 @@
                    name="seatIds" />
 
             <div class="booking-footer">
+
                 <a asp-area="Customer"
                    asp-controller="Flights"
                    asp-action="Details"
                    asp-route-id="@Model.FlightId"
                    class="btn btn-outline-secondary">
+                    <i class="fa-solid fa-arrow-left me-2"></i>
                     Back
                 </a>
 
                 <button type="submit"
                         id="continueButton"
-                        class="btn btn-primary"
+                        class="btn btn-primary continue-btn"
                         disabled>
                     Continue
+                    <i class="fa-solid fa-arrow-right ms-2"></i>
                 </button>
+
             </div>
         </form>
+
     </div>
 </div>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const seatButtons =
-            document.querySelectorAll(".seat:not(:disabled)");
 
-        const selectedCount =
-            document.getElementById("selectedCount");
+        const seatButtons = document.querySelectorAll(".seat:not(:disabled)");
+        const selectedCount = document.getElementById("selectedCount");
+        const selectedQuantity = document.getElementById("selectedQuantity");
+        const selectedSeatNumbers = document.getElementById("selectedSeatNumbers");
+        const seatIdsInput = document.getElementById("seatIds");
+        const continueButton = document.getElementById("continueButton");
+        const seatForm = document.getElementById("seatForm");
 
-        const seatIdsInput =
-            document.getElementById("seatIds");
-
-        const continueButton =
-            document.getElementById("continueButton");
-
-        const seatForm =
-            document.getElementById("seatForm");
-
-        // Check elements before using them
         if (
             !(selectedCount instanceof HTMLElement) ||
+            !(selectedQuantity instanceof HTMLElement) ||
+            !(selectedSeatNumbers instanceof HTMLElement) ||
             !(seatIdsInput instanceof HTMLInputElement) ||
             !(continueButton instanceof HTMLButtonElement) ||
             !(seatForm instanceof HTMLFormElement)
@@ -321,6 +680,7 @@
         const selectedSeats = new Map();
 
         seatButtons.forEach(function (element) {
+
             if (!(element instanceof HTMLButtonElement)) {
                 return;
             }
@@ -328,6 +688,7 @@
             const button = element;
 
             button.addEventListener("click", function () {
+
                 const seatId = button.dataset.seatId;
                 const seatNumber = button.dataset.seatNumber;
 
@@ -338,23 +699,31 @@
                 if (selectedSeats.has(seatId)) {
                     selectedSeats.delete(seatId);
                     button.classList.remove("selected");
-                } else {
+                }
+                else {
                     selectedSeats.set(seatId, seatNumber);
                     button.classList.add("selected");
                 }
 
-                selectedCount.textContent =
-                    String(selectedSeats.size);
+                const count = selectedSeats.size;
+
+                selectedCount.textContent = String(count);
+                selectedQuantity.textContent = String(count);
 
                 seatIdsInput.value =
                     Array.from(selectedSeats.keys()).join(",");
 
-                continueButton.disabled =
-                    selectedSeats.size === 0;
+                selectedSeatNumbers.textContent =
+                    count > 0
+                        ? Array.from(selectedSeats.values()).join(", ")
+                        : "None";
+
+                continueButton.disabled = count === 0;
             });
         });
 
         seatForm.addEventListener("submit", function (event) {
+
             if (selectedSeats.size === 0) {
                 event.preventDefault();
                 alert("Please select at least one available seat.");

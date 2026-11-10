@@ -58,7 +58,6 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             if (string.IsNullOrWhiteSpace(userId))
                 return Challenge();
 
-            // Get booking belonging to current user
             var booking = await _bookingRepository.GetOneAsync(
                 filter: b => b.Id == id &&
                              b.UserId == userId,
@@ -67,12 +66,10 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
             if (booking == null)
                 return NotFound();
 
-            // Check booking status
             if (booking.Status != "Confirmed")
                 return BadRequest(
                     "Booking has not been confirmed.");
 
-            // Get payment
             var payment = await _paymentRepository.GetOneAsync(
                 filter: p => p.BookingId == booking.Id,
                 IsTracking: false);
@@ -81,7 +78,6 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 return BadRequest(
                     "Payment has not been completed.");
 
-            // Get booking tickets
             var tickets = await _ticketRepository.GetAllAsync(
                 filter: t => t.BookingId == booking.Id,
                 IsTracking: false);
@@ -92,7 +88,6 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 return NotFound(
                     "No tickets were found for this booking.");
 
-            // Get flight from first ticket
             var firstTicket = ticketList.First();
 
             var flight = await _flightRepository.GetOneAsync(
@@ -107,7 +102,6 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 return NotFound(
                     "Flight information was not found.");
 
-            // Get airports
             var fromAirport = await _airportRepository.GetOneAsync(
                 filter: a => a.Id == flight.Route.FromAirportId,
                 IsTracking: false);
@@ -116,35 +110,22 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 filter: a => a.Id == flight.Route.ToAirportId,
                 IsTracking: false);
 
-            // Create ViewModel
             var model = new BookingConfirmationViewModel
             {
                 BookingId = booking.Id,
-
                 BookingReference = booking.BookingReference,
-
                 BookingDate = booking.BookingDate,
-
                 Status = booking.Status,
-
                 FlightNumber = flight.FlightNumber,
-
                 FromAirport = fromAirport?.Name ?? "Unknown Airport",
-
                 ToAirport = toAirport?.Name ?? "Unknown Airport",
-
                 DepartureDateTime = flight.DepartureDateTime,
-
                 ArrivalDateTime = flight.ArrivalDateTime,
-
                 PointsRedeemed = booking.PointsRedeemed,
-
                 DiscountAmount = booking.DiscountAmount,
-
                 AmountPaid = payment.Amount
             };
 
-            // Get passengers and seats
             foreach (var ticket in ticketList)
             {
                 var passenger = await _passengerRepository.GetOneAsync(
@@ -169,7 +150,6 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 });
             }
 
-            // Activity Log
             await _activityLogService.LogAsync(
                 nameof(BookingController),
                 nameof(Confirmation),
@@ -208,6 +188,11 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
 
             foreach (var booking in bookingList)
             {
+                // Get payment for this booking
+                var payment = await _paymentRepository.GetOneAsync(
+                    filter: p => p.BookingId == booking.Id,
+                    IsTracking: false);
+
                 // Get tickets for this booking
                 var tickets = await _ticketRepository.GetAllAsync(
                     filter: t => t.BookingId == booking.Id,
@@ -215,6 +200,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
 
                 var ticketList = tickets.ToList();
 
+                // Case 1: Booking has no tickets
                 if (!ticketList.Any())
                 {
                     model.Add(new MyBookingViewModel
@@ -224,7 +210,10 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                         BookingDate = booking.BookingDate,
                         Status = booking.Status,
                         NumberOfTickets = booking.NumberOfTickets,
-                        TotalPrice = 0
+                        TotalPrice = 0,
+
+                        PaymentStatus = payment?.PaymentStatus ?? false,
+                        PaymentAmount = payment?.Amount ?? 0m
                     });
 
                     continue;
@@ -241,6 +230,7 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                     },
                     IsTracking: false);
 
+                // Case 2: Flight not found
                 if (flight == null)
                 {
                     model.Add(new MyBookingViewModel
@@ -250,7 +240,10 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                         BookingDate = booking.BookingDate,
                         Status = booking.Status,
                         NumberOfTickets = booking.NumberOfTickets,
-                        TotalPrice = ticketList.Sum(t => t.TicketPrice)
+                        TotalPrice = ticketList.Sum(t => t.TicketPrice),
+
+                        PaymentStatus = payment?.PaymentStatus ?? false,
+                        PaymentAmount = payment?.Amount ?? 0m
                     });
 
                     continue;
@@ -280,29 +273,24 @@ namespace Flight_Booking_System.Areas.Customer.Controllers
                 decimal totalPrice = ticketList.Sum(
                     t => t.TicketPrice);
 
+                // Case 3: Normal booking
                 model.Add(new MyBookingViewModel
                 {
                     BookingId = booking.Id,
-
                     BookingReference = booking.BookingReference,
-
                     BookingDate = booking.BookingDate,
-
                     Status = booking.Status,
-
                     NumberOfTickets = booking.NumberOfTickets,
-
                     TotalPrice = totalPrice,
 
                     FlightNumber = flight.FlightNumber,
-
                     DepartureAirport = fromAirport,
-
                     ArrivalAirport = toAirport,
-
                     DepartureDateTime = flight.DepartureDateTime,
+                    ArrivalDateTime = flight.ArrivalDateTime,
 
-                    ArrivalDateTime = flight.ArrivalDateTime
+                    PaymentStatus = payment?.PaymentStatus ?? false,
+                    PaymentAmount = payment?.Amount ?? 0m
                 });
             }
 

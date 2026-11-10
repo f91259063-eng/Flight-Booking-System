@@ -4,7 +4,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("passengerForm");
 
     if (!form) {
-        console.error("Passenger form not found.");
         return;
     }
 
@@ -16,26 +15,29 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // =========================================================
-    // Show Message
+    // Show Search Message
     // =========================================================
 
     function showMessage(card, message, type = "info") {
 
-        let messageBox = card.querySelector(".passenger-message");
+        const messageBox = card.querySelector(".search-message");
 
         if (!messageBox) {
-            messageBox = document.createElement("div");
-            messageBox.className = "passenger-message";
-            card.querySelector(".card-body")?.prepend(messageBox);
+            return;
         }
 
-        if (!messageBox) return;
-
-        // Correct Bootstrap alert classes
-        messageBox.className =
-            `alert alert - ${ type } passenger - message`;
-
         messageBox.textContent = message;
+
+        messageBox.className = "small search-message align-self-center";
+
+        const colors = {
+            success: "text-success",
+            warning: "text-warning",
+            danger: "text-danger",
+            info: "text-muted"
+        };
+
+        messageBox.classList.add(colors[type] || colors.info);
     }
 
     // =========================================================
@@ -45,6 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function getValue(object, ...keys) {
 
         for (const key of keys) {
+
             if (
                 Object.prototype.hasOwnProperty.call(object, key) &&
                 object[key] !== null &&
@@ -82,36 +85,29 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function searchPassenger(card) {
 
-        const searchPassportInput =
-            card.querySelector(".search-passport");
+        const passportInput = card.querySelector(".search-passport");
+        const nationalIdInput = card.querySelector(".search-national-id");
 
-        const searchNationalIdInput =
-            card.querySelector(".search-national-id");
-
-        const passportNumber =
-            searchPassportInput?.value.trim() ?? "";
-
-        const nationalID =
-            searchNationalIdInput?.value.trim() ?? "";
+        const passportNumber = passportInput?.value.trim() ?? "";
+        const nationalID = nationalIdInput?.value.trim() ?? "";
 
         if (!passportNumber && !nationalID) {
+
             showMessage(
                 card,
                 "Enter a passport number or national ID.",
                 "warning"
             );
+
             return;
         }
 
         const url = new URL(searchUrl, window.location.origin);
 
-        // Always send both parameters.
-        // This avoids accidentally reusing a missing search parameter.
         url.searchParams.set("passportNumber", passportNumber);
         url.searchParams.set("nationalID", nationalID);
 
-        const searchButton =
-            card.querySelector(".search-passenger-btn");
+        const searchButton = card.querySelector(".search-passenger-btn");
 
         if (searchButton) {
             searchButton.disabled = true;
@@ -119,6 +115,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         try {
+
             showMessage(card, "Searching passenger...", "info");
 
             const response = await fetch(url.toString(), {
@@ -131,27 +128,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const data = await response.json();
 
-            console.log("Passenger search response:", data);
-
             if (!response.ok || !data.success || !data.passenger) {
+
                 showMessage(
                     card,
-                    data.message || "Passenger not found.",
+                    data.message || "Passenger not found. You can enter new details.",
                     "warning"
                 );
+
                 return;
             }
 
             const passenger = data.passenger;
 
-            // Passenger ID
+            // Existing Passenger ID
             setInputValue(
                 card,
                 ".selected-passenger-id",
                 getValue(passenger, "id", "Id")
             );
 
-            // Passenger details
+            // Passenger Information
             setInputValue(
                 card,
                 ".passenger-first-name",
@@ -194,7 +191,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 getValue(passenger, "email", "Email")
             );
 
-            // Format date for <input type="date">
+            // Format Date Of Birth
             const rawDate = getValue(
                 passenger,
                 "dateOfBirth",
@@ -204,24 +201,30 @@ document.addEventListener("DOMContentLoaded", function () {
             let formattedDate = "";
 
             if (rawDate) {
+
                 const dateString = String(rawDate);
 
-                // Handles ISO strings such as 2000-05-20T00:00:00
                 if (/^\d{4}-\d{2}-\d{2}/.test(dateString)) {
+
                     formattedDate = dateString.substring(0, 10);
+
                 } else {
+
                     const parsedDate = new Date(rawDate);
 
                     if (!Number.isNaN(parsedDate.getTime())) {
+
                         const year = parsedDate.getFullYear();
+
                         const month = String(
                             parsedDate.getMonth() + 1
                         ).padStart(2, "0");
+
                         const day = String(
                             parsedDate.getDate()
                         ).padStart(2, "0");
 
-                        formattedDate = `${ year } -${ month } -${ day }`;
+                        formattedDate = `${year}-${month}-${day}`;
                     }
                 }
             }
@@ -232,7 +235,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 formattedDate
             );
 
-            // Copy the returned identity numbers into search fields
+            // Copy ID numbers into search fields
             setInputValue(
                 card,
                 ".search-passport",
@@ -252,6 +255,7 @@ document.addEventListener("DOMContentLoaded", function () {
             );
         }
         catch (error) {
+
             console.error("Passenger search error:", error);
 
             showMessage(
@@ -261,6 +265,7 @@ document.addEventListener("DOMContentLoaded", function () {
             );
         }
         finally {
+
             if (searchButton) {
                 searchButton.disabled = false;
                 searchButton.textContent = "Search";
@@ -269,7 +274,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // =========================================================
-    // Search Button - No Form Submission
+    // Search Button
     // =========================================================
 
     form.addEventListener("click", function (event) {
@@ -290,7 +295,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // =========================================================
-    // Enter Key - Search Instead of Submit
+    // Enter Key Search
     // =========================================================
 
     form.addEventListener("keydown", function (event) {
@@ -328,7 +333,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const card = button.closest(".passenger-card");
 
-        if (!card) return;
+        if (!card) {
+            return;
+        }
 
         const fields = [
             ".selected-passenger-id",
@@ -348,11 +355,11 @@ document.addEventListener("DOMContentLoaded", function () {
             setInputValue(card, selector, "");
         });
 
-        const messageBox = card.querySelector(".passenger-message");
-
-        if (messageBox) {
-            messageBox.remove();
-        }
+        showMessage(
+            card,
+            "Enter a passport number or national ID to search.",
+            "info"
+        );
     });
 
 });

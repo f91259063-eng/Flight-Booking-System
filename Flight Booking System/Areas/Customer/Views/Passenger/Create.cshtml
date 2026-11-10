@@ -1,13 +1,15 @@
-﻿```cshtml
+﻿
 @model Flight_Booking_System.ViewModels.Customer.PassengerBookingViewModel
 
 @{
     ViewData["Title"] = "Passenger Details";
     Layout = "~/Areas/Customer/Views/Shared/_CustomerLayout.cshtml";
 
+    var passengerCount = Model?.Passengers?.Count ?? 0;
+
     var subtotal = Model == null
         ? 0m
-        : Model.TicketPrice * (Model.Passengers?.Count ?? 0);
+        : Model.TicketPrice * passengerCount;
 
     var maxRedeemablePoints = Model == null
         ? 0
@@ -17,34 +19,459 @@
         );
 }
 
-@if (Model == null)
-{
-    <div class="container py-4">
-        <div class="alert alert-danger">
-            Passenger information could not be loaded.
-            Please return to seat selection and try again.
-        </div>
+<style>
+    .passenger-page {
+        padding: 35px 0 60px;
+        color: #263449;
+    }
 
-        <a asp-area="Customer"
-           asp-controller="Flights"
-           asp-action="Index"
-           class="btn btn-primary">
-            Return to Available Flights
-        </a>
+    .passenger-heading {
+        margin-bottom: 30px;
+    }
+
+    .passenger-heading h2 {
+        font-size: 28px;
+        font-weight: 750;
+        color: #172b4d;
+        margin-bottom: 8px;
+    }
+
+    .passenger-heading p {
+        color: #718096;
+        margin-bottom: 0;
+    }
+
+    .booking-progress {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 30px;
+        padding: 18px 22px;
+        background: #fff;
+        border: 1px solid #e8edf4;
+        border-radius: 14px;
+    }
+
+    .progress-step {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        color: #8995a7;
+        font-size: 13px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .progress-number {
+        width: 30px;
+        height: 30px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #edf1f6;
+        color: #718096;
+        font-weight: 700;
+    }
+
+    .progress-step.active {
+        color: #1769aa;
+    }
+
+    .progress-step.active .progress-number {
+        background: #1769aa;
+        color: #fff;
+    }
+
+    .progress-line {
+        flex: 1;
+        height: 2px;
+        background: #e8edf4;
+        min-width: 15px;
+    }
+
+    .passenger-card,
+    .summary-card {
+        background: #fff;
+        border: 1px solid #e8edf4;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(30, 50, 80, .045);
+        overflow: hidden;
+        margin-bottom: 24px;
+    }
+
+    .passenger-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        padding: 19px 24px;
+        background: #f8fafd;
+        border-bottom: 1px solid #e8edf4;
+    }
+
+    .passenger-card-header h5 {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 700;
+        color: #172b4d;
+    }
+
+    .seat-badge {
+        padding: 7px 13px;
+        border-radius: 20px;
+        background: #e8f2fc;
+        color: #1769aa;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .passenger-card-body {
+        padding: 24px;
+    }
+
+    .section-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 18px;
+        color: #263449;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .section-icon {
+        width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9px;
+        background: #eaf3fc;
+        color: #1769aa;
+        font-size: 15px;
+    }
+
+    .passenger-search-box {
+        padding: 20px;
+        margin-bottom: 25px;
+        border: 1px solid #dfeaf5;
+        border-radius: 12px;
+        background: #f7faff;
+    }
+
+    .passenger-page .form-label {
+        display: block;
+        margin-bottom: 8px;
+        color: #43536a;
+        font-size: 13px;
+        font-weight: 650;
+    }
+
+    .passenger-page .form-control {
+        min-height: 45px;
+        border: 1px solid #dce3ec;
+        border-radius: 8px;
+        padding: 10px 13px;
+        font-size: 14px;
+        box-shadow: none;
+    }
+
+    .passenger-page .form-control:focus {
+        border-color: #3987c8;
+        box-shadow: 0 0 0 3px rgba(57, 135, 200, .12);
+    }
+
+    .passenger-page .form-control::placeholder {
+        color: #a5afbd;
+    }
+
+    .passenger-page .btn {
+        border-radius: 8px;
+        font-weight: 650;
+        transition: .2s ease;
+    }
+
+    .search-passenger-btn {
+        min-height: 45px;
+        background: #1769aa;
+        border-color: #1769aa;
+    }
+
+    .search-passenger-btn:hover {
+        background: #10588f;
+        border-color: #10588f;
+    }
+
+    .clear-passenger-btn {
+        font-size: 12px;
+    }
+
+    .search-message {
+        font-size: 12px;
+    }
+
+    .form-section-title {
+        margin-bottom: 18px;
+        color: #263449;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .validation-summary-valid {
+        display: none;
+    }
+
+    .validation-summary-errors {
+        margin-bottom: 20px;
+        padding: 15px 20px;
+        border: 1px solid #f2caca;
+        border-radius: 10px;
+        background: #fff5f5;
+        color: #b42318;
+    }
+
+    .field-validation-error {
+        display: block;
+        margin-top: 5px;
+        font-size: 12px;
+    }
+
+    .summary-card {
+        position: sticky;
+        top: 20px;
+    }
+
+    .summary-header {
+        padding: 20px 24px;
+        background: #172b4d;
+        color: #fff;
+    }
+
+    .summary-header h4 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+    .summary-body {
+        padding: 24px;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 16px;
+        color: #718096;
+        font-size: 14px;
+    }
+
+    .summary-row strong {
+        color: #263449;
+        font-weight: 700;
+    }
+
+    .summary-divider {
+        margin: 20px 0;
+        border-color: #e8edf4;
+        opacity: 1;
+    }
+
+    .reward-box {
+        padding: 18px;
+        margin-bottom: 22px;
+        border: 1px solid #dcece5;
+        border-radius: 12px;
+        background: #f5fbf8;
+    }
+
+    .reward-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+        color: #18794e;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .points-balance {
+        padding: 12px 14px;
+        margin-bottom: 17px;
+        border-radius: 8px;
+        background: #e5f5ec;
+        color: #18794e;
+        font-size: 13px;
+    }
+
+    .discount-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 15px;
+        color: #18794e;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .final-total {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .final-total span {
+        color: #263449;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .final-total strong {
+        color: #168653;
+        font-size: 23px;
+        font-weight: 800;
+    }
+
+    .continue-btn {
+        width: 100%;
+        min-height: 50px;
+        margin-top: 24px;
+        background: #168653;
+        border-color: #168653;
+        color: #fff;
+        font-size: 15px;
+    }
+
+    .continue-btn:hover {
+        background: #116d43;
+        border-color: #116d43;
+        color: #fff;
+    }
+
+    .empty-state {
+        padding: 35px 20px;
+        text-align: center;
+        border: 1px dashed #cbd5e1;
+        border-radius: 14px;
+        background: #f8fafc;
+    }
+
+    .empty-state h5 {
+        margin-bottom: 10px;
+        color: #263449;
+        font-weight: 700;
+    }
+
+    @@media (max-width: 767px) {
+        .passenger-page {
+            padding: 22px 0 40px;
+        }
+
+        .passenger-heading h2 {
+            font-size: 23px;
+        }
+
+        .booking-progress {
+            gap: 7px;
+            padding: 13px 10px;
+            overflow-x: auto;
+        }
+
+        .progress-step {
+            gap: 5px;
+            font-size: 11px;
+        }
+
+        .progress-number {
+            width: 25px;
+            height: 25px;
+            font-size: 11px;
+        }
+
+        .passenger-card-header {
+            padding: 16px;
+        }
+
+        .passenger-card-body {
+            padding: 17px;
+        }
+
+        .passenger-search-box {
+            padding: 15px;
+        }
+
+        .summary-card {
+            position: static;
+        }
+
+        .summary-body {
+            padding: 18px;
+        }
+    }
+</style>
+
+<div class="container passenger-page">
+
+    <!-- Page Heading -->
+    <div class="passenger-heading">
+        <h2>Passenger Details</h2>
+        <p>
+            Enter the required information for every passenger before continuing to payment.
+        </p>
     </div>
-}
-else
-{
-    <div class="container py-4">
 
-        <div class="mb-4">
-            <h2 class="fw-bold">Passenger Details</h2>
-            <p class="text-muted">
-                Enter passenger details for each selected seat.
-                Search for an existing passenger using passport number or national ID.
-            </p>
+    <!-- Booking Progress -->
+    <div class="booking-progress">
+
+        <div class="progress-step">
+            <span class="progress-number">1</span>
+            <span>Choose Flight</span>
         </div>
 
+        <div class="progress-line"></div>
+
+        <div class="progress-step">
+            <span class="progress-number">2</span>
+            <span>Select Seats</span>
+        </div>
+
+        <div class="progress-line"></div>
+
+        <div class="progress-step active">
+            <span class="progress-number">3</span>
+            <span>Passengers</span>
+        </div>
+
+        <div class="progress-line"></div>
+
+        <div class="progress-step">
+            <span class="progress-number">4</span>
+            <span>Payment</span>
+        </div>
+
+    </div>
+
+    @if (Model == null)
+    {
+        <div class="empty-state">
+            <h5>Passenger information could not be loaded.</h5>
+            <p class="text-muted">
+                Please return to available flights and try again.
+            </p>
+
+            <a asp-area="Customer"
+               asp-controller="Flights"
+               asp-action="Index"
+               class="btn btn-primary">
+                Return to Available Flights
+            </a>
+        </div>
+    }
+    else
+    {
         <form asp-area="Customer"
               asp-controller="Passenger"
               asp-action="Create"
@@ -58,270 +485,324 @@ else
             <input type="hidden" asp-for="ClassId" />
             <input type="hidden" asp-for="TicketPrice" />
 
-            <div asp-validation-summary="ModelOnly"
-                 class="alert alert-danger"></div>
+            <div asp-validation-summary="ModelOnly"></div>
 
             @if (Model.Passengers == null || !Model.Passengers.Any())
             {
-                <div class="alert alert-warning">
-                    No seats selected. Please return and select your seats.
-                </div>
+                <div class="empty-state">
+                    <h5>No seats selected</h5>
+                    <p class="text-muted">
+                        Please return to seat selection and choose your seats.
+                    </p>
 
-                <a asp-area="Customer"
-                   asp-controller="Flights"
-                   asp-action="Index"
-                   class="btn btn-primary">
-                    Return to Available Flights
-                </a>
+                    <a asp-area="Customer"
+                       asp-controller="Flights"
+                       asp-action="Index"
+                       class="btn btn-primary">
+                        Return to Available Flights
+                    </a>
+                </div>
             }
             else
             {
-                @for (int i = 0; i < Model.Passengers.Count; i++)
-                {
-                    <div class="card shadow-sm mb-4 passenger-card">
+                <div class="row">
 
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0">
-                                Passenger @(i + 1) - Seat @Model.Passengers[i].SeatNumber
-                            </h5>
-                        </div>
+                    <!-- Passenger Information -->
+                    <div class="col-lg-8">
 
-                        <div class="card-body">
+                        @for (int i = 0; i < Model.Passengers.Count; i++)
+                        {
+                            <div class="passenger-card">
 
-                            <input type="hidden"
-                                   asp-for="Passengers[i].SeatId" />
+                                <div class="passenger-card-header">
 
-                            <input type="hidden"
-                                   asp-for="Passengers[i].SeatNumber" />
+                                    <h5>
+                                        Passenger @(i + 1)
+                                    </h5>
 
-                            <input type="hidden"
-                                   asp-for="Passengers[i].SelectedPassengerId"
-                                   class="selected-passenger-id" />
-
-                            <div class="border rounded p-3 mb-4 bg-light">
-
-                                <h6 class="fw-bold mb-3">
-                                    Search Existing Passenger
-                                </h6>
-
-                                <div class="row g-3">
-
-                                    <div class="col-md-5">
-                                        <label for="search-passport-@i"
-                                               class="form-label">
-                                            Passport Number
-                                        </label>
-
-                                        <input type="text"
-                                               id="search-passport-@i"
-                                               class="form-control search-passport"
-                                               placeholder="Enter passport number"
-                                               autocomplete="off" />
-                                    </div>
-
-                                    <div class="col-md-5">
-                                        <label for="search-national-id-@i"
-                                               class="form-label">
-                                            National ID
-                                        </label>
-
-                                        <input type="text"
-                                               id="search-national-id-@i"
-                                               class="form-control search-national-id"
-                                               placeholder="Enter national ID"
-                                               autocomplete="off"
-                                               inputmode="numeric" />
-                                    </div>
-
-                                    <div class="col-md-2 d-flex align-items-end">
-                                        <button type="button"
-                                                class="btn btn-primary w-100 search-passenger-btn">
-                                            Search
-                                        </button>
-                                    </div>
-
-                                </div>
-
-                                <div class="mt-3 d-flex gap-2 flex-wrap">
-
-                                    <button type="button"
-                                            class="btn btn-outline-secondary btn-sm clear-passenger-btn">
-                                        Clear Passenger
-                                    </button>
-
-                                    <span class="small text-muted align-self-center search-message"
-                                          role="status"
-                                          aria-live="polite">
-                                        Enter a passport number or national ID to search.
+                                    <span class="seat-badge">
+                                        Seat @Model.Passengers[i].SeatNumber
                                     </span>
 
                                 </div>
+
+                                <div class="passenger-card-body">
+
+                                    <input type="hidden"
+                                           asp-for="Passengers[i].SeatId" />
+
+                                    <input type="hidden"
+                                           asp-for="Passengers[i].SeatNumber" />
+
+                                    <input type="hidden"
+                                           asp-for="Passengers[i].SelectedPassengerId"
+                                           class="selected-passenger-id" />
+
+                                    <!-- Search Existing Passenger -->
+                                    <div class="passenger-search-box">
+
+                                        <div class="section-label">
+                                            <span class="section-icon">⌕</span>
+                                            Search Existing Passenger
+                                        </div>
+
+                                        <p class="small text-muted mb-3">
+                                            Find an existing passenger using either passport number or National ID.
+                                        </p>
+
+                                        <div class="row g-3">
+
+                                            <div class="col-md-5">
+
+                                                <label for="search-passport-@i"
+                                                       class="form-label">
+                                                    Passport Number
+                                                </label>
+
+                                                <input type="text"
+                                                       id="search-passport-@i"
+                                                       class="form-control search-passport"
+                                                       placeholder="Enter passport number"
+                                                       autocomplete="off" />
+
+                                            </div>
+
+                                            <div class="col-md-5">
+
+                                                <label for="search-national-id-@i"
+                                                       class="form-label">
+                                                    National ID
+                                                </label>
+
+                                                <input type="text"
+                                                       id="search-national-id-@i"
+                                                       class="form-control search-national-id"
+                                                       placeholder="Enter National ID"
+                                                       autocomplete="off"
+                                                       inputmode="numeric" />
+
+                                            </div>
+
+                                            <div class="col-md-2 d-flex align-items-end">
+
+                                                <button type="button"
+                                                        class="btn btn-primary w-100 search-passenger-btn">
+                                                    Search
+                                                </button>
+
+                                            </div>
+
+                                        </div>
+
+                                        <div class="mt-3 d-flex gap-3 align-items-center flex-wrap">
+
+                                            <button type="button"
+                                                    class="btn btn-outline-secondary btn-sm clear-passenger-btn">
+                                                Clear Passenger
+                                            </button>
+
+                                            <span class="small text-muted search-message"
+                                                  role="status"
+                                                  aria-live="polite">
+                                                Enter a passport number or national ID to search.
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+
+                                    <!-- Personal Information -->
+                                    <div class="section-label">
+                                        <span class="section-icon">●</span>
+                                        Personal Information
+                                    </div>
+
+                                    <div class="row g-3">
+
+                                        <div class="col-md-4">
+
+                                            <label asp-for="Passengers[i].FirstName"
+                                                   class="form-label">
+                                                First Name
+                                            </label>
+
+                                            <input asp-for="Passengers[i].FirstName"
+                                                   class="form-control passenger-first-name"
+                                                   placeholder="First name" />
+
+                                            <span asp-validation-for="Passengers[i].FirstName"
+                                                  class="field-validation-error text-danger"></span>
+
+                                        </div>
+
+                                        <div class="col-md-4">
+
+                                            <label asp-for="Passengers[i].MiddleName"
+                                                   class="form-label">
+                                                Middle Name
+                                            </label>
+
+                                            <input asp-for="Passengers[i].MiddleName"
+                                                   class="form-control passenger-middle-name"
+                                                   placeholder="Middle name" />
+
+                                            <span asp-validation-for="Passengers[i].MiddleName"
+                                                  class="field-validation-error text-danger"></span>
+
+                                        </div>
+
+                                        <div class="col-md-4">
+
+                                            <label asp-for="Passengers[i].LastName"
+                                                   class="form-label">
+                                                Last Name
+                                            </label>
+
+                                            <input asp-for="Passengers[i].LastName"
+                                                   class="form-control passenger-last-name"
+                                                   placeholder="Last name" />
+
+                                            <span asp-validation-for="Passengers[i].LastName"
+                                                  class="field-validation-error text-danger"></span>
+
+                                        </div>
+
+                                        <div class="col-md-6">
+
+                                            <label asp-for="Passengers[i].PassportNumber"
+                                                   class="form-label">
+                                                Passport Number
+                                            </label>
+
+                                            <input asp-for="Passengers[i].PassportNumber"
+                                                   class="form-control passenger-passport"
+                                                   placeholder="Passport number" />
+
+                                            <span asp-validation-for="Passengers[i].PassportNumber"
+                                                  class="field-validation-error text-danger"></span>
+
+                                        </div>
+
+                                        <div class="col-md-6">
+
+                                            <label asp-for="Passengers[i].NationalID"
+                                                   class="form-label">
+                                                National ID
+                                            </label>
+
+                                            <input asp-for="Passengers[i].NationalID"
+                                                   class="form-control passenger-national-id"
+                                                   placeholder="National ID" />
+
+                                            <span asp-validation-for="Passengers[i].NationalID"
+                                                  class="field-validation-error text-danger"></span>
+
+                                        </div>
+
+                                        <div class="col-md-6">
+
+                                            <label asp-for="Passengers[i].Phone"
+                                                   class="form-label">
+                                                Phone
+                                            </label>
+
+                                            <input asp-for="Passengers[i].Phone"
+                                                   class="form-control passenger-phone"
+                                                   type="tel"
+                                                   placeholder="Phone number" />
+
+                                            <span asp-validation-for="Passengers[i].Phone"
+                                                  class="field-validation-error text-danger"></span>
+
+                                        </div>
+
+                                        <div class="col-md-6">
+
+                                            <label asp-for="Passengers[i].Email"
+                                                   class="form-label">
+                                                Email
+                                            </label>
+
+                                            <input asp-for="Passengers[i].Email"
+                                                   class="form-control passenger-email"
+                                                   type="email"
+                                                   placeholder="Email address" />
+
+                                            <span asp-validation-for="Passengers[i].Email"
+                                                  class="field-validation-error text-danger"></span>
+
+                                        </div>
+
+                                        <div class="col-md-6">
+
+                                            <label asp-for="Passengers[i].DateOfBirth"
+                                                   class="form-label">
+                                                Date of Birth
+                                            </label>
+
+                                            <input asp-for="Passengers[i].DateOfBirth"
+                                                   class="form-control passenger-date-of-birth"
+                                                   type="date"
+                                                   asp-format="{0:yyyy-MM-dd}" />
+
+                                            <span asp-validation-for="Passengers[i].DateOfBirth"
+                                                  class="field-validation-error text-danger"></span>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
                             </div>
+                        }
 
-                            <div class="row g-3">
-
-                                <div class="col-md-4">
-                                    <label asp-for="Passengers[i].FirstName"
-                                           class="form-label">
-                                        First Name
-                                    </label>
-
-                                    <input asp-for="Passengers[i].FirstName"
-                                           class="form-control passenger-first-name" />
-
-                                    <span asp-validation-for="Passengers[i].FirstName"
-                                          class="text-danger"></span>
-                                </div>
-
-                                <div class="col-md-4">
-                                    <label asp-for="Passengers[i].MiddleName"
-                                           class="form-label">
-                                        Middle Name
-                                    </label>
-
-                                    <input asp-for="Passengers[i].MiddleName"
-                                           class="form-control passenger-middle-name" />
-
-                                    <span asp-validation-for="Passengers[i].MiddleName"
-                                          class="text-danger"></span>
-                                </div>
-
-                                <div class="col-md-4">
-                                    <label asp-for="Passengers[i].LastName"
-                                           class="form-label">
-                                        Last Name
-                                    </label>
-
-                                    <input asp-for="Passengers[i].LastName"
-                                           class="form-control passenger-last-name" />
-
-                                    <span asp-validation-for="Passengers[i].LastName"
-                                          class="text-danger"></span>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label asp-for="Passengers[i].PassportNumber"
-                                           class="form-label">
-                                        Passport Number
-                                    </label>
-
-                                    <input asp-for="Passengers[i].PassportNumber"
-                                           class="form-control passenger-passport" />
-
-                                    <span asp-validation-for="Passengers[i].PassportNumber"
-                                          class="text-danger"></span>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label asp-for="Passengers[i].NationalID"
-                                           class="form-label">
-                                        National ID
-                                    </label>
-
-                                    <input asp-for="Passengers[i].NationalID"
-                                           class="form-control passenger-national-id" />
-
-                                    <span asp-validation-for="Passengers[i].NationalID"
-                                          class="text-danger"></span>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label asp-for="Passengers[i].Phone"
-                                           class="form-label">
-                                        Phone
-                                    </label>
-
-                                    <input asp-for="Passengers[i].Phone"
-                                           class="form-control passenger-phone"
-                                           type="tel" />
-
-                                    <span asp-validation-for="Passengers[i].Phone"
-                                          class="text-danger"></span>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label asp-for="Passengers[i].Email"
-                                           class="form-label">
-                                        Email
-                                    </label>
-
-                                    <input asp-for="Passengers[i].Email"
-                                           class="form-control passenger-email"
-                                           type="email" />
-
-                                    <span asp-validation-for="Passengers[i].Email"
-                                          class="text-danger"></span>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label asp-for="Passengers[i].DateOfBirth"
-                                           class="form-label">
-                                        Date of Birth
-                                    </label>
-
-                                    <input asp-for="Passengers[i].DateOfBirth"
-                                           class="form-control passenger-date-of-birth"
-                                           type="date"
-                                           asp-format="{0:yyyy-MM-dd}" />
-
-                                    <span asp-validation-for="Passengers[i].DateOfBirth"
-                                          class="text-danger"></span>
-                                </div>
-
-                            </div>
-                        </div>
                     </div>
-                }
 
-                <!-- Booking Summary -->
+                    <!-- Booking Summary -->
+                    <div class="col-lg-4">
 
-                <div class="card shadow-sm mb-4">
-                    <div class="card-body">
+                        <div class="summary-card">
 
-                        <h4 class="fw-bold mb-3">
-                            Booking Summary
-                        </h4>
-
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Number of Passengers</span>
-                            <strong>@Model.Passengers.Count</strong>
-                        </div>
-
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Price per Ticket</span>
-                            <strong>@Model.TicketPrice.ToString("N2") EGP</strong>
-                        </div>
-
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Subtotal</span>
-                            <strong id="subtotal">
-                                @subtotal.ToString("N2")
-                            </strong>
-                        </div>
-
-                        <hr />
-
-                        <!-- Reward Points -->
-
-                        <div class="bg-light border rounded p-3 mb-4">
-
-                            <h5 class="fw-bold mb-3">
-                                Reward Points
-                            </h5>
-
-                            <div class="alert alert-info">
-                                Your available points:
-                                <strong id="availablePoints">
-                                    @Model.AvailablePoints
-                                </strong>
+                            <div class="summary-header">
+                                <h4>Booking Summary</h4>
                             </div>
 
-                            <div class="row g-3 align-items-end">
+                            <div class="summary-body">
 
-                                <div class="col-md-6">
+                                <div class="summary-row">
+                                    <span>Passengers</span>
+                                    <strong>@Model.Passengers.Count</strong>
+                                </div>
+
+                                <div class="summary-row">
+                                    <span>Price per Ticket</span>
+                                    <strong>@Model.TicketPrice.ToString("N2") EGP</strong>
+                                </div>
+
+                                <div class="summary-row">
+                                    <span>Subtotal</span>
+                                    <strong id="subtotal">@subtotal.ToString("N2")</strong>
+                                </div>
+
+                                <hr class="summary-divider" />
+
+                                <!-- Rewards -->
+                                <div class="reward-box">
+
+                                    <div class="reward-title">
+                                        <span>★</span>
+                                        Reward Points
+                                    </div>
+
+                                    <div class="points-balance">
+                                        Available Points:
+                                        <strong id="availablePoints">
+                                            @Model.AvailablePoints
+                                        </strong>
+                                    </div>
 
                                     <label asp-for="PointsToRedeem"
-                                           class="form-label fw-bold">
+                                           class="form-label">
                                         Points to Redeem
                                     </label>
 
@@ -334,67 +815,54 @@ else
                                            class="form-control"
                                            id="pointsToRedeem" />
 
-                                    <small class="text-muted">
+                                    <small class="text-muted d-block mt-2">
                                         Every 100 points = 50 EGP discount.
                                         Minimum redemption is 100 points.
-                                        Points must be redeemed in multiples of 100.
+                                        Points must be multiples of 100.
                                     </small>
 
                                     <span asp-validation-for="PointsToRedeem"
-                                          class="text-danger"></span>
+                                          class="field-validation-error text-danger"></span>
 
-                                </div>
-
-                                <div class="col-md-6">
-
-                                    <div class="alert alert-success mb-0">
-                                        <div class="d-flex justify-content-between">
-                                            <span>Discount</span>
-
-                                            <strong>
-                                                <span id="discountAmount">0.00</span>
-                                                EGP
-                                            </strong>
-                                        </div>
+                                    <div class="discount-row">
+                                        <span>Discount</span>
+                                        <strong>
+                                            <span id="discountAmount">0.00</span> EGP
+                                        </strong>
                                     </div>
 
                                 </div>
 
+                                <hr class="summary-divider" />
+
+                                <div class="final-total">
+                                    <span>Final Total</span>
+
+                                    <strong>
+                                        <span id="finalTotal">@subtotal.ToString("N2")</span>
+                                        <small>EGP</small>
+                                    </strong>
+                                </div>
+
+                                <button type="submit"
+                                        class="btn continue-btn">
+                                    Continue to Payment →
+                                </button>
+
+                                <p class="text-muted text-center small mt-3 mb-0">
+                                    Please verify all passenger information before continuing.
+                                </p>
+
                             </div>
                         </div>
 
-                        <hr />
-
-                        <div class="d-flex justify-content-between align-items-center">
-
-                            <h5 class="fw-bold mb-0">
-                                Final Total
-                            </h5>
-
-                            <h4 class="fw-bold text-success mb-0">
-                                <span id="finalTotal">
-                                    @subtotal.ToString("N2")
-                                </span>
-                                EGP
-                            </h4>
-
-                        </div>
-
-                        <div class="mt-4 text-end">
-
-                            <button type="submit"
-                                    class="btn btn-success btn-lg">
-                                Continue to Booking
-                            </button>
-
-                        </div>
-
                     </div>
+
                 </div>
             }
         </form>
-    </div>
-}
+    }
+</div>
 
 @section Scripts {
 
@@ -424,10 +892,6 @@ else
             const passengerForm =
                 document.getElementById("passengerForm");
 
-            // Ensure that the points element is an input.
-            // This also allows TypeScript/Visual Studio to recognize
-            // the max property correctly.
-
             if (!(pointsInput instanceof HTMLInputElement)) {
                 return;
             }
@@ -443,37 +907,24 @@ else
             }
 
             const availablePoints =
-                parseInt(
-                    availablePointsElement.textContent || "0",
-                    10
-                ) || 0;
-
-            const subtotalText =
-                subtotalElement.textContent || "0";
+                parseInt(availablePointsElement.textContent || "0", 10) || 0;
 
             const subtotal =
                 parseFloat(
-                    subtotalText.replace(/,/g, "")
+                    (subtotalElement.textContent || "0").replace(/,/g, "")
                 ) || 0;
-
-            // Maximum redeemable points:
-            // 1. Cannot exceed available points.
-            // 2. Must be multiples of 100.
-            // 3. Discount cannot exceed booking subtotal.
 
             const maxPoints = Math.min(
                 Math.floor(availablePoints / 100) * 100,
                 Math.floor(subtotal / 50) * 100
             );
 
-            // Set the maximum allowed value.
             pointsInput.max = maxPoints.toString();
 
             function calculateDiscount() {
 
                 const inputValue = pointsInput.value.trim();
 
-                // Empty input is treated as zero.
                 if (inputValue === "") {
                     pointsInput.setCustomValidity("");
                     discountElement.textContent = "0.00";
@@ -483,7 +934,6 @@ else
 
                 const points = Number(inputValue);
 
-                // Invalid numeric value.
                 if (!Number.isInteger(points)) {
                     pointsInput.setCustomValidity(
                         "Please enter a valid whole number of points."
@@ -494,7 +944,6 @@ else
                     return;
                 }
 
-                // Zero points means no discount.
                 if (points === 0) {
                     pointsInput.setCustomValidity("");
                     discountElement.textContent = "0.00";
@@ -502,7 +951,6 @@ else
                     return;
                 }
 
-                // Validate redemption rules.
                 if (
                     points < 100 ||
                     points % 100 !== 0 ||
@@ -517,48 +965,29 @@ else
                     return;
                 }
 
-                // Valid points.
                 pointsInput.setCustomValidity("");
 
                 const discount = (points / 100) * 50;
-
                 const finalTotal = subtotal - discount;
 
-                discountElement.textContent =
-                    discount.toFixed(2);
-
-                totalElement.textContent =
-                    finalTotal.toFixed(2);
+                discountElement.textContent = discount.toFixed(2);
+                totalElement.textContent = finalTotal.toFixed(2);
             }
 
-            // Recalculate when the user changes the points.
-            pointsInput.addEventListener(
-                "input",
-                calculateDiscount
-            );
+            pointsInput.addEventListener("input", calculateDiscount);
+            pointsInput.addEventListener("change", calculateDiscount);
 
-            pointsInput.addEventListener(
-                "change",
-                calculateDiscount
-            );
+            passengerForm.addEventListener("submit", function (event) {
 
-            // Validate points before submitting the form.
-            passengerForm.addEventListener(
-                "submit",
-                function (event) {
+                calculateDiscount();
 
-                    calculateDiscount();
-
-                    if (!pointsInput.checkValidity()) {
-                        event.preventDefault();
-                        pointsInput.reportValidity();
-                    }
+                if (!pointsInput.checkValidity()) {
+                    event.preventDefault();
+                    pointsInput.reportValidity();
                 }
-            );
+            });
 
-            // Initial calculation.
             calculateDiscount();
-
         });
     </script>
 }

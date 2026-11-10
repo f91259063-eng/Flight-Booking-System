@@ -2,302 +2,242 @@
 
 @{
     ViewData["Title"] = "My Bookings";
-    Layout = "~/Areas/Customer/Views/Shared/_CustomerLayout.cshtml";
-
-    var bookings = Model?.ToList()
-        ?? new List<Flight_Booking_System.ViewModels.Customer.MyBookingViewModel>();
 }
 
-<div class="container-fluid py-3">
+<div class="container-fluid py-4">
 
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-
-        <div>
-            <h4 class="mb-1 fw-bold">
-                <i class="fas fa-ticket-alt text-primary me-2"></i>
-                My Bookings
-            </h4>
-
-            <small class="text-muted">
-                View your flight bookings.
-            </small>
-        </div>
-
-        <span class="badge bg-primary rounded-pill px-3 py-2">
-            Total Bookings: @bookings.Count
-        </span>
-
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">My Bookings</h2>
+        <p class="text-muted mb-0">
+            Manage your reservations and payment details.
+        </p>
     </div>
 
-
-    @if (!bookings.Any())
+    @if (!Model.Any())
     {
-        <!-- No Bookings -->
-
-        <div class="card shadow-sm">
-
+        <div class="card border-0 shadow-sm rounded-4">
             <div class="card-body text-center py-5">
+                <i class="fas fa-plane fa-3x text-muted mb-3"></i>
 
-                <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
+                <h5 class="fw-bold">No bookings yet</h5>
 
-                <h5 class="fw-bold">
-                    No Bookings Found
-                </h5>
-
-                <p class="text-muted mb-4">
-                    You have not made any flight bookings yet.
+                <p class="text-muted mb-0">
+                    You don't have any bookings yet.
                 </p>
-
-                <a asp-area="Customer"
-                   asp-controller="Flights"
-                   asp-action="Index"
-                   class="btn btn-primary">
-
-                    <i class="fas fa-plane me-1"></i>
-                    Browse Flights
-
-                </a>
-
             </div>
-
         </div>
     }
     else
     {
-        <!-- Booking Cards -->
+        <div class="row g-4">
 
-        <div class="row g-3">
-
-            @foreach (var booking in bookings)
+            @foreach (var b in Model)
             {
-                <div class="col-12 col-lg-6 col-xxl-4">
+                <div class="col-12">
 
-                    <div class="card h-100 shadow-sm">
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
 
-                        <!-- Header -->
+                        <!-- Booking Header -->
+                        <div class="card-header bg-white border-bottom p-3 p-md-4">
 
-                        <div class="card-header py-2 px-3 bg-body-tertiary">
-
-                            <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
 
                                 <div>
+                                    <span class="text-muted small">
+                                        Booking Reference
+                                    </span>
 
-                                    <div class="fw-bold">
+                                    <h5 class="fw-bold mb-0">
+                                        @b.BookingReference
+                                    </h5>
+                                </div>
 
-                                        <i class="fas fa-ticket-alt text-primary me-1"></i>
+                                <div class="d-flex flex-wrap gap-2">
 
-                                        @booking.BookingReference
+                                    @if (b.Status == "Confirmed")
+                                    {
+                                        <span class="badge bg-success-subtle text-success px-3 py-2">
+                                            Confirmed
+                                        </span>
+                                    }
+                                    else if (b.Status == "Pending")
+                                    {
+                                        <span class="badge bg-warning-subtle text-warning px-3 py-2">
+                                            Pending
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary-subtle text-secondary px-3 py-2">
+                                            @b.Status
+                                        </span>
+                                    }
 
-                                    </div>
-
-                                    <small class="text-muted">
-
-                                        @booking.BookingDate.ToString("dd MMM yyyy hh:mm tt")
-
-                                    </small>
+                                    @if (b.PaymentStatus)
+                                    {
+                                        <span class="badge bg-success-subtle text-success px-3 py-2">
+                                            <i class="fas fa-check-circle me-1"></i>
+                                            Paid
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger-subtle text-danger px-3 py-2">
+                                            <i class="fas fa-exclamation-circle me-1"></i>
+                                            Unpaid
+                                        </span>
+                                    }
 
                                 </div>
 
-
-                                @if (booking.Status == "Pending")
-                                {
-                                    <span class="badge bg-warning text-dark">
-                                        Pending
-                                    </span>
-                                }
-                                else if (booking.Status == "Confirmed")
-                                {
-                                    <span class="badge bg-success">
-                                        Confirmed
-                                    </span>
-                                }
-                                else if (booking.Status == "Cancelled")
-                                {
-                                    <span class="badge bg-danger">
-                                        Cancelled
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-secondary">
-                                        @booking.Status
-                                    </span>
-                                }
-
                             </div>
-
                         </div>
 
+                        <!-- Booking Details -->
+                        <div class="card-body p-3 p-md-4">
 
-                        <!-- Body -->
+                            <div class="row g-4 align-items-center">
 
-                        <div class="card-body p-3">
+                                <!-- Flight Information -->
+                                <div class="col-lg-7">
 
-                            <!-- Flight -->
+                                    <div class="d-flex align-items-center gap-2 mb-3">
+                                        <i class="fas fa-plane text-primary"></i>
 
-                            <div class="mb-3">
-
-                                <small class="text-muted d-block">
-                                    Flight
-                                </small>
-
-                                <div class="fw-bold">
-
-                                    <i class="fas fa-plane-departure text-primary me-1"></i>
-
-                                    @(string.IsNullOrWhiteSpace(booking.FlightNumber)
-                                        ? "-"
-                                        : booking.FlightNumber)
-
-                                </div>
-
-                            </div>
-
-
-                            <!-- Route -->
-
-                            <div class="row g-2 align-items-center">
-
-                                <!-- From -->
-
-                                <div class="col-5">
-
-                                    <small class="text-muted d-block">
-                                        FROM
-                                    </small>
-
-                                    <div class="fw-bold text-break">
-
-                                        @(string.IsNullOrWhiteSpace(booking.DepartureAirport)
-                                            ? "-"
-                                            : booking.DepartureAirport)
-
+                                        <span class="fw-semibold">
+                                            Flight @b.FlightNumber
+                                        </span>
                                     </div>
 
-                                    <small class="text-muted d-block mt-1">
+                                    <div class="row align-items-center">
 
-                                        @booking.DepartureDateTime.ToString("dd MMM yyyy")
+                                        <div class="col-5">
+                                            <h5 class="fw-bold mb-1">
+                                                @b.DepartureAirport
+                                            </h5>
 
-                                    </small>
+                                            <div class="small text-muted">
+                                                @if (b.DepartureDateTime != default)
+                                                {
+                                                    @b.DepartureDateTime.ToString("dd MMM yyyy")
+                                                    <br />
+                                                    @b.DepartureDateTime.ToString("hh:mm tt")
+                                                }
+                                                else
+                                                {
+                                                    <span>Not available</span>
+                                                }
+                                            </div>
+                                        </div>
 
-                                    <div class="small text-primary fw-bold">
+                                        <div class="col-2 text-center">
+                                            <i class="fas fa-plane text-primary"></i>
+                                            <hr class="my-2" />
+                                        </div>
 
-                                        @booking.DepartureDateTime.ToString("hh:mm tt")
+                                        <div class="col-5 text-end">
+                                            <h5 class="fw-bold mb-1">
+                                                @b.ArrivalAirport
+                                            </h5>
 
-                                    </div>
-
-                                </div>
-
-
-                                <!-- Plane -->
-
-                                <div class="col-2 text-center">
-
-                                    <i class="fas fa-plane text-primary"></i>
-
-                                    <div class="border-top border-2 border-dashed my-2"></div>
-
-                                    <small class="text-muted">
-                                        →
-                                    </small>
-
-                                </div>
-
-
-                                <!-- To -->
-
-                                <div class="col-5">
-
-                                    <small class="text-muted d-block">
-                                        TO
-                                    </small>
-
-                                    <div class="fw-bold text-break">
-
-                                        @(string.IsNullOrWhiteSpace(booking.ArrivalAirport)
-                                            ? "-"
-                                            : booking.ArrivalAirport)
-
-                                    </div>
-
-                                    <small class="text-muted d-block mt-1">
-
-                                        @booking.ArrivalDateTime.ToString("dd MMM yyyy")
-
-                                    </small>
-
-                                    <div class="small text-primary fw-bold">
-
-                                        @booking.ArrivalDateTime.ToString("hh:mm tt")
+                                            <div class="small text-muted">
+                                                @if (b.ArrivalDateTime != default)
+                                                {
+                                                    @b.ArrivalDateTime.ToString("dd MMM yyyy")
+                                                    <br />
+                                                    @b.ArrivalDateTime.ToString("hh:mm tt")
+                                                }
+                                                else
+                                                {
+                                                    <span>Not available</span>
+                                                }
+                                            </div>
+                                        </div>
 
                                     </div>
 
                                 </div>
 
-                            </div>
+                                <!-- Payment Information -->
+                                <div class="col-lg-5">
 
+                                    <div class="bg-light rounded-3 p-3">
 
-                            <hr class="my-3" />
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span class="text-muted">
+                                                Booking Date
+                                            </span>
 
+                                            <span class="fw-semibold">
+                                                @b.BookingDate.ToString("dd MMM yyyy")
+                                            </span>
+                                        </div>
 
-                            <!-- Booking Info -->
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span class="text-muted">
+                                                Number of Tickets
+                                            </span>
 
-                            <div class="row g-2">
+                                            <span class="fw-semibold">
+                                                @b.NumberOfTickets
+                                            </span>
+                                        </div>
 
-                                <div class="col-6">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span class="text-muted">
+                                                Total Price
+                                            </span>
 
-                                    <small class="text-muted d-block">
-                                        Passengers
-                                    </small>
+                                            <span class="fw-bold">
+                                                @b.TotalPrice.ToString("N2") EGP
+                                            </span>
+                                        </div>
 
-                                    <div class="fw-bold">
+                                        @if (!b.PaymentStatus && b.PaymentAmount > 0)
+                                        {
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span class="text-muted">
+                                                    Amount Due
+                                                </span>
 
-                                        <i class="fas fa-users text-primary me-1"></i>
+                                                <span class="fw-bold text-danger">
+                                                    @b.PaymentAmount.ToString("N2") EGP
+                                                </span>
+                                            </div>
+                                        }
 
-                                        @booking.NumberOfTickets
+                                        <hr />
+
+                                        @if (b.CanPay)
+                                        {
+                                            <a asp-area="Customer"
+                                               asp-controller="Payment"
+                                               asp-action="Checkout"
+                                               asp-route-bookingId="@b.BookingId"
+                                               class="btn btn-primary w-100 rounded-3">
+
+                                                <i class="fas fa-credit-card me-2"></i>
+                                                Pay Now
+                                            </a>
+                                        }
+                                        else if (b.PaymentStatus)
+                                        {
+                                            <div class="text-center text-success fw-semibold">
+                                                <i class="fas fa-check-circle me-1"></i>
+                                                Payment Completed
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="text-center text-muted small">
+                                                Payment is not available.
+                                            </div>
+                                        }
 
                                     </div>
 
                                 </div>
-
-
-                                <div class="col-6">
-
-                                    <small class="text-muted d-block">
-                                        Total Price
-                                    </small>
-
-                                    <div class="fw-bold text-success">
-
-                                        @booking.TotalPrice.ToString("N2")
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-
-                        <!-- Footer -->
-
-                        <div class="card-footer py-2 px-3 bg-body-tertiary">
-
-                            <div class="d-flex justify-content-end">
-
-                                <a asp-area="Customer"
-                                   asp-controller="Booking"
-                                   asp-action="Confirmation"
-                                   asp-route-id="@booking.BookingId"
-                                   class="btn btn-sm btn-primary">
-
-                                    <i class="fas fa-eye me-1"></i>
-
-                                    View Booking
-
-                                </a>
 
                             </div>
 
