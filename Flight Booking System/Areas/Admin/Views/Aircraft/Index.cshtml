@@ -1,21 +1,26 @@
-﻿```cshtml
-@model IEnumerable<Flight_Booking_System.Models.Aircraft>
+﻿@model IEnumerable<Flight_Booking_System.Models.Aircraft>
 
 @{
     ViewData["Title"] = "Aircraft";
     Layout = "_AdminLayout";
+
+    var aircraftList = Model?.ToList() ?? new List<Flight_Booking_System.Models.Aircraft>();
+    var totalAircraft = aircraftList.Count;
+    var totalCapacity = aircraftList.Sum(a => a.Capacity);
 }
 
-<div class="container-fluid py-4" dir="ltr">
+<div class="container-fluid py-4 aircraft-management" dir="ltr">
 
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- Page Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
+            <span class="text-primary fw-semibold small text-uppercase">
+                Fleet Management
+            </span>
             <h2 class="fw-bold mb-1">
                 <i class="bi bi-airplane me-1"></i>
                 Manage Aircraft
             </h2>
-
             <p class="text-muted mb-0">
                 View and manage aircraft, their information, and travel classes.
             </p>
@@ -26,77 +31,152 @@
            asp-action="Create"
            class="btn btn-primary">
             <i class="bi bi-plus-circle me-1"></i>
-            Add Aircraft
+            Add New Aircraft
         </a>
     </div>
 
-    <!-- Success and Error Messages -->
+    <!-- Alerts -->
     @if (TempData["Success"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>
             @TempData["Success"]
-            <button type="button"
-                    class="btn-close"
-                    data-bs-dismiss="alert"
-                    aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
     @if (TempData["Error"] != null)
     {
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle me-2"></i>
             @TempData["Error"]
-            <button type="button"
-                    class="btn-close"
-                    data-bs-dismiss="alert"
-                    aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
-    <!-- Aircraft Table -->
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-white py-3">
-            <h5 class="mb-0 fw-bold">Aircraft List</h5>
+    <!-- Statistics -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-sm-6 col-xl-4">
+            <div class="card border-0 shadow-sm airline-stat-card">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="airline-table-icon">
+                        <i class="bi bi-airplane"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted small mb-1">Total Aircraft</p>
+                        <h4 class="fw-bold mb-0">@totalAircraft</h4>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="card-body">
-            @if (Model != null && Model.Any())
+        <div class="col-sm-6 col-xl-4">
+            <div class="card border-0 shadow-sm airline-stat-card">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="airline-table-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted small mb-1">Total Seat Capacity</p>
+                        <h4 class="fw-bold mb-0">@totalCapacity.ToString("N0")</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-4">
+            <div class="card border-0 shadow-sm airline-stat-card">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="airline-table-icon">
+                        <i class="bi bi-building"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted small mb-1">Fleet Directory</p>
+                        <h6 class="fw-bold mb-0">Manage Aircraft</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Aircraft Table -->
+    <div class="card border-0 shadow-sm flight-table-card">
+
+        <div class="card-header bg-white py-3 px-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+
+                <div>
+                    <h5 class="fw-bold mb-1">Aircraft Directory</h5>
+                    <p class="text-muted small mb-0">
+                        View aircraft registration, model, airline, and capacity.
+                    </p>
+                </div>
+
+                @if (aircraftList.Any())
+                {
+                    <div class="position-relative" style="width: min(100%, 300px);">
+                        <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                        <input type="search"
+                               id="aircraftSearch"
+                               class="form-control ps-5"
+                               placeholder="Search aircraft..."
+                               aria-label="Search aircraft" />
+                    </div>
+                }
+
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+
+            @if (aircraftList.Any())
             {
-                <div class="table-responsive">
-                    <table class="table table-hover table-bordered align-middle text-center mb-0">
-                        <thead class="table-light">
+                <div class="table-responsive" id="aircraftTableContainer">
+                    <table class="table table-hover align-middle mb-0 flight-table">
+
+                        <thead>
                             <tr>
-                                <th>#</th>
+                                <th class="ps-4">#</th>
                                 <th>Registration Number</th>
                                 <th>Aircraft Model</th>
                                 <th>Airline</th>
-                                <th>Total Capacity</th>
-                                <th style="min-width: 250px;">Actions</th>
+                                <th>Capacity</th>
+                                <th class="text-center" style="min-width: 280px;">Actions</th>
                             </tr>
                         </thead>
 
-                        <tbody>
+                        <tbody id="aircraftTableBody">
                             @{
                                 var counter = 1;
                             }
 
-                            @foreach (var aircraft in Model)
+                            @foreach (var aircraft in aircraftList)
                             {
-                                <tr>
-                                    <td>@counter</td>
-
-                                    <td class="fw-semibold">
-                                        @aircraft.RegistrationNumber
-                                    </td>
-
-                                    <td>@aircraft.Model</td>
+                                <tr class="aircraft-row">
+                                    <td class="ps-4 text-muted">@counter</td>
 
                                     <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="airline-table-icon">
+                                                <i class="bi bi-airplane"></i>
+                                            </div>
+                                            <span class="fw-semibold aircraft-registration">
+                                                @aircraft.RegistrationNumber
+                                            </span>
+                                        </div>
+                                    </td>
+
+                                    <td class="aircraft-model">@aircraft.Model</td>
+
+                                    <td class="aircraft-airline">
                                         @(aircraft.Airline?.Name ?? "Not specified")
                                     </td>
 
                                     <td>
-                                        <span class="badge bg-info text-dark">
+                                        <span class="badge bg-info text-dark px-3 py-2">
+                                            <i class="bi bi-people me-1"></i>
                                             @aircraft.Capacity Seats
                                         </span>
                                     </td>
@@ -108,30 +188,30 @@
                                                asp-controller="Aircraft"
                                                asp-action="Details"
                                                asp-route-id="@aircraft.Id"
-                                               class="btn btn-sm btn-info text-white"
+                                               class="flight-action-btn btn-outline-info"
                                                title="View Details">
-                                                <i class="bi bi-eye me-1"></i>
-                                                Details
+                                                <i class="bi bi-eye"></i>
+                                                <span>Details</span>
                                             </a>
 
                                             <a asp-area="Admin"
                                                asp-controller="Aircraft"
                                                asp-action="Edit"
                                                asp-route-id="@aircraft.Id"
-                                               class="btn btn-sm btn-warning"
+                                               class="flight-action-btn btn-outline-primary"
                                                title="Edit Aircraft">
-                                                <i class="bi bi-pencil-square me-1"></i>
-                                                Edit
+                                                <i class="bi bi-pencil-square"></i>
+                                                <span>Edit</span>
                                             </a>
 
                                             <a asp-area="Admin"
                                                asp-controller="Aircraft"
                                                asp-action="Delete"
                                                asp-route-id="@aircraft.Id"
-                                               class="btn btn-sm btn-danger"
+                                               class="flight-action-btn btn-outline-danger"
                                                title="Delete Aircraft">
-                                                <i class="bi bi-trash me-1"></i>
-                                                Delete
+                                                <i class="bi bi-trash"></i>
+                                                <span>Delete</span>
                                             </a>
 
                                         </div>
@@ -141,17 +221,37 @@
                                 counter++;
                             }
                         </tbody>
+
                     </table>
+                </div>
+
+                <!-- Search Empty State -->
+                <div id="aircraftNoResults"
+                     class="text-center py-5 text-muted d-none">
+                    <i class="bi bi-search fs-2 d-block mb-2"></i>
+                    <h6 class="fw-semibold">No Matching Aircraft</h6>
+                    <p class="mb-0">Try another search term.</p>
+                </div>
+
+                <!-- Footer -->
+                <div class="card-footer bg-white border-0 px-4 py-3">
+                    <small class="text-muted">
+                        Showing
+                        <strong id="visibleAircraftCount">@totalAircraft</strong>
+                        of <strong>@totalAircraft</strong> aircraft
+                    </small>
                 </div>
             }
             else
             {
                 <div class="text-center py-5">
-                    <i class="bi bi-airplane display-4 text-muted"></i>
+                    <div class="airline-table-icon mx-auto mb-3"
+                         style="width:65px;height:65px;font-size:28px;">
+                        <i class="bi bi-airplane"></i>
+                    </div>
 
-                    <h5 class="mt-3">No Aircraft Registered</h5>
-
-                    <p class="text-muted">
+                    <h5 class="fw-bold">No Aircraft Registered</h5>
+                    <p class="text-muted mb-3">
                         Start by adding the first aircraft to the system.
                     </p>
 
@@ -164,8 +264,87 @@
                     </a>
                 </div>
             }
+
         </div>
     </div>
 
 </div>
-```
+
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const searchElement = document.getElementById("aircraftSearch");
+            const tableBody = document.getElementById("aircraftTableBody");
+            const noResults = document.getElementById("aircraftNoResults");
+            const visibleCount = document.getElementById("visibleAircraftCount");
+            const tableContainer = document.getElementById("aircraftTableContainer");
+
+            if (
+                !(searchElement instanceof HTMLInputElement) ||
+                !(tableBody instanceof HTMLTableSectionElement) ||
+                !(noResults instanceof HTMLElement) ||
+                !(visibleCount instanceof HTMLElement) ||
+                !(tableContainer instanceof HTMLElement)
+            ) {
+                return;
+            }
+
+            // Use non-null local references after validation
+            const searchInput = searchElement;
+            const tbody = tableBody;
+            const emptyState = noResults;
+            const countElement = visibleCount;
+            const container = tableContainer;
+
+            const rows = tbody.querySelectorAll(".aircraft-row");
+
+            function filterAircraft() {
+
+                const searchValue = searchInput.value.trim().toLowerCase();
+                let visibleRows = 0;
+
+                rows.forEach(function (item) {
+
+                    if (!(item instanceof HTMLTableRowElement)) {
+                        return;
+                    }
+
+                    const row = item;
+
+                    const registration =
+                        row.querySelector(".aircraft-registration");
+
+                    const model =
+                        row.querySelector(".aircraft-model");
+
+                    const airline =
+                        row.querySelector(".aircraft-airline");
+
+                    const searchableText = [
+                        registration?.textContent ?? "",
+                        model?.textContent ?? "",
+                        airline?.textContent ?? ""
+                    ].join(" ").toLowerCase();
+
+                    const matches = searchableText.includes(searchValue);
+
+                    row.style.display = matches ? "" : "none";
+
+                    if (matches) {
+                        visibleRows++;
+                    }
+                });
+
+                countElement.textContent = visibleRows.toString();
+
+                emptyState.classList.toggle("d-none", visibleRows > 0);
+                container.classList.toggle("d-none", visibleRows === 0);
+            }
+
+            searchInput.addEventListener("input", filterAircraft);
+
+        });
+    </script>
+}

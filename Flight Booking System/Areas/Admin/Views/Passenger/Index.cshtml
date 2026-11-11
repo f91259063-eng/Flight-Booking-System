@@ -1,203 +1,468 @@
-﻿
-@model IEnumerable<Flight_Booking_System.Models.Passenger>
+﻿@model IEnumerable<Flight_Booking_System.Models.Passenger>
 
 @{
     ViewData["Title"] = "Passenger Management";
     Layout = "_AdminLayout";
+
+    var passengers = Model?.ToList() ?? new List<Flight_Booking_System.Models.Passenger>();
+    var totalPassengers = passengers.Count;
 }
 
-<div class="container-fluid py-4" dir="ltr">
+<div class="container-fluid py-4 passenger-management" dir="ltr">
 
-    <!-- Page Header -->
-    <!-- Header -->
+    <!-- PAGE HEADER -->
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
         <div>
             <h2 class="fw-bold mb-1">
-                <i class="bi bi-people me-1"></i>
+                <i class="fas fa-users me-2"></i>
                 Passenger Management
             </h2>
             <p class="text-muted mb-0">
                 Manage registered passengers and their personal information.
-                View and manage passenger information.
             </p>
         </div>
 
         <a asp-area="Admin"
            asp-controller="Passenger"
            asp-action="Create"
-           class="btn btn-primary">
-            <i class="bi bi-plus-circle me-1"></i>
+           class="btn btn-primary rounded-3 px-4">
+            <i class="fas fa-plus me-2"></i>
             Add New Passenger
         </a>
     </div>
 
-    <!-- Notifications -->
-            Add Passenger
-        </a>
-    </div>
-
-    <!-- Success Message -->
+    <!-- ALERTS -->
     @if (TempData["Success"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle me-1"></i>
+            <i class="fas fa-check-circle me-2"></i>
             @TempData["Success"]
-            <button type="button" class="btn-close"
-                    data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
 
             <button type="button"
                     class="btn-close"
                     data-bs-dismiss="alert"
-                    aria-label="Close"></button>
+                    aria-label="Close">
+            </button>
         </div>
     }
 
-    <!-- Error Message -->
     @if (TempData["Error"] != null)
     {
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle me-1"></i>
+            <i class="fas fa-exclamation-circle me-2"></i>
             @TempData["Error"]
-            <button type="button" class="btn-close"
-                    data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
 
-    <!-- Registered Passengers -->
             <button type="button"
                     class="btn-close"
                     data-bs-dismiss="alert"
-                    aria-label="Close"></button>
+                    aria-label="Close">
+            </button>
         </div>
     }
 
-    <!-- Passenger List -->
-    <div class="card border-0 shadow-sm">
+    <!-- STATISTICS -->
+    <div class="row g-3 mb-4">
 
-        <div class="card-header bg-white py-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fw-bold">
-                    <i class="bi bi-list-ul me-1"></i>
-                    Registered Passengers
-                </h5>
+        <div class="col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm airline-stat-card">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="airline-table-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
 
-                <span class="badge bg-primary">
-                    @(Model?.Count() ?? 0) Passengers
-                </span>
+                    <div>
+                        <p class="text-muted small mb-1">Total Passengers</p>
+                        <h4 class="fw-bold mb-0">@totalPassengers</h4>
+                    </div>
+                </div>
             </div>
-            <h5 class="mb-0 fw-bold">
-                <i class="bi bi-list-ul me-1"></i>
-                Passenger List
-            </h5>
         </div>
 
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
+        <div class="col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm airline-stat-card">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="airline-table-icon">
+                        <i class="fas fa-passport"></i>
+                    </div>
 
-                    <thead style="background-color: #0b1729; color: white;">
-                        <tr>
-                            <th>ID</th>
-                            <th>Full Name</th>
-                            <th>Passport No.</th>
-                            <th>National ID</th>
-                            <th>Phone Number</th>
-                            <th>Email Address</th>
-                            <th>Passenger Name</th>
-                            <th>Passport Number</th>
-                            <th>National ID</th>
-                            <th>Phone</th>
-                            <th>Email</th>
-                            <th>Date of Birth</th>
-                            <th class="text-center">Actions</th>
+                    <div>
+                        <p class="text-muted small mb-1">Passport Records</p>
+                        <h4 class="fw-bold mb-0">
+                            @passengers.Count(p => !string.IsNullOrWhiteSpace(p.PassportNumber))
+                        </h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm airline-stat-card">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="airline-table-icon">
+                        <i class="fas fa-id-card"></i>
+                    </div>
+
+                    <div>
+                        <p class="text-muted small mb-1">National ID Records</p>
+                        <h4 class="fw-bold mb-0">
+                            @passengers.Count(p => !string.IsNullOrWhiteSpace(p.NationalID))
+                        </h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- PASSENGERS TABLE -->
+    <div class="card border-0 shadow-sm flight-table-card">
+
+        <!-- TABLE HEADER -->
+        <div class="card-header bg-white border-0 p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+                <div>
+                    <h5 class="fw-bold mb-1">
+                        <i class="fas fa-list-ul me-2"></i>
+                        Registered Passengers
+                    </h5>
+
+                    <p class="text-muted small mb-0">
+                        View and manage all registered passenger records.
+                    </p>
+                </div>
+
+                <!-- SEARCH -->
+                <div class="position-relative passenger-search-box"
+                     style="min-width:260px; max-width:100%;">
+
+                    <i class="fas fa-search position-absolute text-muted"
+                       style="left:13px; top:13px;"></i>
+
+                    <input type="text"
+                           id="passengerSearch"
+                           class="form-control ps-5"
+                           placeholder="Search passengers..."
+                           autocomplete="off" />
+                </div>
+
+            </div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-responsive">
+            <table class="table flight-table align-middle mb-0">
+
+                <thead>
+                    <tr>
+                        <th class="ps-4">ID</th>
+                        <th>Passenger Name</th>
+                        <th>Passport Number</th>
+                        <th>National ID</th>
+                        <th>Phone Number</th>
+                        <th>Email Address</th>
+                        <th>Date of Birth</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody id="passengerTableBody">
+
+                    @foreach (var item in passengers)
+                    {
+                        var fullName = string.Join(" ", new[]
+                        {
+                            item.FirstName,
+                            item.MiddleName,
+                            item.LastName
+                        }.Where(name => !string.IsNullOrWhiteSpace(name)));
+
+                        <tr class="passenger-row"
+                            data-search="@($"{item.Id} {fullName} {item.PassportNumber} {item.NationalID} {item.Phone} {item.Email}")">
+
+                            <!-- ID -->
+                            <td class="ps-4">
+                                <span class="fw-bold text-muted">
+                                    #@item.Id
+                                </span>
+                            </td>
+
+                            <!-- NAME -->
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+
+                                    <div class="passenger-avatar">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+
+                                    <span class="fw-semibold">
+                                        @fullName
+                                    </span>
+
+                                </div>
+                            </td>
+
+                            <!-- PASSPORT -->
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(item.PassportNumber))
+                                {
+                                    <span class="passenger-code-badge">
+                                        @item.PassportNumber
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Not provided</span>
+                                }
+                            </td>
+
+                            <!-- NATIONAL ID -->
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(item.NationalID))
+                                {
+                                    <span class="text-secondary fw-medium">
+                                        @item.NationalID
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Not provided</span>
+                                }
+                            </td>
+
+                            <!-- PHONE -->
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(item.Phone))
+                                {
+                                    <span dir="ltr">@item.Phone</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Not provided</span>
+                                }
+                            </td>
+
+                            <!-- EMAIL -->
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(item.Email))
+                                {
+                                    <span>@item.Email</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Not provided</span>
+                                }
+                            </td>
+
+                            <!-- DATE OF BIRTH -->
+                            <td>
+                                @item.DateOfBirth.ToString("yyyy/MM/dd")
+                            </td>
+
+                            <!-- ACTIONS -->
+                            <td>
+                                <div class="d-flex justify-content-center flex-wrap gap-2">
+
+                                    <a asp-area="Admin"
+                                       asp-controller="Passenger"
+                                       asp-action="Edit"
+                                       asp-route-id="@item.Id"
+                                       class="flight-action-btn btn-outline-primary">
+                                        <i class="fas fa-edit"></i>
+                                        Edit
+                                    </a>
+
+                                    <a asp-area="Admin"
+                                       asp-controller="ActivityLog"
+                                       asp-action="Index"
+                                       asp-route-entityId="@item.Id"
+                                       class="flight-action-btn btn-outline-info">
+                                        <i class="fas fa-history"></i>
+                                        History
+                                    </a>
+
+                                    <a asp-area="Admin"
+                                       asp-controller="Passenger"
+                                       asp-action="Delete"
+                                       asp-route-id="@item.Id"
+                                       class="flight-action-btn btn-outline-danger">
+                                        <i class="fas fa-trash-alt"></i>
+                                        Delete
+                                    </a>
+
+                                </div>
+                            </td>
+
                         </tr>
-                    </thead>
+                    }
 
-                    <tbody>
-                        @if (Model != null && Model.Any())
-                        {
-                            foreach (var item in Model)
-                            {
-                                <tr>
-                                    <td>@item.Id</td>
+                    <!-- NO RESULTS -->
+                    <tr id="passengerNoResults" style="display:none;">
+                        <td colspan="8" class="text-center py-5">
 
-                                    <td class="fw-semibold">
-                                        @item.FirstName
-                                        @item.MiddleName
-                                        @item.LastName
-                                    </td>
+                            <i class="fas fa-users fa-2x text-muted mb-3"></i>
 
-                                    <td>@item.PassportNumber</td>
+                            <h6 class="fw-bold">No Passengers Found</h6>
 
-                                    <td>@item.NationalID</td>
+                            <p class="text-muted small mb-0">
+                                Try changing your search keywords.
+                            </p>
 
-                                    <td dir="ltr" class="text-start">
-                                        @item.Phone
-                                    </td>
+                        </td>
+                    </tr>
 
-                                    <td>@item.Email</td>
+                </tbody>
 
-                                    <td>
-                                        @item.DateOfBirth.ToString("yyyy/MM/dd")
-                                    </td>
-
-                                    <td>
-                                        <div class="d-flex justify-content-center gap-2 flex-wrap">
-
-                                            <a asp-area="Admin"
-                                               asp-controller="Passenger"
-                                               asp-action="Edit"
-                                               asp-route-id="@item.Id"
-                                               class="btn btn-warning btn-sm">
-                                                <i class="bi bi-pencil-square me-1"></i>
-                                                Edit
-                                            </a>
-
-                                            <a asp-area="Admin"
-                                               asp-controller="ActivityLog"
-                                               asp-action="Index"
-                                               asp-route-entityId="@item.Id"
-                                               class="btn btn-info btn-sm">
-                                                <i class="bi bi-clock-history me-1"></i>
-                                                Activity History
-                                            </a>
-
-                                            <a asp-area="Admin"
-                                               asp-controller="Passenger"
-                                               asp-action="Delete"
-                                               asp-route-id="@item.Id"
-                                               class="btn btn-danger btn-sm">
-                                                <i class="bi bi-trash me-1"></i>
-                                                Delete
-                                            </a>
-
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        }
-                        else
-                        {
-                            <tr>
-                                <td colspan="8" class="text-center py-5 text-muted">
-                                    <i class="bi bi-people display-6 d-block mb-3"></i>
-                                    <h5>No Passengers Available</h5>
-                                    <p class="mb-0">
-                                        There are currently no registered passengers.
-                                    <h5>No Passengers Found</h5>
-                                    <p class="mb-0">
-                                        No passengers have been registered yet.
-                                    </p>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-
-                </table>
-            </div>
+            </table>
         </div>
+
+        <!-- TABLE FOOTER -->
+        <div class="card-footer bg-white border-0 px-4 py-3">
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+                <small class="text-muted">
+                    Showing
+                    <strong id="visiblePassengerCount">@totalPassengers</strong>
+                    of
+                    <strong>@totalPassengers</strong>
+                    passengers
+                </small>
+
+                <small class="text-muted">
+                    <i class="fas fa-database me-1"></i>
+                    Passengers Database
+                </small>
+
+            </div>
+
+        </div>
+
     </div>
 
 </div>
+
+<style>
+    .passenger-management .passenger-avatar {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: var(--admin-primary-light, #eaf1ff);
+        color: var(--admin-primary, #2563eb);
+        font-size: 15px;
+    }
+
+    .passenger-management .passenger-code-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 10px;
+        border-radius: 7px;
+        background: #f1f5f9;
+        color: #334155;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .4px;
+    }
+
+    .passenger-management .flight-table th {
+        white-space: nowrap;
+    }
+
+    .passenger-management .flight-table td {
+        vertical-align: middle;
+    }
+
+    .passenger-management .flight-action-btn.btn-outline-info {
+        color: #0891b2;
+        border: 1px solid #0891b2;
+    }
+
+        .passenger-management .flight-action-btn.btn-outline-info:hover {
+            background: #0891b2;
+            color: #fff;
+        }
+
+    @@media (max-width: 576px) {
+        .passenger-management .card-header {
+            padding: 20px !important;
+        }
+
+        .passenger-management .card-footer {
+            padding-left: 15px !important;
+            padding-right: 15px !important;
+        }
+
+        .passenger-management .passenger-search-box {
+            width: 100%;
+            min-width: 100% !important;
+        }
+    }
+</style>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const searchElement = document.getElementById("passengerSearch");
+            const tableElement = document.getElementById("passengerTableBody");
+            const noResultsElement = document.getElementById("passengerNoResults");
+            const countElement = document.getElementById("visiblePassengerCount");
+
+            // Validate element types
+            if (
+                !(searchElement instanceof HTMLInputElement) ||
+                !(tableElement instanceof HTMLTableSectionElement) ||
+                !(noResultsElement instanceof HTMLTableRowElement) ||
+                !(countElement instanceof HTMLElement)
+            ) {
+                return;
+            }
+
+            const searchInput = searchElement;
+            const tableBody = tableElement;
+            const noResults = noResultsElement;
+            const visibleCount = countElement;
+
+            const rows = Array.from(
+                tableBody.querySelectorAll(".passenger-row")
+            ).filter(
+                (row) => row instanceof HTMLTableRowElement
+            );
+
+            function filterPassengers() {
+
+                const searchValue = searchInput.value.trim().toLowerCase();
+
+                let visible = 0;
+
+                rows.forEach((row) => {
+
+                    const searchText = (
+                        row.getAttribute("data-search") || ""
+                    ).toLowerCase();
+
+                    const matches = searchText.includes(searchValue);
+
+                    row.style.display = matches ? "" : "none";
+
+                    if (matches) {
+                        visible++;
+                    }
+                });
+
+                noResults.style.display = visible === 0 ? "" : "none";
+
+                visibleCount.textContent = visible.toString();
+            }
+
+            searchInput.addEventListener("input", filterPassengers);
+
+            // Initialize count
+            filterPassengers();
+        });
+    </script>
+}

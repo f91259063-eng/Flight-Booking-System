@@ -1,559 +1,179 @@
 ﻿@model Flight_Booking_System.ViewModels.AdminDashboardViewModel
 
 @{
-    ViewData["Title"] = "Admin Dashboard";
+    ViewData["Title"] = "Admin Overview";
     Layout = "_AdminLayout";
+
+    var chartItems = new[]
+    {
+        new { Label = "Flights", Value = Model.TotalFlights, Color = "#0891b2" },
+        new { Label = "Bookings", Value = Model.TotalBookings, Color = "#2563eb" },
+        new { Label = "Passengers", Value = Model.TotalPassengers, Color = "#16a34a" },
+        new { Label = "Aircraft", Value = Model.TotalAircraft, Color = "#7c3aed" },
+        new { Label = "Airports", Value = Model.TotalAirports, Color = "#ea580c" },
+        new { Label = "Routes", Value = Model.TotalRoutes, Color = "#db2777" }
+    };
+    var maxChartValue = Math.Max(1, chartItems.Max(x => x.Value));
 }
 
-<style>
-    .dashboard-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 12px;
-        margin-bottom: 25px;
-    }
-
-        .dashboard-header h2 {
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .dashboard-header p {
-            color: #6c757d;
-            margin: 0;
-        }
-
-    .dashboard-card {
-        border: 0;
-        border-radius: 16px;
-        box-shadow: 0 4px 18px rgba(0, 0, 0, .06);
-        transition: transform .2s, box-shadow .2s;
-        height: 100%;
-        overflow: hidden;
-        background: #fff;
-    }
-
-        .dashboard-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, .10);
-        }
-
-        .dashboard-card a {
-            display: block;
-            color: inherit;
-            text-decoration: none;
-            padding: 22px;
-            height: 100%;
-        }
-
-        .dashboard-card .card-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .dashboard-card .card-label {
-            color: #6c757d;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-
-        .dashboard-card .card-number {
-            font-size: 30px;
-            font-weight: 800;
-            color: #212529;
-            line-height: 1.2;
-        }
-
-        .dashboard-card .card-icon {
-            width: 55px;
-            height: 55px;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 25px;
-            flex-shrink: 0;
-        }
-
-    .icon-blue {
-        background: #e7f0ff;
-        color: #0d6efd;
-    }
-
-    .icon-green {
-        background: #e4f7ec;
-        color: #198754;
-    }
-
-    .icon-orange {
-        background: #fff0df;
-        color: #fd7e14;
-    }
-
-    .icon-purple {
-        background: #f0e8ff;
-        color: #6f42c1;
-    }
-
-    .icon-red {
-        background: #ffe8e8;
-        color: #dc3545;
-    }
-
-    .icon-cyan {
-        background: #e1f7fb;
-        color: #0dcaf0;
-    }
-
-    .section-title {
-        font-size: 18px;
-        font-weight: 700;
-        margin: 30px 0 16px;
-    }
-
-    .quick-action {
-        border: 1px solid #e9ecef;
-        border-radius: 12px;
-        padding: 15px;
-        color: #212529;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        transition: background .2s;
-        height: 100%;
-    }
-
-        .quick-action:hover {
-            background: #f8f9fa;
-            color: #0d6efd;
-        }
-
-        .quick-action i {
-            font-size: 22px;
-            color: #0d6efd;
-        }
-
-    .chart-container {
-        position: relative;
-        height: 350px;
-        max-width: 500px;
-        margin: auto;
-    }
-
-    .chart-card {
-        border: 0;
-        border-radius: 16px;
-        box-shadow: 0 4px 18px rgba(0, 0, 0, .06);
-        background: #fff;
-        height: 100%;
-    }
-</style>
-
-<div class="container-fluid py-3">
-
-    <!-- Dashboard Header -->
-    <div class="dashboard-header">
-        <div>
-            <h2>Admin Dashboard</h2>
-            <p>Welcome to Flight Booking System management panel.</p>
-        </div>
-
-        <span class="badge text-bg-primary p-2">
-            <i class="bi bi-airplane"></i>
-            Flight Management
-        </span>
+<div class="admin-dashboard-welcome">
+    <div>
+        <div class="admin-eyebrow text-white-50 mb-2">Flight Booking System</div>
+        <h1>Welcome to your control center</h1>
+        <p>Monitor your airline operations, manage resources, and review system activity.</p>
     </div>
-
-    <!-- Statistics Cards -->
-    <h5 class="section-title">System Statistics</h5>
-
-    <div class="row g-4">
-
-        <!-- Users -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="dashboard-card">
-                <a asp-area="Admin" asp-controller="Users" asp-action="Index">
-                    <div class="card-content">
-                        <div>
-                            <div class="card-label">Total Users</div>
-                            <div class="card-number">@Model.TotalUsers</div>
-                        </div>
-                        <div class="card-icon icon-blue">
-                            <i class="bi bi-people"></i>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
-
-        <!-- Roles -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="dashboard-card">
-                <a asp-area="Admin" asp-controller="Roles" asp-action="Index">
-                    <div class="card-content">
-                        <div>
-                            <div class="card-label">Total Roles</div>
-                            <div class="card-number">@Model.TotalRoles</div>
-                        </div>
-                        <div class="card-icon icon-purple">
-                            <i class="bi bi-shield-lock"></i>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
-
-        <!-- Flights -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="dashboard-card">
-                <a asp-area="" asp-controller="Flights" asp-action="Index">
-                    <div class="card-content">
-                        <div>
-                            <div class="card-label">Total Flights</div>
-                            <div class="card-number">@Model.TotalFlights</div>
-                        </div>
-                        <div class="card-icon icon-cyan">
-                            <i class="bi bi-airplane"></i>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
-
-        <!-- Bookings -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="dashboard-card">
-                <a asp-area="" asp-controller="Bookings" asp-action="Index">
-                    <div class="card-content">
-                        <div>
-                            <div class="card-label">Total Bookings</div>
-                            <div class="card-number">@Model.TotalBookings</div>
-                        </div>
-                        <div class="card-icon icon-green">
-                            <i class="bi bi-ticket-perforated"></i>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
-
-        <!-- Passengers -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="dashboard-card">
-                <a asp-area="" asp-controller="Passengers" asp-action="Index">
-                    <div class="card-content">
-                        <div>
-                            <div class="card-label">Total Passengers</div>
-                            <div class="card-number">@Model.TotalPassengers</div>
-                        </div>
-                        <div class="card-icon icon-blue">
-                            <i class="bi bi-person-vcard"></i>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
-
-        <!-- Aircraft -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="dashboard-card">
-                <a asp-area="" asp-controller="Aircraft" asp-action="Index">
-                    <div class="card-content">
-                        <div>
-                            <div class="card-label">Total Aircraft</div>
-                            <div class="card-number">@Model.TotalAircraft</div>
-                        </div>
-                        <div class="card-icon icon-orange">
-                            <i class="bi bi-airplane-engines"></i>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
-
-        <!-- Airports -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="dashboard-card">
-                <a asp-area="" asp-controller="Airports" asp-action="Index">
-                    <div class="card-content">
-                        <div>
-                            <div class="card-label">Total Airports</div>
-                            <div class="card-number">@Model.TotalAirports</div>
-                        </div>
-                        <div class="card-icon icon-red">
-                            <i class="bi bi-geo-alt"></i>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
-
-        <!-- Routes -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="dashboard-card">
-                <a asp-area="" asp-controller="Routes" asp-action="Index">
-                    <div class="card-content">
-                        <div>
-                            <div class="card-label">Total Routes</div>
-                            <div class="card-number">@Model.TotalRoutes</div>
-                        </div>
-                        <div class="card-icon icon-purple">
-                            <i class="bi bi-signpost-2"></i>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
-
-        <!-- Seats -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="dashboard-card">
-                <div style="padding:22px">
-                    <div class="card-content">
-                        <div>
-                            <div class="card-label">Total Seats</div>
-                            <div class="card-number">@Model.TotalSeats</div>
-                        </div>
-                        <div class="card-icon icon-green">
-                            <i class="bi bi-grid-3x3"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Payments -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="dashboard-card">
-                <a asp-area="" asp-controller="Payments" asp-action="Index">
-                    <div class="card-content">
-                        <div>
-                            <div class="card-label">Total Payments</div>
-                            <div class="card-number">@Model.TotalPayments</div>
-                        </div>
-                        <div class="card-icon icon-orange">
-                            <i class="bi bi-credit-card"></i>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
-
-        <!-- Cities -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="dashboard-card">
-                <a asp-area="" asp-controller="Cities" asp-action="Index">
-                    <div class="card-content">
-                        <div>
-                            <div class="card-label">Total Cities</div>
-                            <div class="card-number">@Model.TotalCities</div>
-                        </div>
-                        <div class="card-icon icon-cyan">
-                            <i class="bi bi-buildings"></i>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Pie Chart -->
-    <h5 class="section-title">System Statistics Chart</h5>
-
-    <div class="row g-4">
-        <div class="col-12 col-lg-7">
-            <div class="chart-card">
-                <div class="p-4">
-                    <h5 class="fw-bold mb-4">System Data Distribution</h5>
-
-                    <div class="chart-container">
-                        <canvas id="systemPieChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-12 col-lg-5">
-            <div class="chart-card">
-                <div class="p-4">
-                    <h5 class="fw-bold mb-4">Statistics Summary</h5>
-
-                    <div class="d-flex justify-content-between border-bottom py-3">
-                        <span><i class="bi bi-airplane text-info me-2"></i>Flights</span>
-                        <strong>@Model.TotalFlights</strong>
-                    </div>
-
-                    <div class="d-flex justify-content-between border-bottom py-3">
-                        <span><i class="bi bi-ticket-perforated text-success me-2"></i>Bookings</span>
-                        <strong>@Model.TotalBookings</strong>
-                    </div>
-
-                    <div class="d-flex justify-content-between border-bottom py-3">
-                        <span><i class="bi bi-people text-primary me-2"></i>Passengers</span>
-                        <strong>@Model.TotalPassengers</strong>
-                    </div>
-
-                    <div class="d-flex justify-content-between border-bottom py-3">
-                        <span><i class="bi bi-airplane-engines text-warning me-2"></i>Aircraft</span>
-                        <strong>@Model.TotalAircraft</strong>
-                    </div>
-
-                    <div class="d-flex justify-content-between border-bottom py-3">
-                        <span><i class="bi bi-geo-alt text-danger me-2"></i>Airports</span>
-                        <strong>@Model.TotalAirports</strong>
-                    </div>
-
-                    <div class="d-flex justify-content-between py-3">
-                        <span><i class="bi bi-signpost-2 text-secondary me-2"></i>Routes</span>
-                        <strong>@Model.TotalRoutes</strong>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Quick Actions -->
-    <h5 class="section-title">Quick Actions</h5>
-
-    <div class="row g-3">
-
-        <div class="col-12 col-md-6 col-xl-3">
-            <a class="quick-action"
-               asp-area="" asp-controller="Flights" asp-action="Create">
-                <i class="bi bi-plus-circle"></i>
-                <div>
-                    <strong>Add Flight</strong>
-                    <div class="text-muted small">Create a new flight</div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-12 col-md-6 col-xl-3">
-            <a class="quick-action"
-               asp-area="" asp-controller="Airports" asp-action="Create">
-                <i class="bi bi-geo-alt"></i>
-                <div>
-                    <strong>Add Airport</strong>
-                    <div class="text-muted small">Register a new airport</div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-12 col-md-6 col-xl-3">
-            <a class="quick-action"
-               asp-area="" asp-controller="Routes" asp-action="Create">
-                <i class="bi bi-signpost"></i>
-                <div>
-                    <strong>Add Route</strong>
-                    <div class="text-muted small">Create an airport route</div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-12 col-md-6 col-xl-3">
-            <a class="quick-action"
-               asp-area="Admin" asp-controller="Users" asp-action="Index">
-                <i class="bi bi-person-gear"></i>
-                <div>
-                    <strong>Manage Users</strong>
-                    <div class="text-muted small">Manage system accounts</div>
-                </div>
-            </a>
-        </div>
-
+    <div class="welcome-icon" aria-hidden="true">
+        <i class="fas fa-plane-departure"></i>
     </div>
 </div>
 
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<div class="admin-section-heading">
+    <h2>System Overview</h2>
+    <span>Live totals from your database</span>
+</div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const canvas = document.getElementById('systemPieChart');
+<div class="admin-stats-grid">
+    <article class="admin-stat-card stat-blue">
+        <div class="admin-stat-top">
+            <span class="admin-stat-label">Total Users</span>
+            <span class="admin-stat-icon"><i class="fas fa-users"></i></span>
+        </div>
+        <div class="admin-stat-value">@Model.TotalUsers.ToString("N0")</div>
+        <div class="admin-stat-foot">Registered system accounts</div>
+    </article>
 
-        if (!canvas) {
-            return;
-        }
+    <article class="admin-stat-card stat-cyan">
+        <div class="admin-stat-top">
+            <span class="admin-stat-label">Total Flights</span>
+            <span class="admin-stat-icon"><i class="fas fa-plane"></i></span>
+        </div>
+        <div class="admin-stat-value">@Model.TotalFlights.ToString("N0")</div>
+        <div class="admin-stat-foot">Flights in the system</div>
+    </article>
 
-        const chartData = [
-                @Model.TotalFlights,
-                @Model.TotalBookings,
-                @Model.TotalPassengers,
-                @Model.TotalAircraft,
-                @Model.TotalAirports,
-            @Model.TotalRoutes
-        ];
+    <article class="admin-stat-card stat-green">
+        <div class="admin-stat-top">
+            <span class="admin-stat-label">Total Bookings</span>
+            <span class="admin-stat-icon"><i class="fas fa-ticket-alt"></i></span>
+        </div>
+        <div class="admin-stat-value">@Model.TotalBookings.ToString("N0")</div>
+        <div class="admin-stat-foot">Booking records</div>
+    </article>
 
-        new Chart(canvas, {
-            type: 'pie',
+    <article class="admin-stat-card stat-violet">
+        <div class="admin-stat-top">
+            <span class="admin-stat-label">Total Passengers</span>
+            <span class="admin-stat-icon"><i class="fas fa-user-friends"></i></span>
+        </div>
+        <div class="admin-stat-value">@Model.TotalPassengers.ToString("N0")</div>
+        <div class="admin-stat-foot">Passenger profiles</div>
+    </article>
 
-            data: {
-                labels: [
-                    'Flights',
-                    'Bookings',
-                    'Passengers',
-                    'Aircraft',
-                    'Airports',
-                    'Routes'
-                ],
+    <article class="admin-stat-card stat-orange">
+        <div class="admin-stat-top">
+            <span class="admin-stat-label">Aircraft</span>
+            <span class="admin-stat-icon"><i class="fas fa-plane"></i></span>
+        </div>
+        <div class="admin-stat-value">@Model.TotalAircraft.ToString("N0")</div>
+        <div class="admin-stat-foot">Registered aircraft</div>
+    </article>
 
-                datasets: [{
-                    data: chartData,
+    <article class="admin-stat-card stat-rose">
+        <div class="admin-stat-top">
+            <span class="admin-stat-label">Airports</span>
+            <span class="admin-stat-icon"><i class="fas fa-map-marker-alt"></i></span>
+        </div>
+        <div class="admin-stat-value">@Model.TotalAirports.ToString("N0")</div>
+        <div class="admin-stat-foot">Airport locations</div>
+    </article>
 
-                    backgroundColor: [
-                        '#0d6efd',
-                        '#198754',
-                        '#ffc107',
-                        '#6f42c1',
-                        '#dc3545',
-                        '#0dcaf0'
-                    ],
+    <article class="admin-stat-card stat-cyan">
+        <div class="admin-stat-top">
+            <span class="admin-stat-label">Routes</span>
+            <span class="admin-stat-icon"><i class="fas fa-route"></i></span>
+        </div>
+        <div class="admin-stat-value">@Model.TotalRoutes.ToString("N0")</div>
+        <div class="admin-stat-foot">Available flight routes</div>
+    </article>
 
-                    borderColor: '#ffffff',
-                    borderWidth: 3,
-                    hoverOffset: 8
-                }]
-            },
+    <article class="admin-stat-card stat-green">
+        <div class="admin-stat-top">
+            <span class="admin-stat-label">Total Seats</span>
+            <span class="admin-stat-icon"><i class="fas fa-chair"></i></span>
+        </div>
+        <div class="admin-stat-value">@Model.TotalSeats.ToString("N0")</div>
+        <div class="admin-stat-foot">Configured aircraft seats</div>
+    </article>
+</div>
 
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
+<div class="admin-dashboard-grid">
+    <section class="admin-panel">
+        <div class="admin-panel-header">
+            <div>
+                <h2 class="admin-panel-title">System Data Distribution</h2>
+                <p class="admin-panel-subtitle">A quick comparison of the main operational records</p>
+            </div>
+            <span class="admin-eyebrow">Overview</span>
+        </div>
 
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 18,
-                            usePointStyle: true
-                        }
-                    },
-
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                const value = Number(context.raw) || 0;
-
-                                const total = context.dataset.data.reduce(
-                                    (sum, item) => sum + (Number(item) || 0),
-                                    0
-                                );
-
-                                const percentage = total > 0
-                                    ? ((value / total) * 100).toFixed(1)
-                                    : '0.0';
-
-                                return `${context.label}: ${value} (${percentage}%)`;
-                            }
-                        }
-                    }
-                }
+        <div class="d-grid gap-3">
+            @foreach (var item in chartItems)
+            {
+                var percentage = Math.Round((double)item.Value / maxChartValue * 100);
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="small fw-semibold">@item.Label</span>
+                        <strong class="small">@item.Value.ToString("N0")</strong>
+                    </div>
+                    <div class="progress" style="height:9px; background:#edf2f7; border-radius:20px;">
+                        <div class="progress-bar" role="progressbar"
+                             style="width:@percentage%; background-color:@item.Color; border-radius:20px;"
+                             aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
             }
-        });
-    });
-</script>
+        </div>
+    </section>
+
+    <section class="admin-panel">
+        <div class="admin-panel-header">
+            <div>
+                <h2 class="admin-panel-title">System Summary</h2>
+                <p class="admin-panel-subtitle">Additional platform totals</p>
+            </div>
+            <i class="fas fa-chart-pie admin-muted"></i>
+        </div>
+
+        <ul class="admin-summary-list">
+            <li><span><i class="fas fa-user-tag me-2"></i>Roles</span><strong>@Model.TotalRoles.ToString("N0")</strong></li>
+            <li><span><i class="fas fa-credit-card me-2"></i>Payments</span><strong>@Model.TotalPayments.ToString("N0")</strong></li>
+            <li><span><i class="fas fa-city me-2"></i>Cities</span><strong>@Model.TotalCities.ToString("N0")</strong></li>
+            <li><span><i class="fas fa-plane me-2"></i>Aircraft</span><strong>@Model.TotalAircraft.ToString("N0")</strong></li>
+            <li><span><i class="fas fa-map-marked-alt me-2"></i>Airports</span><strong>@Model.TotalAirports.ToString("N0")</strong></li>
+        </ul>
+    </section>
+</div>
+
+<div class="admin-section-heading">
+    <h2>Quick Actions</h2>
+    <span>Shortcuts to common tasks</span>
+</div>
+
+<div class="admin-quick-actions">
+    <a class="admin-quick-action" asp-area="Admin" asp-controller="Flight" asp-action="Create">
+        <i class="fas fa-plus"></i>
+        <span><strong>Create Flight</strong><small>Add a new flight</small></span>
+    </a>
+    <a class="admin-quick-action" asp-area="Admin" asp-controller="Airports" asp-action="Create">
+        <i class="fas fa-map-marker-alt"></i>
+        <span><strong>Add Airport</strong><small>Register an airport</small></span>
+    </a>
+    <a class="admin-quick-action" asp-area="Admin" asp-controller="Routes" asp-action="Create">
+        <i class="fas fa-route"></i>
+        <span><strong>Create Route</strong><small>Connect two airports</small></span>
+    </a>
+    <a class="admin-quick-action" asp-area="Admin" asp-controller="Admin" asp-action="Users">
+        <i class="fas fa-user-cog"></i>
+        <span><strong>Manage Users</strong><small>Review system accounts</small></span>
+    </a>
+</div>

@@ -7,9 +7,18 @@
 
 <div class="container-fluid py-4" dir="ltr">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Edit Airport</h2>
+            <span class="text-primary fw-semibold small text-uppercase">
+                Airport Management
+            </span>
+
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-pencil-square me-2"></i>
+                Edit Airport
+            </h2>
+
             <p class="text-muted mb-0">
                 Update airport information and geographical coordinates.
             </p>
@@ -24,14 +33,29 @@
         </a>
     </div>
 
+    <!-- Edit Form -->
     <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
+        <div class="col-xl-8 col-lg-9 col-md-10">
 
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0">Airport Information</h5>
+            <div class="card border-0 shadow-sm flight-form-card">
+
+                <!-- Card Header -->
+                <div class="card-header bg-white p-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="flight-form-header-icon">
+                            <i class="bi bi-geo-alt"></i>
+                        </div>
+
+                        <div>
+                            <h5 class="fw-bold mb-1">Airport Information</h5>
+                            <p class="text-muted small mb-0">
+                                Update the airport details below.
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
+                <!-- Card Body -->
                 <div class="card-body p-4">
 
                     <form asp-area="Admin"
@@ -45,89 +69,135 @@
                         <input type="hidden" asp-for="Id" />
 
                         <div asp-validation-summary="All"
-                             class="text-danger mb-3">
+                             class="alert alert-danger"
+                             role="alert">
                         </div>
 
-                        <div class="mb-3">
-                            <label asp-for="Name"
-                                   class="form-label fw-semibold">
-                                Airport Name
-                            </label>
-
-                            <input asp-for="Name"
-                                   class="form-control"
-                                   placeholder="Enter airport name" />
-
-                            <span asp-validation-for="Name"
-                                  class="text-danger">
-                            </span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="cityId"
-                                   class="form-label fw-semibold">
-                                City
-                            </label>
-
-                            <select asp-for="cityId"
-                                    asp-items="ViewBag.Cities"
-                                    class="form-select">
-                                <option value="">-- Select a City --</option>
-                            </select>
-
-                            <span asp-validation-for="cityId"
-                                  class="text-danger">
-                            </span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Latitude"
-                                   class="form-label fw-semibold">
-                                Latitude
-                            </label>
-
-                            <input asp-for="Latitude"
-                                   type="number"
-                                   step="any"
-                                   class="form-control"
-                                   dir="ltr" />
-
-                            <span asp-validation-for="Latitude"
-                                  class="text-danger">
-                            </span>
-                        </div>
-
+                        <!-- Airport Details -->
                         <div class="mb-4">
-                            <label asp-for="Longitude"
-                                   class="form-label fw-semibold">
-                                Longitude
-                            </label>
+                            <h6 class="flight-section-title mb-3">
+                                <i class="bi bi-building"></i>
+                                General Information
+                            </h6>
 
-                            <input asp-for="Longitude"
-                                   type="number"
-                                   step="any"
-                                   class="form-control"
-                                   dir="ltr" />
+                            <div class="mb-3">
+                                <label asp-for="Name" class="form-label fw-semibold">
+                                    Airport Name
+                                    <span class="text-danger">*</span>
+                                </label>
 
-                            <span asp-validation-for="Longitude"
-                                  class="text-danger">
-                            </span>
+                                <input asp-for="Name"
+                                       class="form-control"
+                                       placeholder="Enter airport name" />
+
+                                <span asp-validation-for="Name"
+                                      class="text-danger">
+                                </span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="cityId" class="form-label fw-semibold">
+                                    City
+                                    <span class="text-danger">*</span>
+                                </label>
+
+                                <select asp-for="cityId"
+                                        asp-items="ViewBag.Cities"
+                                        class="form-select">
+                                    <option value="">-- Select a City --</option>
+                                </select>
+
+                                <span asp-validation-for="cityId"
+                                      class="text-danger">
+                                </span>
+                            </div>
                         </div>
 
-                        <hr />
+                        <hr class="my-4" />
 
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-save me-1"></i>
-                                Save Changes
-                            </button>
+                        <!-- Geographical Coordinates -->
+                        <div class="mb-4">
+
+                            <h6 class="flight-section-title mb-3">
+                                <i class="bi bi-globe"></i>
+                                Geographical Coordinates
+                            </h6>
+
+                            <p class="text-muted small mb-3">
+                                Update the geographical location of this airport.
+                            </p>
+
+                            <div class="row g-3">
+
+                                <div class="col-md-6">
+                                    <label asp-for="Latitude"
+                                           class="form-label fw-semibold">
+                                        Latitude
+                                    </label>
+
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light">
+                                            <i class="bi bi-geo text-primary"></i>
+                                        </span>
+
+                                        <input asp-for="Latitude"
+                                               type="number"
+                                               step="any"
+                                               class="form-control"
+                                               placeholder="Enter latitude"
+                                               dir="ltr" />
+                                    </div>
+
+                                    <span asp-validation-for="Latitude"
+                                          class="text-danger">
+                                    </span>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label asp-for="Longitude"
+                                           class="form-label fw-semibold">
+                                        Longitude
+                                    </label>
+
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light">
+                                            <i class="bi bi-geo-alt text-primary"></i>
+                                        </span>
+
+                                        <input asp-for="Longitude"
+                                               type="number"
+                                               step="any"
+                                               class="form-control"
+                                               placeholder="Enter longitude"
+                                               dir="ltr" />
+                                    </div>
+
+                                    <span asp-validation-for="Longitude"
+                                          class="text-danger">
+                                    </span>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <!-- Actions -->
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
 
                             <a asp-area="Admin"
                                asp-controller="Airports"
                                asp-action="Index"
                                class="btn btn-light border">
+                                <i class="bi bi-x-circle me-1"></i>
                                 Cancel
                             </a>
+
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-save me-2"></i>
+                                Save Changes
+                            </button>
+
                         </div>
 
                     </form>
@@ -135,8 +205,23 @@
                 </div>
             </div>
 
+            <!-- Information Note -->
+            <div class="alert alert-info border-0 shadow-sm mt-3 mb-0">
+                <div class="d-flex gap-2">
+                    <i class="bi bi-info-circle-fill mt-1"></i>
+                    <div>
+                        <strong>Note</strong>
+                        <p class="mb-0 small">
+                            Make sure the airport coordinates are accurate to ensure
+                            correct geographical location data.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
+
 </div>
 
 @section Scripts {

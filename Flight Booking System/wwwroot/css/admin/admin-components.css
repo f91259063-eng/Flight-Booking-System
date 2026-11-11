@@ -1,0 +1,180 @@
+.admin-page-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 25px;
+}
+.admin-page-heading h1 { margin: 0 0 5px; color: var(--admin-navy-900); font-size: clamp(22px, 2vw, 28px); font-weight: 850; letter-spacing: -.035em; }
+.admin-page-heading p { margin: 0; color: var(--admin-text-soft); font-size: 13px; }
+
+.admin-panel {
+    min-width: 0;
+    padding: 22px;
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-md);
+    box-shadow: var(--admin-shadow-sm);
+}
+.admin-panel-header { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 18px; }
+.admin-panel-title { margin: 0; color: var(--admin-text); font-size: 15px; font-weight: 800; }
+.admin-panel-subtitle { margin: 4px 0 0; color: var(--admin-text-soft); font-size: 12px; }
+
+.admin-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 39px;
+    padding: 9px 15px;
+    font-size: 12px;
+    font-weight: 750;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: all var(--admin-transition);
+}
+.admin-btn-primary { color: #fff !important; background: var(--admin-navy-800); }
+.admin-btn-primary:hover { color: #fff !important; background: var(--admin-cyan-600); transform: translateY(-1px); }
+.admin-btn-outline { color: var(--admin-text); background: #fff; border-color: var(--admin-border); }
+.admin-btn-outline:hover { color: var(--admin-cyan-600); border-color: var(--admin-cyan-500); }
+.admin-btn-danger { color: #fff !important; background: #dc2626; }
+.admin-btn-sm { min-height: 32px; padding: 6px 10px; font-size: 11px; }
+
+.admin-form-label { display: block; margin: 0 0 7px; color: #344258; font-size: 12px; font-weight: 750; }
+.admin-form-control {
+    display: block;
+    width: 100%;
+    min-height: 42px;
+    padding: 9px 12px;
+    color: var(--admin-text);
+    background: #fff;
+    border: 1px solid #dce3ed;
+    border-radius: 9px;
+    outline: 0;
+    transition: border-color var(--admin-transition), box-shadow var(--admin-transition);
+}
+.admin-form-control:focus { border-color: var(--admin-cyan-500); box-shadow: 0 0 0 3px rgba(6,182,212,.12); }
+.admin-form-hint { display: block; margin-top: 6px; color: var(--admin-text-soft); font-size: 11px; }
+.admin-form-group { margin-bottom: 17px; }
+
+.admin-table-wrap { width: 100%; overflow-x: auto; }
+.admin-table { width: 100%; margin: 0; border-collapse: separate; border-spacing: 0; white-space: nowrap; }
+.admin-table thead th {
+    padding: 13px 15px;
+    color: #68778e;
+    background: #f7f9fc;
+    border-bottom: 1px solid var(--admin-border);
+    font-size: 10px;
+    font-weight: 850;
+    letter-spacing: .06em;
+    text-align: left;
+    text-transform: uppercase;
+}
+.admin-table tbody td { padding: 14px 15px; color: #354258; border-bottom: 1px solid #edf1f6; font-size: 12px; vertical-align: middle; }
+.admin-table tbody tr:last-child td { border-bottom: 0; }
+.admin-table tbody tr:hover td { background: #fbfdff; }
+
+.admin-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 9px;
+    font-size: 10px;
+    font-weight: 800;
+    border-radius: 30px;
+}
+.admin-status::before { width: 6px; height: 6px; content: ""; border-radius: 50%; background: currentColor; }
+.admin-status-success { color: var(--admin-success); background: var(--admin-success-bg); }
+.admin-status-warning { color: var(--admin-warning); background: var(--admin-warning-bg); }
+.admin-status-danger { color: var(--admin-danger); background: var(--admin-danger-bg); }
+.admin-status-info { color: var(--admin-info); background: var(--admin-info-bg); }
+
+.admin-alert { padding: 13px 15px; border: 1px solid transparent; border-radius: 10px; font-size: 12px; }
+.admin-alert-success { color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
+.admin-alert-danger { color: #991b1b; background: #fef2f2; border-color: #fecaca; }
+.admin-empty-state { padding: 38px 18px; color: var(--admin-text-soft); text-align: center; }
+.admin-empty-state i { display: block; margin-bottom: 10px; color: #9aabc1; font-size: 28px; }
+
+/* FLIGHT TABLE ACTION BUTTONS */
+
+.flight-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-width: 85px;
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+    .flight-action-btn i {
+        font-size: 14px;
+    }
+
+    .flight-action-btn.btn-outline-primary:hover {
+        background-color: var(--admin-primary, #2563eb);
+        color: #fff;
+    }
+
+    .flight-action-btn.btn-outline-danger:hover {
+        background-color: #dc3545;
+        color: #fff;
+    }
+
+
+/* AIRLINE MANAGEMENT */
+
+.airline-stat-card {
+    min-height: 100px;
+}
+
+.airline-table-icon {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: var(--admin-primary-light, #eaf1ff);
+    color: var(--admin-primary, #2563eb);
+    font-size: 17px;
+}
+
+.airline-code-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 11px;
+    border-radius: 7px;
+    background: #f1f5f9;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .5px;
+}
+
+.airline-management .flight-table th {
+    white-space: nowrap;
+}
+
+.airline-management .flight-table td {
+    vertical-align: middle;
+}
+
+@media (max-width: 576px) {
+    .airline-management .card-header {
+        padding: 20px !important;
+    }
+
+    .airline-management .flight-table-card .px-4 {
+        padding-left: 15px !important;
+        padding-right: 15px !important;
+    }
+}

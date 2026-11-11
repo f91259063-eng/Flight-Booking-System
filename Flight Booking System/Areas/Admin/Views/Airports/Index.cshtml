@@ -1,18 +1,30 @@
-﻿
-@model IEnumerable<Flight_Booking_System.Models.AirPort>
+﻿@model IEnumerable<Flight_Booking_System.Models.AirPort>
 
 @{
     ViewData["Title"] = "Airports";
     Layout = "_AdminLayout";
+
+    var airports = Model?.ToList() ?? new List<Flight_Booking_System.Models.AirPort>();
+    var totalAirports = airports.Count;
+    var coordinatesAvailable = airports.Count(a => a.Latitude.HasValue && a.Longitude.HasValue);
+    var coordinatesMissing = totalAirports - coordinatesAvailable;
 }
 
-<div class="container-fluid py-4" dir="ltr">
+<div class="container-fluid py-4 airline-management" dir="ltr">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Manage Airports</h2>
+            <div class="d-flex align-items-center gap-2 text-muted small mb-2">
+                <i class="bi bi-geo-alt"></i>
+                <span>Flight Management</span>
+                <i class="bi bi-chevron-right"></i>
+                <span>Airports</span>
+            </div>
+
+            <h2 class="fw-bold mb-1">Airport Management</h2>
             <p class="text-muted mb-0">
-                View and manage airport information and coordinates.
+                Manage airport information, city assignments, and geographical coordinates.
             </p>
         </div>
 
@@ -20,14 +32,16 @@
            asp-controller="Airports"
            asp-action="Create"
            class="btn btn-primary">
-            <i class="bi bi-plus-circle me-1"></i>
+            <i class="bi bi-plus-circle me-2"></i>
             Add New Airport
         </a>
     </div>
 
+    <!-- Alerts -->
     @if (TempData["Success"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
             @TempData["Success"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"
                     aria-label="Close"></button>
@@ -36,34 +50,124 @@
 
     @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
             @TempData["Error"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"
                     aria-label="Close"></button>
         </div>
     }
 
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white py-3">
-            <h5 class="mb-0">Airports List</h5>
+    <!-- Statistics -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-xl-4 col-md-6">
+            <div class="card airline-stat-card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="airline-table-icon">
+                        <i class="bi bi-airport"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small mb-1">Total Airports</div>
+                        <h4 class="fw-bold mb-0">@totalAirports</h4>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="card-body">
-            @if (Model == null || !Model.Any())
+        <div class="col-xl-4 col-md-6">
+            <div class="card airline-stat-card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="airline-table-icon">
+                        <i class="bi bi-geo-alt-fill"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small mb-1">Coordinates Available</div>
+                        <h4 class="fw-bold text-success mb-0">@coordinatesAvailable</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6">
+            <div class="card airline-stat-card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="airline-table-icon">
+                        <i class="bi bi-geo"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small mb-1">Coordinates Missing</div>
+                        <h4 class="fw-bold text-warning mb-0">@coordinatesMissing</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Airports Table -->
+    <div class="card flight-table-card border-0 shadow-sm">
+
+        <div class="card-header bg-white p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+                <div>
+                    <h5 class="fw-bold mb-1">Airport Directory</h5>
+                    <p class="text-muted small mb-0">
+                        View and manage all registered airports.
+                    </p>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2">
+                    <div class="input-group" style="width: min(100%, 280px);">
+                        <span class="input-group-text bg-light border-end-0">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input type="search"
+                               id="airportSearch"
+                               class="form-control border-start-0"
+                               placeholder="Search airports..."
+                               aria-label="Search airports" />
+                    </div>
+
+                    <select id="coordinateFilter" class="form-select" style="width: 180px;">
+                        <option value="all">All Coordinates</option>
+                        <option value="available">Available</option>
+                        <option value="missing">Missing</option>
+                    </select>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+
+            @if (totalAirports == 0)
             {
-                <div class="alert alert-info mb-0">
-                    No airports have been registered yet.
+                <div class="text-center py-5">
+                    <i class="bi bi-building display-4 text-muted"></i>
+                    <h5 class="fw-bold mt-3">No Airports Found</h5>
+                    <p class="text-muted mb-3">
+                        No airports have been registered yet.
+                    </p>
+                    <a asp-area="Admin"
+                       asp-controller="Airports"
+                       asp-action="Create"
+                       class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Add First Airport
+                    </a>
                 </div>
             }
             else
             {
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover align-middle mb-0">
+                    <table class="table flight-table table-hover align-middle mb-0">
 
-                        <thead style="background-color: #0b1729; color: white;">
+                        <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Airport Name</th>
+                                <th>Airport</th>
                                 <th>City</th>
                                 <th>Latitude</th>
                                 <th>Longitude</th>
@@ -72,40 +176,65 @@
                             </tr>
                         </thead>
 
-                        <tbody>
-                            @foreach (var airport in Model)
+                        <tbody id="airportTableBody">
+                            @foreach (var airport in airports)
                             {
-                                <tr>
-                                    <td>@airport.Id</td>
+                                var hasCoordinates = airport.Latitude.HasValue &&
+                                                     airport.Longitude.HasValue;
 
-                                    <td class="fw-semibold">
-                                        @airport.Name
+                                <tr class="airport-row"
+                                    data-search="@($"{airport.Id} {airport.Name} {airport.City?.Name}")"
+                                    data-coordinates="@(hasCoordinates ? "available" : "missing")">
+
+                                    <td>
+                                        <span class="text-muted fw-semibold">
+                                            #@airport.Id
+                                        </span>
                                     </td>
 
                                     <td>
-                                        @(airport.City?.Name ?? "Not specified")
-                                    </td>
-
-                                    <td dir="ltr">
-                                        @(airport.Latitude?.ToString("F6") ?? "Not available")
-                                    </td>
-
-                                    <td dir="ltr">
-                                        @(airport.Longitude?.ToString("F6") ?? "Not available")
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="airline-table-icon">
+                                                <i class="bi bi-airport"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">@airport.Name</div>
+                                                <small class="text-muted">Airport</small>
+                                            </div>
+                                        </div>
                                     </td>
 
                                     <td>
-                                        @if (airport.Latitude.HasValue &&
-                                             airport.Longitude.HasValue)
+                                        <span class="fw-semibold">
+                                            @(airport.City?.Name ?? "Not specified")
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span dir="ltr" class="text-muted small">
+                                            @(airport.Latitude?.ToString("F6") ?? "Not available")
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span dir="ltr" class="text-muted small">
+                                            @(airport.Longitude?.ToString("F6") ?? "Not available")
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        @if (hasCoordinates)
                                         {
-                                            <span class="badge bg-success">
-                                                Coordinates Available
+                                            <span class="badge bg-success-subtle text-success px-3 py-2">
+                                                <i class="bi bi-check-circle me-1"></i>
+                                                Available
                                             </span>
                                         }
                                         else
                                         {
-                                            <span class="badge bg-warning text-dark">
-                                                Coordinates Missing
+                                            <span class="badge bg-warning-subtle text-warning-emphasis px-3 py-2">
+                                                <i class="bi bi-exclamation-circle me-1"></i>
+                                                Missing
                                             </span>
                                         }
                                     </td>
@@ -117,8 +246,8 @@
                                                asp-controller="Airports"
                                                asp-action="Edit"
                                                asp-route-id="@airport.Id"
-                                               class="btn btn-warning btn-sm">
-                                                <i class="bi bi-pencil-square me-1"></i>
+                                               class="flight-action-btn btn-outline-primary">
+                                                <i class="bi bi-pencil-square"></i>
                                                 Edit
                                             </a>
 
@@ -133,8 +262,8 @@
                                                 @Html.AntiForgeryToken()
 
                                                 <button type="submit"
-                                                        class="btn btn-danger btn-sm">
-                                                    <i class="bi bi-trash me-1"></i>
+                                                        class="flight-action-btn btn-outline-danger">
+                                                    <i class="bi bi-trash3"></i>
                                                     Delete
                                                 </button>
                                             </form>
@@ -147,7 +276,111 @@
 
                     </table>
                 </div>
+
+                <div id="airportNoResults" class="text-center py-5 d-none">
+                    <i class="bi bi-search display-5 text-muted"></i>
+                    <h6 class="fw-bold mt-3">No Matching Airports</h6>
+                    <p class="text-muted mb-0">
+                        Try changing your search or filter.
+                    </p>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 p-3 border-top">
+                    <small class="text-muted">
+                        Showing <strong id="visibleAirportCount">@totalAirports</strong>
+                        of <strong>@totalAirports</strong> airports
+                    </small>
+                </div>
             }
+
         </div>
     </div>
+
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const searchElement = document.getElementById("airportSearch");
+            const filterElement = document.getElementById("coordinateFilter");
+            const tableBody = document.getElementById("airportTableBody");
+            const noResults = document.getElementById("airportNoResults");
+            const visibleCount = document.getElementById("visibleAirportCount");
+
+            if (
+                !(searchElement instanceof HTMLInputElement) ||
+                !(filterElement instanceof HTMLSelectElement) ||
+                !(tableBody instanceof HTMLTableSectionElement) ||
+                !(noResults instanceof HTMLElement) ||
+                !(visibleCount instanceof HTMLElement)
+            ) {
+                return;
+            }
+
+            // Validated element references
+            const searchInput = searchElement;
+            const filterSelect = filterElement;
+            const tbody = tableBody;
+            const emptyState = noResults;
+            const countElement = visibleCount;
+
+            const tableContainer = tbody.closest(".table-responsive");
+
+            if (!(tableContainer instanceof HTMLElement)) {
+                return;
+            }
+
+            const container = tableContainer;
+
+            const rows = tbody.querySelectorAll(".airport-row");
+
+            function filterAirports() {
+
+                const searchValue = searchInput.value.trim().toLowerCase();
+                const coordinateValue = filterSelect.value;
+
+                let visible = 0;
+
+                rows.forEach(function (item) {
+
+                    if (!(item instanceof HTMLTableRowElement)) {
+                        return;
+                    }
+
+                    const row = item;
+
+                    const searchText = row.dataset.search || "";
+                    const coordinateStatus = row.dataset.coordinates || "";
+
+                    const matchesSearch =
+                        searchText.toLowerCase().includes(searchValue);
+
+                    const matchesCoordinates =
+                        coordinateValue === "all" ||
+                        coordinateStatus === coordinateValue;
+
+                    const show = matchesSearch && matchesCoordinates;
+
+                    row.style.display = show ? "" : "none";
+
+                    if (show) {
+                        visible++;
+                    }
+                });
+
+                countElement.textContent = visible.toString();
+
+                emptyState.classList.toggle("d-none", visible > 0);
+
+                container.classList.toggle("d-none", visible === 0);
+            }
+
+            searchInput.addEventListener("input", filterAirports);
+
+            filterSelect.addEventListener("change", filterAirports);
+
+        });
+    </script>
+}
+

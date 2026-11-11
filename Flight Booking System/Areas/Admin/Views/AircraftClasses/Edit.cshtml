@@ -1,0 +1,230 @@
+﻿@model Flight_Booking_System.Models.AircraftClass
+
+@using Flight_Booking_System.Models
+
+@{
+    ViewData["Title"] = "Edit Aircraft Class";
+    Layout = "_AdminLayout";
+
+    var aircrafts = ViewBag.Aircrafts as IEnumerable<Aircraft>
+        ?? Enumerable.Empty<Aircraft>();
+
+    var classes = ViewBag.Classes as IEnumerable<Class>
+        ?? Enumerable.Empty<Class>();
+}
+
+<div class="container-fluid py-4 aircraft-class-management">
+
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Edit Aircraft Class</h2>
+            <p class="text-muted mb-0">
+                Update the aircraft, seating class, and allocated seat capacity.
+            </p>
+        </div>
+
+        <a asp-area="Admin"
+           asp-controller="AircraftClasses"
+           asp-action="Index"
+           class="btn btn-outline-secondary rounded-3 px-3">
+            <i class="fas fa-arrow-left me-2"></i>
+            Back to Aircraft Classes
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xl-7 col-lg-9">
+
+            <div class="card border-0 shadow-sm flight-form-card">
+
+                <!-- CARD HEADER -->
+                <div class="card-header bg-white p-4">
+                    <div class="d-flex align-items-center gap-3">
+
+                        <div class="flight-form-header-icon">
+                            <i class="fas fa-edit"></i>
+                        </div>
+
+                        <div>
+                            <h5 class="fw-bold mb-1">
+                                Aircraft Class Information
+                            </h5>
+                            <p class="text-muted small mb-0">
+                                Update the information for aircraft class #@Model.ID.
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- FORM BODY -->
+                <div class="card-body p-4">
+
+                    <form asp-area="Admin"
+                          asp-controller="AircraftClasses"
+                          asp-action="Edit"
+                          asp-route-id="@Model.ID"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden" asp-for="ID" />
+
+                        <!-- VALIDATION SUMMARY -->
+                        <div asp-validation-summary="All"
+                             class="alert alert-danger"
+                             role="alert">
+                        </div>
+
+                        <!-- AIRCRAFT -->
+                        <div class="mb-4">
+
+                            <h6 class="flight-section-title mb-3">
+                                <i class="fas fa-plane"></i>
+                                Aircraft Selection
+                            </h6>
+
+                            <label asp-for="AircraftId"
+                                   class="form-label fw-semibold">
+                                Aircraft <span class="text-danger">*</span>
+                            </label>
+
+                            <select asp-for="AircraftId" class="form-select">
+
+                                <option value="">
+                                    -- Select Aircraft --
+                                </option>
+
+                                @foreach (var aircraft in aircrafts)
+                                {
+                                    <option value="@aircraft.Id">
+                                        @aircraft.Model - @aircraft.RegistrationNumber
+                                    </option>
+                                }
+
+                            </select>
+
+                            <span asp-validation-for="AircraftId"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <!-- CLASS -->
+                        <div class="mb-4">
+
+                            <h6 class="flight-section-title mb-3">
+                                <i class="fas fa-tags"></i>
+                                Seating Class
+                            </h6>
+
+                            <label asp-for="ClassId"
+                                   class="form-label fw-semibold">
+                                Class <span class="text-danger">*</span>
+                            </label>
+
+                            <select asp-for="ClassId" class="form-select">
+
+                                <option value="">
+                                    -- Select Class --
+                                </option>
+
+                                @foreach (var item in classes)
+                                {
+                                    <option value="@item.Id">
+                                        @item.Name
+                                    </option>
+                                }
+
+                            </select>
+
+                            <span asp-validation-for="ClassId"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <!-- NUMBER OF SEATS -->
+                        <div class="mb-4">
+
+                            <h6 class="flight-section-title mb-3">
+                                <i class="fas fa-chair"></i>
+                                Seat Configuration
+                            </h6>
+
+                            <label asp-for="NumberOfSeats"
+                                   class="form-label fw-semibold">
+                                Number of Seats <span class="text-danger">*</span>
+                            </label>
+
+                            <input asp-for="NumberOfSeats"
+                                   type="number"
+                                   min="1"
+                                   step="1"
+                                   class="form-control"
+                                   placeholder="Enter number of seats" />
+
+                            <span asp-validation-for="NumberOfSeats"
+                                  class="text-danger">
+                            </span>
+
+                            <small class="text-muted d-block mt-2">
+                                The system will synchronize the generated seats
+                                with the new seat count. Seats linked to existing
+                                tickets cannot be removed.
+                            </small>
+
+                        </div>
+
+                        <!-- ACTIONS -->
+                        <div class="d-flex justify-content-end flex-wrap gap-2 pt-3 border-top">
+
+                            <a asp-area="Admin"
+                               asp-controller="AircraftClasses"
+                               asp-action="Index"
+                               class="btn btn-light border px-4">
+                                Cancel
+                            </a>
+
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="fas fa-save me-2"></i>
+                                Save Changes
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+            <!-- INFORMATION NOTE -->
+            <div class="alert alert-light border mt-3 mb-0">
+                <div class="d-flex gap-2">
+                    <i class="fas fa-info-circle text-primary mt-1"></i>
+
+                    <div>
+                        <strong class="d-block mb-1">
+                            Important Information
+                        </strong>
+
+                        <small class="text-muted">
+                            Aircraft capacity is validated before saving.
+                            Existing booked seats are protected from deletion.
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

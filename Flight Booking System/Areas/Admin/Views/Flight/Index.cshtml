@@ -1,160 +1,402 @@
 ﻿@model IEnumerable<Flight_Booking_System.Models.Flight>
+
 @using Flight_Booking_System.Models.ENUM
 
 @{
     ViewData["Title"] = "Manage Flights";
     Layout = "_AdminLayout";
+
+    var flights = Model?.ToList() ?? new List<Flight_Booking_System.Models.Flight>();
+
+    var totalFlights = flights.Count;
+    var scheduledFlights = flights.Count(x => x.FlightStatus == FlightStatus.Scheduled);
+    var inProgressFlights = flights.Count(x => x.FlightStatus == FlightStatus.InProgress);
+    var completedFlights = flights.Count(x => x.FlightStatus == FlightStatus.Completed);
+    var cancelledFlights = flights.Count(x => x.FlightStatus == FlightStatus.Cancelled);
 }
 
-<div class="container-fluid py-4">
-    <div class="card shadow-sm">
+<div class="container-fluid py-4 flight-management">
 
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h4 class="mb-0">Manage Flights</h4>
-
-            <a asp-area="Admin"
-               asp-controller="Flight"
-               asp-action="Create"
-               class="btn btn-primary">
-                Add New Flight
-            </a>
+    <!-- Page Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <div class="text-muted small mb-1">Flight Operations / Management</div>
+            <h2 class="fw-bold mb-1">Manage Flights</h2>
+            <p class="text-muted mb-0">
+                Manage schedules, flight information and operational status.
+            </p>
         </div>
 
-        <div class="card-body">
+        <a asp-area="Admin"
+           asp-controller="Flight"
+           asp-action="Create"
+           class="btn btn-primary px-4 py-2">
+            <i class="bi bi-plus-lg me-2"></i>
+            Add New Flight
+        </a>
+    </div>
 
-            @if (TempData["Success"] != null)
-            {
-                <div class="alert alert-success">
-                    @TempData["Success"]
+    <!-- Success Message -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>
+            @TempData["Success"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close">
+            </button>
+        </div>
+    }
+
+    <!-- Statistics -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-12 col-sm-6 col-xl">
+            <div class="flight-stat-card">
+                <div class="flight-stat-icon bg-primary-subtle text-primary">
+                    <i class="bi bi-airplane"></i>
                 </div>
+                <div>
+                    <div class="text-muted small">Total Flights</div>
+                    <h3 class="fw-bold mb-0">@totalFlights</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl">
+            <div class="flight-stat-card">
+                <div class="flight-stat-icon bg-success-subtle text-success">
+                    <i class="bi bi-calendar-check"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">Scheduled</div>
+                    <h3 class="fw-bold mb-0">@scheduledFlights</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl">
+            <div class="flight-stat-card">
+                <div class="flight-stat-icon bg-info-subtle text-info">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">In Progress</div>
+                    <h3 class="fw-bold mb-0">@inProgressFlights</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl">
+            <div class="flight-stat-card">
+                <div class="flight-stat-icon bg-success-subtle text-success">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">Completed</div>
+                    <h3 class="fw-bold mb-0">@completedFlights</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl">
+            <div class="flight-stat-card">
+                <div class="flight-stat-icon bg-danger-subtle text-danger">
+                    <i class="bi bi-x-circle"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">Cancelled</div>
+                    <h3 class="fw-bold mb-0">@cancelledFlights</h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Flight List -->
+    <div class="card border-0 shadow-sm flight-table-card">
+
+        <div class="card-header bg-white border-0 p-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <h5 class="fw-bold mb-1">Flight List</h5>
+                    <span class="text-muted small">
+                        View and manage all registered flights
+                    </span>
+                </div>
+
+                <span class="badge bg-primary-subtle text-primary px-3 py-2">
+                    @totalFlights Flights
+                </span>
+            </div>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="px-4 pb-3">
+            <div class="row g-3">
+
+                <div class="col-12 col-md-7">
+                    <div class="flight-search-box">
+                        <i class="bi bi-search"></i>
+
+                        <input type="text"
+                               id="flightSearch"
+                               class="form-control"
+                               placeholder="Search by flight number, airline, aircraft or route..."
+                               autocomplete="off" />
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-5">
+                    <select id="flightStatusFilter" class="form-select">
+                        <option value="">All Flight Statuses</option>
+                        <option value="Scheduled">Scheduled</option>
+                        <option value="InProgress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Flights Table -->
+        <div class="table-responsive">
+            <table class="table align-middle flight-table mb-0">
+
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Flight Number</th>
+                        <th>Airline</th>
+                        <th>Aircraft</th>
+                        <th>Route</th>
+                        <th>Departure</th>
+                        <th>Arrival</th>
+                        <th>Day</th>
+                        <th>Status</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody id="flightTableBody">
+
+                    @if (flights.Any())
+                    {
+                        var count = 1;
+
+                        foreach (var flight in flights)
+                        {
+                            var statusClass = flight.FlightStatus switch
+                            {
+                                FlightStatus.Scheduled => "status-scheduled",
+                                FlightStatus.InProgress => "status-progress",
+                                FlightStatus.Completed => "status-completed",
+                                FlightStatus.Cancelled => "status-cancelled",
+                                _ => "status-undefined"
+                            };
+
+                            var statusText = flight.FlightStatus switch
+                            {
+                                FlightStatus.InProgress => "In Progress",
+                                _ => flight.FlightStatus.ToString()
+                            };
+
+                            <tr class="flight-row"
+                                data-search="@($"{flight.FlightNumber} {flight.Airline?.Name} {flight.AircraftId} {flight.RouteId}")"
+                                data-status="@flight.FlightStatus">
+
+                                <td class="text-muted">@count</td>
+
+                                <td>
+                                    <span class="fw-bold">
+                                        @flight.FlightNumber
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="fw-semibold">
+                                        @(flight.Airline?.Name ?? "N/A")
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="text-muted">
+                                        #@flight.AircraftId
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="text-muted">
+                                        #@flight.RouteId
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <div class="fw-semibold">
+                                        @flight.DepartureDateTime.ToString("dd MMM yyyy")
+                                    </div>
+                                    <small class="text-muted">
+                                        @flight.DepartureDateTime.ToString("HH:mm")
+                                    </small>
+                                </td>
+
+                                <td>
+                                    <div class="fw-semibold">
+                                        @flight.ArrivalDateTime.ToString("dd MMM yyyy")
+                                    </div>
+                                    <small class="text-muted">
+                                        @flight.ArrivalDateTime.ToString("HH:mm")
+                                    </small>
+                                </td>
+
+                                <td>
+                                    <span class="text-muted">
+                                        @flight.DayOfWeek
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="flight-status @statusClass">
+                                        @statusText
+                                    </span>
+                                </td>
+
+                                <!-- Actions -->
+                                <td>
+                                    <div class="d-flex justify-content-center align-items-center gap-2 flex-wrap">
+
+                                        <a asp-area="Admin"
+                                           asp-controller="Flight"
+                                           asp-action="Edit"
+                                           asp-route-id="@flight.Id"
+                                           class="btn btn-sm btn-outline-primary flight-action-btn">
+                                            <i class="bi bi-pencil-square"></i>
+                                            <span>Edit</span>
+                                        </a>
+
+                                        <a asp-area="Admin"
+                                           asp-controller="Flight"
+                                           asp-action="Delete"
+                                           asp-route-id="@flight.Id"
+                                           class="btn btn-sm btn-outline-danger flight-action-btn">
+                                            <i class="bi bi-trash"></i>
+                                            <span>Delete</span>
+                                        </a>
+
+                                    </div>
+                                </td>
+
+                            </tr>
+
+                            count++;
+                        }
+                    }
+                    else
+                    {
+                        <tr id="emptyFlights">
+                            <td colspan="10" class="text-center py-5">
+                                <i class="bi bi-airplane display-5 text-muted"></i>
+
+                                <h6 class="fw-bold mt-3">No Flights Found</h6>
+
+                                <p class="text-muted mb-0">
+                                    Start by adding your first flight.
+                                </p>
+                            </td>
+                        </tr>
+                    }
+
+                    <!-- Search Empty Result -->
+                    <tr id="noSearchResults" style="display:none;">
+                        <td colspan="10" class="text-center py-5 text-muted">
+                            <i class="bi bi-search display-6"></i>
+                            <p class="mt-2 mb-0">No matching flights found.</p>
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Footer / Count -->
+        <div class="card-footer bg-white border-0 px-4 py-3">
+            <small class="text-muted">
+                Showing
+                <strong id="visibleFlightCount">@totalFlights</strong>
+                of
+                <strong>@totalFlights</strong>
+                flights
+            </small>
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const searchElement = document.getElementById("flightSearch");
+            const statusElement = document.getElementById("flightStatusFilter");
+            const resultsElement = document.getElementById("noSearchResults");
+            const countElement = document.getElementById("visibleFlightCount");
+
+            if (!(searchElement instanceof HTMLInputElement)) return;
+            if (!(statusElement instanceof HTMLSelectElement)) return;
+            if (!(resultsElement instanceof HTMLTableRowElement)) return;
+            if (!(countElement instanceof HTMLElement)) return;
+
+            const searchInput = searchElement;
+            const statusFilter = statusElement;
+            const noResults = resultsElement;
+            const visibleCount = countElement;
+
+            const rows = document.querySelectorAll("tr.flight-row");
+
+            function filterFlights() {
+
+                const search = searchInput.value.trim().toLowerCase();
+                const selectedStatus = statusFilter.value;
+
+                let visible = 0;
+
+                rows.forEach(function (row) {
+
+                    if (!(row instanceof HTMLTableRowElement)) return;
+
+                    const searchText =
+                        (row.getAttribute("data-search") || "").toLowerCase();
+
+                    const rowStatus =
+                        row.getAttribute("data-status") || "";
+
+                    const matchesSearch = searchText.includes(search);
+                    const matchesStatus =
+                        !selectedStatus || rowStatus === selectedStatus;
+
+                    const shouldShow = matchesSearch && matchesStatus;
+
+                    row.style.display = shouldShow ? "" : "none";
+
+                    if (shouldShow) {
+                        visible++;
+                    }
+                });
+
+                noResults.style.display =
+                    rows.length > 0 && visible === 0 ? "" : "none";
+
+                visibleCount.textContent = String(visible);
             }
 
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover text-center align-middle">
+            searchInput.addEventListener("input", filterFlights);
+            statusFilter.addEventListener("change", filterFlights);
 
-                    <thead class="table-dark">
-                        <tr>
-                            <th>#</th>
-                            <th>Flight Number</th>
-                            <th>Aircraft ID</th>
-                            <th>Airline</th>
-                            <th>Route ID</th>
-                            <th>Departure Date & Time</th>
-                            <th>Arrival Date & Time</th>
-                            <th>Day of Week</th>
-                            <th>Flight Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        @if (Model != null && Model.Any())
-                        {
-                            var count = 1;
-
-                            @foreach (var flight in Model)
-                            {
-                                <tr>
-                                    <td>@count</td>
-
-                                    <td>@flight.FlightNumber</td>
-
-                                    <td>@flight.AircraftId</td>
-
-                                    <td>@flight.Airline?.Name</td>
-
-                                    <td>@flight.RouteId</td>
-
-                                    <td>
-                                        @flight.DepartureDateTime.ToString("yyyy/MM/dd HH:mm")
-                                    </td>
-
-                                    <td>
-                                        @flight.ArrivalDateTime.ToString("yyyy/MM/dd HH:mm")
-                                    </td>
-
-                                    <td>
-                                        @{
-                                            var day = flight.DayOfWeek switch
-                                            {
-                                                DayOfWeek.Saturday => "Saturday",
-                                                DayOfWeek.Sunday => "Sunday",
-                                                DayOfWeek.Monday => "Monday",
-                                                DayOfWeek.Tuesday => "Tuesday",
-                                                DayOfWeek.Wednesday => "Wednesday",
-                                                DayOfWeek.Thursday => "Thursday",
-                                                DayOfWeek.Friday => "Friday",
-                                                _ => "Undefined"
-                                            };
-                                        }
-
-                                        @day
-                                    </td>
-
-                                    <td>
-                                        @switch (flight.FlightStatus)
-                                        {
-                                            case FlightStatus.Scheduled:
-                                                <span class="badge bg-success">Scheduled</span>
-                                                break;
-
-                                            case FlightStatus.InProgress:
-                                                <span class="badge bg-primary">In Progress</span>
-                                                break;
-
-                                            case FlightStatus.Completed:
-                                                <span class="badge bg-info">Completed</span>
-                                                break;
-
-                                            case FlightStatus.Cancelled:
-                                                <span class="badge bg-danger">Cancelled</span>
-                                                break;
-
-                                            default:
-                                                <span class="badge bg-secondary">Undefined</span>
-                                                break;
-                                        }
-                                    </td>
-
-                                    <td>
-                                        <div class="d-flex gap-1 justify-content-center">
-
-                                            <a asp-area="Admin"
-                                               asp-controller="Flight"
-                                               asp-action="Edit"
-                                               asp-route-id="@flight.Id"
-                                               class="btn btn-sm btn-warning">
-                                                Edit
-                                            </a>
-
-                                            <a asp-area="Admin"
-                                               asp-controller="Flight"
-                                               asp-action="Delete"
-                                               asp-route-id="@flight.Id"
-                                               class="btn btn-sm btn-danger">
-                                                Delete
-                                            </a>
-
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                count++;
-                            }
-                        }
-                        else
-                        {
-                            <tr>
-                                <td colspan="10">
-                                    No flights have been registered yet.
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-
-                </table>
-            </div>
-
-        </div>
-    </div>
-</div>
+        });
+    </script>
+}

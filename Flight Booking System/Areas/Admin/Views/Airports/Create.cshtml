@@ -1,5 +1,4 @@
-﻿```cshtml
-@model Flight_Booking_System.Models.AirPort
+﻿@model Flight_Booking_System.Models.AirPort
 
 @{
     ViewData["Title"] = "Create Airport";
@@ -8,31 +7,61 @@
 
 <div class="container-fluid py-4" dir="ltr">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+
         <div>
+            <div class="d-flex align-items-center gap-2 text-muted small mb-2">
+                <i class="bi bi-geo-alt"></i>
+                <span>Flight Management</span>
+                <i class="bi bi-chevron-right"></i>
+                <span>Airports</span>
+                <i class="bi bi-chevron-right"></i>
+                <span>Create</span>
+            </div>
+
             <h2 class="fw-bold mb-1">Add New Airport</h2>
+
             <p class="text-muted mb-0">
-                Enter the airport name and select its city to retrieve coordinates.
+                Add a new airport and assign it to its corresponding city.
             </p>
         </div>
 
         <a asp-area="Admin"
            asp-controller="Airports"
            asp-action="Index"
-           class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i>
+           class="btn btn-light border">
+            <i class="bi bi-arrow-left me-2"></i>
             Back to Airports
         </a>
+
     </div>
 
+    <!-- Airport Form -->
     <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
+        <div class="col-xl-8 col-lg-9">
 
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0">Airport Information</h5>
+            <div class="card flight-form-card border-0 shadow-sm">
+
+                <!-- Card Header -->
+                <div class="card-header bg-white p-4">
+                    <div class="d-flex align-items-center gap-3">
+
+                        <div class="flight-form-header-icon">
+                            <i class="bi bi-geo-alt"></i>
+                        </div>
+
+                        <div>
+                            <h5 class="fw-bold mb-1">Airport Information</h5>
+                            <p class="text-muted small mb-0">
+                                Enter the airport details below.
+                            </p>
+                        </div>
+
+                    </div>
                 </div>
 
+                <!-- Form Body -->
                 <div class="card-body p-4">
 
                     <form asp-area="Admin"
@@ -43,61 +72,103 @@
                         @Html.AntiForgeryToken()
 
                         <div asp-validation-summary="ModelOnly"
-                             class="text-danger mb-3">
+                             class="alert alert-danger mb-4"
+                             role="alert">
                         </div>
 
-                        <div class="mb-3">
-                            <label asp-for="Name"
-                                   class="form-label fw-semibold">
-                                Airport Name
-                            </label>
-
-                            <input asp-for="Name"
-                                   class="form-control"
-                                   placeholder="e.g. Cairo International Airport" />
-
-                            <span asp-validation-for="Name"
-                                  class="text-danger">
-                            </span>
-                        </div>
-
+                        <!-- Basic Information -->
                         <div class="mb-4">
-                            <label asp-for="cityId"
-                                   class="form-label fw-semibold">
-                                City
-                            </label>
 
-                            <select asp-for="cityId"
-                                    asp-items="ViewBag.Cities"
-                                    class="form-select">
-                                <option value="">-- Select a City --</option>
-                            </select>
+                            <h6 class="flight-section-title mb-3">
+                                <i class="bi bi-info-circle"></i>
+                                Basic Information
+                            </h6>
 
-                            <span asp-validation-for="cityId"
-                                  class="text-danger">
-                            </span>
+                            <div class="mb-4">
+                                <label asp-for="Name" class="form-label">
+                                    Airport Name
+                                    <span class="text-danger">*</span>
+                                </label>
+
+                                <input asp-for="Name"
+                                       class="form-control"
+                                       placeholder="e.g. Cairo International Airport" />
+
+                                <span asp-validation-for="Name"
+                                      class="text-danger small">
+                                </span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="cityId" class="form-label">
+                                    City
+                                    <span class="text-danger">*</span>
+                                </label>
+
+                                <select asp-for="cityId"
+                                        asp-items="ViewBag.Cities"
+                                        class="form-select">
+                                    <option value="">-- Select a City --</option>
+                                </select>
+
+                                <span asp-validation-for="cityId"
+                                      class="text-danger small">
+                                </span>
+                            </div>
+
                         </div>
 
-                        <div class="alert alert-info">
-                            <i class="bi bi-info-circle me-1"></i>
-                            Airport coordinates will be retrieved automatically
-                            based on the airport name and selected city.
+                        <hr class="my-4" />
+
+                        <!-- Coordinates Information -->
+                        <div class="mb-4">
+
+                            <h6 class="flight-section-title mb-3">
+                                <i class="bi bi-crosshair"></i>
+                                Geographic Coordinates
+                            </h6>
+
+                            <div class="alert alert-info border-0 mb-0">
+                                <div class="d-flex align-items-start gap-3">
+
+                                    <i class="bi bi-info-circle-fill fs-5"></i>
+
+                                    <div>
+                                        <h6 class="fw-bold mb-1">
+                                            Automatic Coordinates Retrieval
+                                        </h6>
+
+                                        <p class="mb-0 small">
+                                            Airport coordinates will be retrieved
+                                            automatically based on the airport name
+                                            and selected city.
+                                        </p>
+                                    </div>
+
+                                </div>
+                            </div>
+
                         </div>
 
-                        <hr />
+                        <hr class="my-4" />
 
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-save me-1"></i>
-                                Save Airport
-                            </button>
+                        <!-- Form Actions -->
+                        <div class="d-flex flex-wrap justify-content-end gap-2">
 
                             <a asp-area="Admin"
                                asp-controller="Airports"
                                asp-action="Index"
-                               class="btn btn-light border">
+                               class="btn btn-light border px-4">
+                                <i class="bi bi-x-circle me-2"></i>
                                 Cancel
                             </a>
+
+                            <button type="submit"
+                                    class="btn btn-primary px-4">
+                                <i class="bi bi-save me-2"></i>
+                                Save Airport
+                            </button>
+
                         </div>
 
                     </form>
@@ -107,9 +178,9 @@
 
         </div>
     </div>
+
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
-```

@@ -1,45 +1,172 @@
-﻿
-@{
-    ViewData["Title"] = "إضافة مسار";
+﻿@{
+    ViewData["Title"] = "Create Route";
+    Layout = "_AdminLayout";
 }
 
-<h2 class="mb-4">إضافة مسار طيران جديد</h2>
+<div class="container-fluid py-4" dir="ltr">
 
-<form asp-controller="Routes" asp-action="Create" method="post">
-    @Html.AntiForgeryToken()
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Create New Route</h2>
+            <p class="text-muted mb-0">
+                Define a new flight route by selecting departure and arrival airports.
+            </p>
+        </div>
 
-    <div asp-validation-summary="All"
-         class="text-danger mb-3"></div>
-
-    <div class="mb-3">
-        <label class="form-label">مطار المغادرة</label>
-        <select name="FromAirportId"
-                asp-items="ViewBag.FromAirports"
-                class="form-select"
-                required>
-            <option value="">-- اختر مطار المغادرة --</option>
-        </select>
+        <a asp-area="Admin"
+           asp-controller="Routes"
+           asp-action="Index"
+           class="btn btn-outline-secondary rounded-3 px-3">
+            <i class="fas fa-arrow-left me-2"></i>
+            Back to Routes
+        </a>
     </div>
 
-    <div class="mb-3">
-        <label class="form-label">مطار الوصول</label>
-        <select name="ToAirportId"
-                asp-items="ViewBag.ToAirports"
-                class="form-select"
-                required>
-            <option value="">-- اختر مطار الوصول --</option>
-        </select>
+    <div class="row justify-content-center">
+        <div class="col-xl-7 col-lg-9">
+
+            <div class="card border-0 shadow-sm flight-form-card">
+
+                <!-- CARD HEADER -->
+                <div class="card-header bg-white p-4">
+                    <div class="d-flex align-items-center gap-3">
+
+                        <div class="flight-form-header-icon">
+                            <i class="fas fa-route"></i>
+                        </div>
+
+                        <div>
+                            <h5 class="fw-bold mb-1">Route Information</h5>
+                            <p class="text-muted small mb-0">
+                                Select the airports for this flight route.
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- FORM BODY -->
+                <div class="card-body p-4">
+
+                    <form asp-area="Admin"
+                          asp-controller="Routes"
+                          asp-action="Create"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <!-- VALIDATION SUMMARY -->
+                        <div asp-validation-summary="All"
+                             class="alert alert-danger"
+                             role="alert">
+                        </div>
+
+                        <!-- DEPARTURE AIRPORT -->
+                        <div class="mb-4">
+
+                            <h6 class="flight-section-title mb-3">
+                                <i class="fas fa-plane-departure"></i>
+                                Departure Information
+                            </h6>
+
+                            <label for="FromAirportId"
+                                   class="form-label fw-semibold">
+                                Departure Airport
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <select id="FromAirportId"
+                                    name="FromAirportId"
+                                    asp-items="ViewBag.FromAirports"
+                                    class="form-select"
+                                    required>
+
+                                <option value="">
+                                    -- Select Departure Airport --
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <!-- ARRIVAL AIRPORT -->
+                        <div class="mb-4">
+
+                            <h6 class="flight-section-title mb-3">
+                                <i class="fas fa-plane-arrival"></i>
+                                Arrival Information
+                            </h6>
+
+                            <label for="ToAirportId"
+                                   class="form-label fw-semibold">
+                                Arrival Airport
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <select id="ToAirportId"
+                                    name="ToAirportId"
+                                    asp-items="ViewBag.ToAirports"
+                                    class="form-select"
+                                    required>
+
+                                <option value="">
+                                    -- Select Arrival Airport --
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <!-- DISTANCE INFORMATION -->
+                        <div class="alert alert-info border-0 rounded-3 mb-4">
+                            <div class="d-flex gap-3 align-items-start">
+                                <i class="fas fa-info-circle fs-5 mt-1"></i>
+
+                                <div>
+                                    <strong class="d-block mb-1">
+                                        Automatic Distance Calculation
+                                    </strong>
+
+                                    <small>
+                                        The flight distance will be calculated
+                                        automatically using the geographical
+                                        coordinates of the selected airports.
+                                        You do not need to enter the distance manually.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FORM ACTIONS -->
+                        <div class="d-flex justify-content-end flex-wrap gap-2 pt-3 border-top">
+
+                            <a asp-area="Admin"
+                               asp-controller="Routes"
+                               asp-action="Index"
+                               class="btn btn-light border px-4">
+                                Cancel
+                            </a>
+
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="fas fa-save me-2"></i>
+                                Create Route
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
     </div>
 
-    <p class="text-muted">
-        سيتم حساب المسافة الجوية تلقائيًا من إحداثيات المطارين.
-    </p>
+</div>
 
-    <button type="submit" class="btn btn-primary">
-        حفظ المسار وحساب المسافة
-    </button>
-
-    <a asp-action="Index" class="btn btn-secondary">
-        رجوع
-    </a>
-</form>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

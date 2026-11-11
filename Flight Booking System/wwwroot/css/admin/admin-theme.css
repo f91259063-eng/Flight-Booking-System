@@ -1,0 +1,63 @@
+:root {
+    color-scheme: light;
+    --admin-navy-950: #0b1530;
+    --admin-navy-900: #101d3a;
+    --admin-navy-800: #17284b;
+    --admin-navy-700: #20365f;
+    --admin-cyan-600: #0891b2;
+    --admin-cyan-500: #06b6d4;
+    --admin-cyan-100: #cffafe;
+    --admin-bg: #f4f7fb;
+    --admin-surface: #ffffff;
+    --admin-surface-soft: #f8fafc;
+    --admin-text: #172033;
+    --admin-text-soft: #64748b;
+    --admin-border: #e5eaf2;
+    --admin-success: #15803d;
+    --admin-success-bg: #dcfce7;
+    --admin-warning: #b45309;
+    --admin-warning-bg: #fef3c7;
+    --admin-danger: #b91c1c;
+    --admin-danger-bg: #fee2e2;
+    --admin-info: #0369a1;
+    --admin-info-bg: #e0f2fe;
+    --admin-sidebar-width: 272px;
+    --admin-topbar-height: 76px;
+    --admin-radius-sm: 9px;
+    --admin-radius-md: 14px;
+    --admin-radius-lg: 20px;
+    --admin-shadow-sm: 0 2px 10px rgba(15, 23, 42, .045);
+    --admin-shadow-md: 0 12px 32px rgba(15, 23, 42, .085);
+    --admin-transition:  .22s ease;
+}
+
+html { scroll-behavior: smooth; }
+
+body.admin-app {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--admin-bg);
+    color: var(--admin-text);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.admin-app *,
+.admin-app *::before,
+.admin-app *::after { box-sizing: border-box; }
+
+.admin-app a { color: inherit; text-decoration: none; }
+.admin-app button,
+.admin-app input,
+.admin-app select,
+.admin-app textarea { font: inherit; }
+
+.admin-muted { color: var(--admin-text-soft) !important; }
+.admin-eyebrow {
+    color: var(--admin-text-soft);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+}

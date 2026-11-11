@@ -1,64 +1,102 @@
-﻿```cshtml
-@model Flight_Booking_System.Models.AircraftClass
+﻿@model Flight_Booking_System.Models.AircraftClass
+
+@using Flight_Booking_System.Models
 
 @{
     ViewData["Title"] = "Create Aircraft Class";
     Layout = "_AdminLayout";
 
-    var aircrafts = ViewBag.Aircrafts
-        as IEnumerable<Flight_Booking_System.Models.Aircraft>;
+    var aircrafts = ViewBag.Aircrafts as IEnumerable<Aircraft>
+        ?? Enumerable.Empty<Aircraft>();
 
-    var classes = ViewBag.Classes
-        as IEnumerable<Flight_Booking_System.Models.Class>;
+    var classes = ViewBag.Classes as IEnumerable<Class>
+        ?? Enumerable.Empty<Class>();
 }
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-lg-7 mx-auto">
+<div class="container-fluid py-4 aircraft-class-management">
 
-            <div class="card shadow-sm">
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Create Aircraft Class</h2>
+            <p class="text-muted mb-0">
+                Assign a seating class and define its capacity for an aircraft.
+            </p>
+        </div>
 
-                <div class="card-header">
-                    <h4 class="mb-0">Create Aircraft Class</h4>
+        <a asp-area="Admin"
+           asp-controller="AircraftClasses"
+           asp-action="Index"
+           class="btn btn-outline-secondary rounded-3 px-3">
+            <i class="fas fa-arrow-left me-2"></i>
+            Back to Aircraft Classes
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xl-7 col-lg-9">
+
+            <div class="card border-0 shadow-sm flight-form-card">
+
+                <!-- CARD HEADER -->
+                <div class="card-header bg-white p-4">
+                    <div class="d-flex align-items-center gap-3">
+
+                        <div class="flight-form-header-icon">
+                            <i class="fas fa-layer-group"></i>
+                        </div>
+
+                        <div>
+                            <h5 class="fw-bold mb-1">
+                                Aircraft Class Information
+                            </h5>
+                            <p class="text-muted small mb-0">
+                                Complete the information below to create a new aircraft class.
+                            </p>
+                        </div>
+
+                    </div>
                 </div>
 
-                <div class="card-body">
+                <!-- FORM BODY -->
+                <div class="card-body p-4">
 
-                    <form asp-controller="AircraftClasses"
+                    <form asp-area="Admin"
+                          asp-controller="AircraftClasses"
                           asp-action="Create"
                           method="post">
 
                         @Html.AntiForgeryToken()
 
-                        <div asp-validation-summary="ModelOnly"
-                             class="text-danger mb-3">
+                        <!-- VALIDATION SUMMARY -->
+                        <div asp-validation-summary="All"
+                             class="alert alert-danger"
+                             role="alert">
                         </div>
 
-                        <!-- Aircraft -->
-                        <div class="mb-3">
+                        <!-- AIRCRAFT -->
+                        <div class="mb-4">
 
-                            <label asp-for="AircraftId"
-                                   class="form-label">
-                                Aircraft
+                            <h6 class="flight-section-title mb-3">
+                                <i class="fas fa-plane"></i>
+                                Aircraft Selection
+                            </h6>
+
+                            <label asp-for="AircraftId" class="form-label fw-semibold">
+                                Aircraft <span class="text-danger">*</span>
                             </label>
 
-                            <select asp-for="AircraftId"
-                                    class="form-select">
+                            <select asp-for="AircraftId" class="form-select">
 
                                 <option value="">
                                     -- Select Aircraft --
                                 </option>
 
-                                @if (aircrafts != null)
+                                @foreach (var aircraft in aircrafts)
                                 {
-                                    foreach (var aircraft in aircrafts)
-                                    {
-                                        <option value="@aircraft.Id">
-                                            @aircraft.Model
-                                            -
-                                            @aircraft.RegistrationNumber
-                                        </option>
-                                    }
+                                    <option value="@aircraft.Id">
+                                        @aircraft.Model - @aircraft.RegistrationNumber
+                                    </option>
                                 }
 
                             </select>
@@ -67,31 +105,37 @@
                                   class="text-danger">
                             </span>
 
+                            <small class="text-muted d-block mt-2">
+                                Select the aircraft to which this class will belong.
+                            </small>
+
                         </div>
 
-                        <!-- Class -->
-                        <div class="mb-3">
+                        <hr class="my-4" />
 
-                            <label asp-for="ClassId"
-                                   class="form-label">
-                                Class
+                        <!-- CLASS -->
+                        <div class="mb-4">
+
+                            <h6 class="flight-section-title mb-3">
+                                <i class="fas fa-tags"></i>
+                                Seating Class
+                            </h6>
+
+                            <label asp-for="ClassId" class="form-label fw-semibold">
+                                Class <span class="text-danger">*</span>
                             </label>
 
-                            <select asp-for="ClassId"
-                                    class="form-select">
+                            <select asp-for="ClassId" class="form-select">
 
                                 <option value="">
                                     -- Select Class --
                                 </option>
 
-                                @if (classes != null)
+                                @foreach (var item in classes)
                                 {
-                                    foreach (var item in classes)
-                                    {
-                                        <option value="@item.Id">
-                                            @item.Name
-                                        </option>
-                                    }
+                                    <option value="@item.Id">
+                                        @item.Name
+                                    </option>
                                 }
 
                             </select>
@@ -100,19 +144,31 @@
                                   class="text-danger">
                             </span>
 
+                            <small class="text-muted d-block mt-2">
+                                Choose the seating category for this aircraft.
+                            </small>
+
                         </div>
 
-                        <!-- Number Of Seats -->
-                        <div class="mb-3">
+                        <hr class="my-4" />
+
+                        <!-- NUMBER OF SEATS -->
+                        <div class="mb-4">
+
+                            <h6 class="flight-section-title mb-3">
+                                <i class="fas fa-chair"></i>
+                                Seat Configuration
+                            </h6>
 
                             <label asp-for="NumberOfSeats"
-                                   class="form-label">
-                                Number of Seats
+                                   class="form-label fw-semibold">
+                                Number of Seats <span class="text-danger">*</span>
                             </label>
 
                             <input asp-for="NumberOfSeats"
                                    type="number"
                                    min="1"
+                                   step="1"
                                    class="form-control"
                                    placeholder="Enter number of seats" />
 
@@ -120,26 +176,27 @@
                                   class="text-danger">
                             </span>
 
-                            <small class="text-muted">
-                                Number of seats assigned to this class.
+                            <small class="text-muted d-block mt-2">
+                                Enter the number of seats assigned to this class.
+                                The total must not exceed the aircraft capacity.
                             </small>
 
                         </div>
 
-                        <!-- Buttons -->
-                        <div class="d-flex gap-2">
+                        <!-- ACTIONS -->
+                        <div class="d-flex justify-content-end flex-wrap gap-2 pt-3 border-top">
 
-                            <button type="submit"
-                                    class="btn btn-success">
-                                <i class="bi bi-save"></i>
-                                Save
-                            </button>
-
-                            <a asp-controller="AircraftClasses"
+                            <a asp-area="Admin"
+                               asp-controller="AircraftClasses"
                                asp-action="Index"
-                               class="btn btn-secondary">
-                                Back
+                               class="btn btn-light border px-4">
+                                Cancel
                             </a>
+
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="fas fa-save me-2"></i>
+                                Create Aircraft Class
+                            </button>
 
                         </div>
 
@@ -148,13 +205,29 @@
                 </div>
             </div>
 
+            <!-- INFORMATION NOTE -->
+            <div class="alert alert-light border mt-3 mb-0">
+                <div class="d-flex gap-2">
+                    <i class="fas fa-info-circle text-primary mt-1"></i>
+
+                    <div>
+                        <strong class="d-block mb-1">
+                            Important Information
+                        </strong>
+
+                        <small class="text-muted">
+                            Make sure the selected aircraft, seating class, and seat
+                            count are correct before saving. The system will validate
+                            the aircraft capacity and generate the corresponding seats.
+                        </small>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
 
 @section Scripts {
-
     <partial name="_ValidationScriptsPartial" />
-
 }
-```

@@ -1,0 +1,412 @@
+﻿@model IEnumerable<Flight_Booking_System.Models.Booking>
+
+@{
+    ViewData["Title"] = "Manage Bookings";
+    Layout = "_AdminLayout";
+
+    var bookings = Model?.OrderByDescending(x => x.BookingDate).ToList()
+                   ?? new List<Flight_Booking_System.Models.Booking>();
+
+    var totalBookings = bookings.Count;
+    var confirmedBookings = bookings.Count(x =>
+        string.Equals(x.Status, "Confirmed", StringComparison.OrdinalIgnoreCase));
+
+    var pendingBookings = bookings.Count(x =>
+        string.Equals(x.Status, "Pending", StringComparison.OrdinalIgnoreCase));
+
+    var cancelledBookings = bookings.Count(x =>
+        string.Equals(x.Status, "Cancelled", StringComparison.OrdinalIgnoreCase));
+}
+
+<div class="container-fluid py-4" dir="ltr">
+
+    <!-- Page Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="airline-table-icon">
+                    <i class="fas fa-ticket-alt"></i>
+                </span>
+                <span class="text-muted small">Admin / Bookings</span>
+            </div>
+
+            <h2 class="fw-bold mb-1">Manage Bookings</h2>
+            <p class="text-muted mb-0">
+                View and manage all customer flight bookings.
+            </p>
+        </div>
+
+        <div>
+            <span class="badge bg-light text-dark border px-3 py-2">
+                <i class="fas fa-calendar-alt me-1"></i>
+                Booking Management
+            </span>
+        </div>
+    </div>
+
+    <!-- Notifications -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle me-2"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Statistics -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted small mb-1">Total Bookings</p>
+                        <h3 class="fw-bold mb-0">@totalBookings</h3>
+                    </div>
+                    <div class="rounded-3 bg-primary bg-opacity-10 text-primary p-3">
+                        <i class="fas fa-ticket-alt fa-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted small mb-1">Confirmed</p>
+                        <h3 class="fw-bold text-success mb-0">@confirmedBookings</h3>
+                    </div>
+                    <div class="rounded-3 bg-success bg-opacity-10 text-success p-3">
+                        <i class="fas fa-check-circle fa-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted small mb-1">Pending</p>
+                        <h3 class="fw-bold text-warning mb-0">@pendingBookings</h3>
+                    </div>
+                    <div class="rounded-3 bg-warning bg-opacity-10 text-warning p-3">
+                        <i class="fas fa-clock fa-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted small mb-1">Cancelled</p>
+                        <h3 class="fw-bold text-danger mb-0">@cancelledBookings</h3>
+                    </div>
+                    <div class="rounded-3 bg-danger bg-opacity-10 text-danger p-3">
+                        <i class="fas fa-times-circle fa-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bookings Table -->
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white border-0 pt-4 px-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <h5 class="fw-bold mb-1">All Bookings</h5>
+                    <p class="text-muted small mb-0">
+                        Review customer reservations and booking information.
+                    </p>
+                </div>
+
+                <span class="badge bg-light text-dark border px-3 py-2">
+                    <span id="visibleBookingCount">@totalBookings</span> Records
+                </span>
+            </div>
+        </div>
+
+        <div class="card-body px-4">
+
+            <!-- Search and Filter -->
+            <div class="row g-3 mb-4">
+
+                <div class="col-lg-7">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text"
+                               id="bookingSearch"
+                               class="form-control bg-light border-start-0"
+                               placeholder="Search by reference or customer..." />
+                    </div>
+                </div>
+
+                <div class="col-lg-3">
+                    <select id="bookingStatusFilter" class="form-select bg-light">
+                        <option value="">All Statuses</option>
+                        @foreach (var status in bookings
+                            .Select(x => x.Status)
+                            .Where(x => !string.IsNullOrWhiteSpace(x))
+                            .Distinct(StringComparer.OrdinalIgnoreCase)
+                            .OrderBy(x => x))
+                        {
+                            <option value="@status">@status</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-lg-2">
+                    <button type="button"
+                            id="resetBookingFilters"
+                            class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-undo me-1"></i>
+                        Reset
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Table -->
+            <div class="table-responsive">
+                <table class="table align-middle table-hover" id="bookingsTable">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th class="py-3">#</th>
+                            <th class="py-3">Booking Reference</th>
+                            <th class="py-3">Customer</th>
+                            <th class="py-3">Booking Date</th>
+                            <th class="py-3 text-center">Tickets</th>
+                            <th class="py-3">Discount</th>
+                            <th class="py-3">Status</th>
+                            <th class="py-3 text-center">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="bookingsTableBody">
+
+                        @if (bookings.Any())
+                        {
+                            var index = 0;
+
+                            foreach (var booking in bookings)
+                            {
+                                index++;
+
+                                var status = booking.Status?.Trim() ?? "Unknown";
+
+                                var badgeClass = status.ToLowerInvariant() switch
+                                {
+                                    "confirmed" => "bg-success",
+                                    "pending" => "bg-warning text-dark",
+                                    "cancelled" => "bg-danger",
+                                    "completed" => "bg-primary",
+                                    _ => "bg-secondary"
+                                };
+
+                                var customerName =
+                                    booking.ApplicationUser?.UserName
+                                    ?? booking.ApplicationUser?.Email
+                                    ?? "Unknown Customer";
+
+                                <tr class="booking-row">
+                                    <td class="text-muted">@index</td>
+
+                                    <td>
+                                        <div class="fw-semibold text-primary booking-reference">
+                                            @booking.BookingReference
+                                        </div>
+                                        <small class="text-muted">
+                                            ID: @booking.Id
+                                        </small>
+                                    </td>
+
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="rounded-circle bg-light text-primary d-flex align-items-center justify-content-center"
+                                                 style="width:36px;height:36px;">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold booking-customer">
+                                                    @customerName
+                                                </div>
+                                                <small class="text-muted">
+                                                    @booking.ApplicationUser?.Email
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <div class="fw-medium">
+                                            @booking.BookingDate.ToString("dd MMM yyyy")
+                                        </div>
+                                        <small class="text-muted">
+                                            @booking.BookingDate.ToString("hh:mm tt")
+                                        </small>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <span class="badge bg-light text-dark border px-3 py-2">
+                                            @booking.NumberOfTickets
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <div class="fw-semibold">
+                                            @booking.DiscountAmount.ToString("N2") EGP
+                                        </div>
+                                        @if (booking.PointsRedeemed > 0)
+                                        {
+                                            <small class="text-muted">
+                                                @booking.PointsRedeemed points
+                                            </small>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        <span class="badge @badgeClass px-3 py-2">
+                                            @status
+                                        </span>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <a asp-area="Admin"
+                                           asp-controller="Bookings"
+                                           asp-action="Details"
+                                           asp-route-id="@booking.Id"
+                                           class="flight-action-btn btn-outline-primary"
+                                           title="View Booking Details">
+                                            <i class="fas fa-eye"></i>
+                                            Details
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center py-5">
+                                    <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
+                                    <h6 class="fw-bold">No Bookings Found</h6>
+                                    <p class="text-muted mb-0">
+                                        There are no bookings available yet.
+                                    </p>
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- No Search Results -->
+            <div id="bookingNoResults" class="text-center py-5 d-none">
+                <i class="fas fa-search fa-2x text-muted mb-3"></i>
+                <h6 class="fw-bold">No Matching Bookings</h6>
+                <p class="text-muted mb-0">
+                    Try changing your search or filter.
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const searchElement = document.getElementById("bookingSearch");
+            const statusElement = document.getElementById("bookingStatusFilter");
+            const resetElement = document.getElementById("resetBookingFilters");
+            const tableBodyElement = document.getElementById("bookingsTableBody");
+            const countElement = document.getElementById("visibleBookingCount");
+            const noResultsElement = document.getElementById("bookingNoResults");
+
+            if (!(searchElement instanceof HTMLInputElement) ||
+                !(statusElement instanceof HTMLSelectElement) ||
+                !(resetElement instanceof HTMLButtonElement) ||
+                !(tableBodyElement instanceof HTMLTableSectionElement) ||
+                !(countElement instanceof HTMLElement) ||
+                !(noResultsElement instanceof HTMLElement)) {
+                return;
+            }
+
+            const searchInput = searchElement;
+            const statusFilter = statusElement;
+            const resetButton = resetElement;
+            const tableBody = tableBodyElement;
+            const visibleCount = countElement;
+            const noResults = noResultsElement;
+
+            function filterBookings() {
+                const searchValue = searchInput.value.trim().toLowerCase();
+                const selectedStatus = statusFilter.value.toLowerCase();
+
+                const rows = tableBody.querySelectorAll(".booking-row");
+                let visibleRows = 0;
+
+                rows.forEach(function (row) {
+                    const referenceElement = row.querySelector(".booking-reference");
+                    const customerElement = row.querySelector(".booking-customer");
+                    const statusBadge = row.querySelector("td:nth-child(7) .badge");
+
+                    const reference = referenceElement?.textContent?.toLowerCase() ?? "";
+                    const customer = customerElement?.textContent?.toLowerCase() ?? "";
+                    const status = statusBadge?.textContent?.trim().toLowerCase() ?? "";
+
+                    const matchesSearch =
+                        reference.includes(searchValue) ||
+                        customer.includes(searchValue);
+
+                    const matchesStatus =
+                        selectedStatus === "" || status === selectedStatus;
+
+                    const isVisible = matchesSearch && matchesStatus;
+
+                    row.classList.toggle("d-none", !isVisible);
+
+                    if (isVisible) {
+                        visibleRows++;
+                    }
+                });
+
+                visibleCount.textContent = String(visibleRows);
+                noResults.classList.toggle("d-none", visibleRows > 0);
+            }
+
+            searchInput.addEventListener("input", filterBookings);
+            statusFilter.addEventListener("change", filterBookings);
+
+            resetButton.addEventListener("click", function () {
+                searchInput.value = "";
+                statusFilter.value = "";
+                filterBookings();
+            });
+
+            filterBookings();
+        });
+    </script>
+}

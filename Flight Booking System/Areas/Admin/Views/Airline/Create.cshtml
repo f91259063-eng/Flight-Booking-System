@@ -5,11 +5,18 @@
     Layout = "_AdminLayout";
 }
 
-<div class="container-fluid py-4" dir="ltr">
+<div class="container-fluid py-4 airline-management">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- Page Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
         <div>
+            <div class="text-muted small mb-1">
+                Airline Operations / Management
+            </div>
+
             <h2 class="fw-bold mb-1">Add New Airline</h2>
+
             <p class="text-muted mb-0">
                 Enter the details of the new airline.
             </p>
@@ -18,21 +25,44 @@
         <a asp-area="Admin"
            asp-controller="Airline"
            asp-action="Index"
-           class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i>
+           class="btn btn-light border px-3 py-2">
+            <i class="bi bi-arrow-left me-2"></i>
             Back to Airlines
         </a>
+
     </div>
 
+    <!-- Form -->
     <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
 
-            <div class="card border-0 shadow-sm">
+        <div class="col-12 col-lg-8 col-xl-7">
 
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0">Airline Information</h5>
+            <div class="card border-0 shadow-sm flight-form-card">
+
+                <!-- Card Header -->
+                <div class="card-header bg-white p-4">
+
+                    <div class="d-flex align-items-center gap-3">
+
+                        <div class="flight-form-header-icon">
+                            <i class="bi bi-buildings"></i>
+                        </div>
+
+                        <div>
+                            <h5 class="fw-bold mb-1">
+                                Airline Information
+                            </h5>
+
+                            <p class="text-muted small mb-0">
+                                Complete the information below to register an airline.
+                            </p>
+                        </div>
+
+                    </div>
+
                 </div>
 
+                <!-- Card Body -->
                 <div class="card-body p-4">
 
                     <form asp-area="Admin"
@@ -43,99 +73,163 @@
                         @Html.AntiForgeryToken()
 
                         <div asp-validation-summary="ModelOnly"
-                             class="text-danger mb-3">
+                             class="alert alert-danger"
+                             role="alert">
                         </div>
 
-                        <div class="mb-3">
-                            <label asp-for="Name"
-                                   class="form-label fw-semibold">
-                                Airline Name
-                            </label>
-
-                            <input asp-for="Name"
-                                   class="form-control"
-                                   placeholder="Enter airline name" />
-
-                            <span asp-validation-for="Name"
-                                  class="text-danger">
-                            </span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="AirlineCode"
-                                   class="form-label fw-semibold">
-                                Airline Code
-                            </label>
-
-                            <input asp-for="AirlineCode"
-                                   class="form-control"
-                                   placeholder="Enter airline code" />
-
-                            <span asp-validation-for="AirlineCode"
-                                  class="text-danger">
-                            </span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Email"
-                                   class="form-label fw-semibold">
-                                Email Address
-                            </label>
-
-                            <input asp-for="Email"
-                                   type="email"
-                                   dir="ltr"
-                                   class="form-control"
-                                   placeholder="example@email.com" />
-
-                            <span asp-validation-for="Email"
-                                  class="text-danger">
-                            </span>
-                        </div>
-
+                        <!-- Basic Information -->
                         <div class="mb-4">
-                            <label asp-for="Phone"
-                                   class="form-label fw-semibold">
-                                Phone Number
-                            </label>
 
-                            <input asp-for="Phone"
-                                   type="tel"
-                                   dir="ltr"
-                                   maxlength="11"
-                                   minlength="11"
-                                   class="form-control"
-                                   placeholder="Enter 11-digit phone number" />
+                            <h6 class="flight-section-title mb-3">
+                                <i class="bi bi-info-circle"></i>
+                                Basic Information
+                            </h6>
 
-                            <span asp-validation-for="Phone"
-                                  class="text-danger">
-                            </span>
+                            <div class="mb-3">
+
+                                <label asp-for="Name"
+                                       class="form-label fw-semibold">
+                                    Airline Name
+                                </label>
+
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light">
+                                        <i class="bi bi-building text-muted"></i>
+                                    </span>
+
+                                    <input asp-for="Name"
+                                           class="form-control"
+                                           placeholder="Enter airline name" />
+                                </div>
+
+                                <span asp-validation-for="Name"
+                                      class="text-danger small">
+                                </span>
+
+                            </div>
+
+                            <div class="mb-3">
+
+                                <label asp-for="AirlineCode"
+                                       class="form-label fw-semibold">
+                                    Airline Code
+                                </label>
+
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light">
+                                        <i class="bi bi-upc-scan text-muted"></i>
+                                    </span>
+
+                                    <input asp-for="AirlineCode"
+                                           class="form-control"
+                                           placeholder="Enter airline code" />
+                                </div>
+
+                                <span asp-validation-for="AirlineCode"
+                                      class="text-danger small">
+                                </span>
+
+                            </div>
+
                         </div>
 
-                        <hr />
+                        <hr class="my-4" />
 
-                        <div class="d-flex justify-content-start gap-2">
+                        <!-- Contact Information -->
+                        <div class="mb-4">
 
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-save me-1"></i>
-                                Save Airline
-                            </button>
+                            <h6 class="flight-section-title mb-3">
+                                <i class="bi bi-telephone"></i>
+                                Contact Information
+                            </h6>
+
+                            <div class="mb-3">
+
+                                <label asp-for="Email"
+                                       class="form-label fw-semibold">
+                                    Email Address
+                                </label>
+
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light">
+                                        <i class="bi bi-envelope text-muted"></i>
+                                    </span>
+
+                                    <input asp-for="Email"
+                                           type="email"
+                                           dir="ltr"
+                                           class="form-control"
+                                           placeholder="example@email.com" />
+                                </div>
+
+                                <span asp-validation-for="Email"
+                                      class="text-danger small">
+                                </span>
+
+                            </div>
+
+                            <div class="mb-3">
+
+                                <label asp-for="Phone"
+                                       class="form-label fw-semibold">
+                                    Phone Number
+                                </label>
+
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light">
+                                        <i class="bi bi-phone text-muted"></i>
+                                    </span>
+
+                                    <input asp-for="Phone"
+                                           type="tel"
+                                           dir="ltr"
+                                           maxlength="11"
+                                           minlength="11"
+                                           class="form-control"
+                                           placeholder="Enter 11-digit phone number" />
+                                </div>
+
+                                <span asp-validation-for="Phone"
+                                      class="text-danger small">
+                                </span>
+
+                                <small class="text-muted d-block mt-2">
+                                    Enter an 11-digit phone number.
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <!-- Form Actions -->
+                        <div class="d-flex flex-wrap justify-content-end gap-2">
 
                             <a asp-area="Admin"
                                asp-controller="Airline"
                                asp-action="Index"
-                               class="btn btn-light border">
+                               class="btn btn-light border px-4">
+                                <i class="bi bi-x-circle me-1"></i>
                                 Cancel
                             </a>
+
+                            <button type="submit"
+                                    class="btn btn-primary px-4">
+                                <i class="bi bi-save me-1"></i>
+                                Save Airline
+                            </button>
 
                         </div>
 
                     </form>
 
                 </div>
+
             </div>
 
         </div>
+
     </div>
 
 </div>

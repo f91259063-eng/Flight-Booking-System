@@ -1,0 +1,169 @@
+﻿@model Flight_Booking_System.Models.AircraftClass
+
+@{
+    ViewData["Title"] = "Delete Aircraft Class";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid py-4">
+
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Delete Aircraft Class</h2>
+            <p class="text-muted mb-0">
+                Review the aircraft class information before confirming deletion.
+            </p>
+        </div>
+
+        <a asp-area="Admin"
+           asp-controller="AircraftClasses"
+           asp-action="Index"
+           class="btn btn-outline-secondary rounded-3 px-3">
+            <i class="fas fa-arrow-left me-2"></i>
+            Back to Aircraft Classes
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xl-7 col-lg-9">
+
+            <div class="card border-0 shadow-sm flight-form-card">
+
+                <!-- HEADER -->
+                <div class="card-header bg-white p-4">
+                    <div class="d-flex align-items-center gap-3">
+
+                        <div class="d-flex align-items-center justify-content-center rounded-3 bg-danger bg-opacity-10 text-danger"
+                             style="width:48px;height:48px;font-size:22px;">
+                            <i class="fas fa-trash-alt"></i>
+                        </div>
+
+                        <div>
+                            <h5 class="fw-bold mb-1">Confirm Deletion</h5>
+                            <p class="text-muted small mb-0">
+                                Aircraft Class #@Model.ID
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- BODY -->
+                <div class="card-body p-4">
+
+                    <div class="alert alert-danger d-flex gap-3 align-items-start">
+                        <i class="fas fa-exclamation-triangle fs-5 mt-1"></i>
+                        <div>
+                            <strong>Are you sure you want to delete this aircraft class?</strong>
+                            <p class="mb-0 small mt-1">
+                                This action cannot be undone. Associated seats may also be affected.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- AIRCRAFT INFORMATION -->
+                    <h6 class="flight-section-title mb-3">
+                        <i class="fas fa-plane"></i>
+                        Aircraft Class Details
+                    </h6>
+
+                    <div class="border rounded-3 p-3 mb-4">
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+                                <label class="text-muted small d-block mb-1">
+                                    Aircraft Class ID
+                                </label>
+                                <strong>#@Model.ID</strong>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="text-muted small d-block mb-1">
+                                    Aircraft
+                                </label>
+                                <strong>
+                                    @(Model.Aircraft?.RegistrationNumber ?? "N/A")
+                                </strong>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="text-muted small d-block mb-1">
+                                    Aircraft Model
+                                </label>
+                                <strong>
+                                    @(Model.Aircraft?.Model ?? "N/A")
+                                </strong>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="text-muted small d-block mb-1">
+                                    Seating Class
+                                </label>
+                                <strong>
+                                    @(Model.Class?.Name ?? "N/A")
+                                </strong>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="text-muted small d-block mb-1">
+                                    Number of Seats
+                                </label>
+                                <strong>
+                                    @Model.NumberOfSeats
+                                </strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- DELETE FORM -->
+                    <form asp-area="Admin"
+                          asp-controller="AircraftClasses"
+                          asp-action="Delete"
+                          asp-route-id="@Model.ID"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden" name="id" value="@Model.ID" />
+
+                        <div class="d-flex justify-content-end flex-wrap gap-2 pt-3 border-top">
+
+                            <a asp-area="Admin"
+                               asp-controller="AircraftClasses"
+                               asp-action="Index"
+                               class="btn btn-light border px-4">
+                                Cancel
+                            </a>
+
+                            <button type="submit" class="btn btn-danger px-4">
+                                <i class="fas fa-trash-alt me-2"></i>
+                                Confirm Delete
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+            <div class="alert alert-warning border mt-3 mb-0">
+                <div class="d-flex gap-2">
+                    <i class="fas fa-info-circle mt-1"></i>
+                    <div>
+                        <strong class="d-block mb-1">Important</strong>
+                        <small>
+                            The controller must prevent deletion if any seat in this
+                            aircraft class is associated with an existing ticket.
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
